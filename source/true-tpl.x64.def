@@ -1,0 +1,10 @@
+LIBRARY        true-tpl.x64.dll
+EXPORTS
+    GetGlobalInfoW
+    SetStartupInfoW
+    GetPluginInfoW
+    ConfigureW
+    ProcessEditorEventW
+    ProcessEditorInputW
+    ExitFARW
+    OpenW
