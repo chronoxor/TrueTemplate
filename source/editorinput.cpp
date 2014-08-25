@@ -141,7 +141,7 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 
 	if (ret != -1)
 	{
-		memcpy (buff, gs.StringText, ret);
+		wmemcpy (buff, gs.StringText, ret);
 		buff[ret] = 0;
 		return (buff);
 	}
@@ -184,7 +184,7 @@ static wchar_t *prevStringIndent (void)
 	}
 
 	EditorSetPos (o);
-	memcpy (buff, gs.StringText, ret);
+	wmemcpy (buff, gs.StringText, ret);
 	buff[ret] = 0;
 	return (buff);
 }
