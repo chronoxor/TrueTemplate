@@ -137,7 +137,7 @@ static DWORD WINAPI StdOutputThreadFunction (LPVOID lpParameter)
 			if (curlength + (int)ReadCount > fullength - 1)
 			{
 				wchar_t	*temp = new wchar_t[fullength + MAX_STR_LEN];
-				memcpy (temp, output, curlength);
+				wmemcpy (temp, output, curlength);
 				delete[] output;
 				output = temp;
 				fullength += MAX_STR_LEN;
