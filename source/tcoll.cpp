@@ -7,7 +7,7 @@
 
 #define MAXCOLLECTIONSIZE 0x7FFFFFFF
 
-TCollection::TCollection(unsigned aLimit, unsigned aDelta, void (*aDelItem)(void*))
+TCollection::TCollection(unsigned aLimit, unsigned aDelta, void(*aDelItem)(void*))
 {
   init(aLimit, aDelta, aDelItem);
 }
@@ -15,6 +15,24 @@ TCollection::TCollection(unsigned aLimit, unsigned aDelta, void (*aDelItem)(void
 TCollection::TCollection()
 {
   init(0, 5, NULL);
+}
+
+TCollection::TCollection(const TCollection &coll)
+{
+  *this = coll;
+}
+
+TCollection& TCollection::operator=(const TCollection &coll)
+{
+  if (this != &coll)
+  {
+    items = coll.items;
+    count = coll.count;
+    limit = coll.limit;
+    delta = coll.delta;
+    delItem = coll.delItem;
+  }
+  return *this;
 }
 
 void TCollection::init(unsigned aLimit, unsigned aDelta, void (*aDelItem)(void*))

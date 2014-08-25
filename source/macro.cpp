@@ -27,7 +27,7 @@ static void InitMacro ()
 		TLang				*lng = NULL;
 		bool				group;
 		TCollection dummyLang;
-		memcpy (&langColl, &dummyLang, sizeof (TLangCollection));
+		langColl = dummyLang;
 		findSectionInXML (p);
 		while ((item = getItem (p, name, group)) != NULL)
 		{

@@ -6,7 +6,9 @@ class TCollection
   public:
     TCollection(unsigned, unsigned, void (*)(void*));
     TCollection();
-    ~TCollection();
+    TCollection(const TCollection &coll);
+    TCollection& operator=(const TCollection &coll);
+    virtual ~TCollection();
     void init(unsigned = 0, unsigned = 5, void (*)(void*) = 0);
     void done(void);
     inline void *operator[](unsigned i) { return at(i);};
