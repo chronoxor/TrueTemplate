@@ -14,7 +14,7 @@ static void InitMacro ()
 
 	HANDLE			hScreen = Info.SaveScreen (0, 0, -1, -1);
 	const wchar_t	*MsgItems[] = { GetMsg (MTitle), GetMsg (MLoading) };
-	Info.Message (&MainGuid, &InitMacroGuid, 0, NULL, MsgItems, dimOf (MsgItems), 0);
+	Info.Message (&MainGuid, &InitMacroGuid, 0, NULL, MsgItems, _countof (MsgItems), 0);
 
 	wchar_t	path[NM];
 	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;

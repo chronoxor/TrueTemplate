@@ -143,18 +143,18 @@ static CmdType CommandType(bool NT, const wchar_t *Command, const wchar_t *Path)
       *EndName = 0;
   }
   const wchar_t *ext = getExt(FileName);
-  if ( ExeExist(Path, FileName, ext, L".com", FullName, dimOf(FullName)) )
+  if ( ExeExist(Path, FileName, ext, L".com", FullName, _countof(FullName)) )
     return com;
-  if ( ExeExist(Path, FileName, ext, L".exe", FullName, dimOf(FullName)) )
+  if ( ExeExist(Path, FileName, ext, L".exe", FullName, _countof(FullName)) )
   {
     SHFILEINFO sfi;
     DWORD_PTR ExeType = SHGetFileInfo(FullName, 0, &sfi, sizeof(sfi), SHGFI_EXETYPE);
     bool GUIType = HIWORD(ExeType) >= 0x0300 && HIWORD(ExeType) <= 0x1000 && HIBYTE(ExeType) == 'E' && ( LOBYTE(ExeType) == 'N' || LOBYTE(ExeType) == 'P' );
     return GUIType ? gui : exe;
   }
-  if ( ExeExist(Path, FileName, ext, L".bat", FullName, dimOf(FullName)) )
+  if ( ExeExist(Path, FileName, ext, L".bat", FullName, _countof(FullName)) )
     return bat;
-  if ( NT && ExeExist(Path, FileName, ext, L".cmd", FullName, dimOf(FullName)) )
+  if ( NT && ExeExist(Path, FileName, ext, L".cmd", FullName, _countof(FullName)) )
     return cmd;
   return none;
 }
@@ -173,7 +173,7 @@ DWORD ExecConsoleApp(const wchar_t *CmdStr, const wchar_t *path, TCollection *Ou
   bool NT = WinVer.dwPlatformId == VER_PLATFORM_WIN32_NT;
   bool OldNT = NT && WinVer.dwMajorVersion < 4;
   *CommandName=0;
-  GetEnvironmentVariable(L"COMSPEC", CommandName, dimOf(CommandName));
+  GetEnvironmentVariable(L"COMSPEC", CommandName, _countof(CommandName));
   CmdType GUIType = CommandType(NT, CmdStr, path);
   wcscat(wcscpy(ExecLine, CommandName), L" /C");
   if ( !OldNT && ( ( GUIType == gui ) || ( GUIType == none ) ) )

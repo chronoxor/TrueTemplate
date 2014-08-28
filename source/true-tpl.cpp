@@ -391,7 +391,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 				if (te)
 				{
 					FarMenuItemEx mMenu[9];
-					int						count = dimOf (mMenu);
+					int						count = _countof (mMenu);
 					for (int i = 0; i < count; i++) mMenu[i].Flags = 0;
 					mMenu[0].Text = GetMsg (MMenuTemplates);
 					mMenu[1].Text = GetMsg (MFormatting);
@@ -453,7 +453,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 		case OPEN_PLUGINSMENU:
 			FarMenuItemEx mMenu[3];
 
-			int count = dimOf (mMenu);
+			int count = _countof (mMenu);
 			mMenu[0].Text = GetMsg (MMenuCompile);
 			mMenu[2].Text = GetMsg (MShowOutput);
 			mMenu[1].Flags |= MIF_SEPARATOR;

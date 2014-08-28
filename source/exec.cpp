@@ -234,7 +234,7 @@ static void execute (TCollection *coll, const wchar_t *title, bool showExec)
 	if (!showExec)
 	{
 		const wchar_t	*MsgItems[] = { GetMsg (MTitle), title };
-		Info.Message (&MainGuid, &ExecGuid, 0, NULL, MsgItems, dimOf (MsgItems), 0);
+		Info.Message (&MainGuid, &ExecGuid, 0, NULL, MsgItems, _countof (MsgItems), 0);
 	}
 
 	ExecConsoleApp (cmd, cmdpath, coll, true, showExec);

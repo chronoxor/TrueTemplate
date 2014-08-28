@@ -510,7 +510,7 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 			if (!SaveAll ())
 			{
 				const wchar_t *MsgItems[] = { GetMsg (MTitle), GetMsg (MSaveError), GetMsg (MContinue) };
-				if (Info.Message (&MainGuid, &RunCompilerGuid, FMSG_MB_YESNO, NULL, MsgItems, dimOf (MsgItems), 0)) return (false);
+				if (Info.Message (&MainGuid, &RunCompilerGuid, FMSG_MB_YESNO, NULL, MsgItems, _countof (MsgItems), 0)) return (false);
 			}
 		}
 	}
