@@ -376,7 +376,6 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						listBox[i].Items[j].Flags = (j == sel) ? LIF_SELECTED : 0;
 						listBox[i].Items[j].Reserved[0] = 0;
 						listBox[i].Items[j].Reserved[1] = 0;
-						listBox[i].Items[j].Reserved[2] = 0;
 						unpackUserString (userString[i], ulist[i][j], (utypString[i] == USER_COMBO) ? j : 3 * j);
 						listBox[i].Items[j].Text = ulist[i][j];
 					}
@@ -464,7 +463,6 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						listBox[i].Items[j].Flags = (j == sel) ? LIF_SELECTED : 0;
 						listBox[i].Items[j].Reserved[0] = 0;
 						listBox[i].Items[j].Reserved[1] = 0;
-						listBox[i].Items[j].Reserved[2] = 0;
 						unpackUserString (userString[i], ulist[i][j], 3 * j);
 						listBox[i].Items[j].Text = ulist[i][j];
 					}
