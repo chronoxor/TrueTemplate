@@ -133,7 +133,6 @@ intptr_t WINAPI ConfigureW(const struct ConfigureInfo *Info)
 intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 {
 	wchar_t filename[NM];
-	static INPUT_RECORD dummy;
 	EditorInfoEx					ei;
 	initEList ();
 	switch (Info->Event)
@@ -142,10 +141,6 @@ intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 		::Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 		::Info.EditorControl (ei.EditorID, ECTL_GETFILENAME, NM, filename);
 		eListInsert (ei.EditorID, filename);
-		memset (&dummy, 0, sizeof (dummy));
-		dummy.EventType = KEY_EVENT;
-		dummy.Event.KeyEvent.bKeyDown = true;
-		::Info.EditorControl (-1, ECTL_PROCESSINPUT, 0, &dummy);
 		return (0);
 	case EE_CLOSE:
 		eList->removeID (Info->EditorID);
