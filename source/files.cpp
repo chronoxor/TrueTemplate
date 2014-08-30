@@ -59,7 +59,7 @@ static wchar_t *addExt (wchar_t *path, wchar_t *defExt)
 static bool IsFile (const wchar_t *szFileName)
 {
 	DWORD d = GetFileAttributes (szFileName);
-	return (((HANDLE) d != INVALID_HANDLE_VALUE) && !(d & FILE_ATTRIBUTE_DIRECTORY));
+	return ((d != INVALID_FILE_ATTRIBUTES) && !(d & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 static void squeeze (wchar_t *path)
