@@ -1,7 +1,8 @@
 struct TExec
 {
-	TExec();
+	TExec ();
 	TExec (const TExec &);
+	TExec& operator= (const TExec &);
 	wchar_t			title[MAX_REG_LEN], cmd[MAX_STR_LEN], compiler[MAX_STR_LEN];
 	wchar_t			enable[NM], disable[NM];
 	TJumpType jumpType;
@@ -24,18 +25,27 @@ TExec::TExec ()
 	defaults ();
 }
 
-TExec::TExec (const TExec &e)
+TExec::TExec(const TExec &e)
 {
-	wcscpy (title, e.title);
-	wcscpy (cmd, e.cmd);
-	wcscpy (compiler, e.compiler);
-	wcscpy (enable, e.enable);
-	wcscpy (disable, e.disable);
-	jumpType = e.jumpType;
-	saveType = e.saveType;
-	cd = e.cd;
-	echo = e.echo;
-	searchBase = e.searchBase;
+	*this = e;
+}
+
+TExec& TExec::operator= (const TExec &e)
+{
+	if (this != &e)
+	{
+    	wcscpy(title, e.title);
+    	wcscpy(cmd, e.cmd);
+    	wcscpy(compiler, e.compiler);
+    	wcscpy(enable, e.enable);
+    	wcscpy(disable, e.disable);
+    	jumpType = e.jumpType;
+    	saveType = e.saveType;
+    	cd = e.cd;
+    	echo = e.echo;
+    	searchBase = e.searchBase;
+	}
+	return *this;
 }
 
 static wchar_t cmd[MAX_STR_LEN];

@@ -2,6 +2,7 @@ struct TCompiler
 {
 	TCompiler();
 	TCompiler (const TCompiler &);
+	TCompiler& operator= (const TCompiler &);
 	wchar_t	title[MAX_REG_LEN], err[MAX_STR_LEN];
 	int		line, col, fileMatch;
 	bool	searchCol;
@@ -20,12 +21,21 @@ TCompiler::TCompiler ()
 
 TCompiler::TCompiler (const TCompiler &e)
 {
-	wcscpy (title, e.title);
-	wcscpy (err, e.err);
-	line = e.line;
-	col = e.col;
-	searchCol = e.searchCol;
-	fileMatch = e.fileMatch;
+	*this = e;
+}
+
+TCompiler& TCompiler::operator= (const TCompiler &e)
+{
+	if (&e != this)
+	{
+		wcscpy (title, e.title);
+		wcscpy (err, e.err);
+		line = e.line;
+		col = e.col;
+		searchCol = e.searchCol;
+		fileMatch = e.fileMatch;
+	}
+	return *this;
 }
 
 TEICollection *eList = NULL;
@@ -180,7 +190,7 @@ static void showCompileOut (EditorInfoEx *ei, const wchar_t* path)
 		BreakKeys[3].ControlKeyState = 0;
 		BreakKeys[4].VirtualKeyCode = 0;
 		BreakKeys[4].ControlKeyState = 0;
-	
+
 		for (;;)
 		{
 			compilerOutP = Info.Menu
