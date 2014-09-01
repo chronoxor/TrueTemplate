@@ -116,8 +116,8 @@ static void EditorSaveSelected (void)
 				if (egs.SelEnd != -1)
 				{
 					wchar_t tmp = L' ';
-					int	    truelen = ((egs.StringLength - egs.SelStart) > 0) ? (egs.StringLength - egs.SelStart) : 0;
-					len = egs.SelEnd - egs.SelStart;
+					int	    truelen = ((egs.StringLength - egs.SelStart) > 0) ? (int)(egs.StringLength - egs.SelStart) : 0;
+					len = (int)(egs.SelEnd - egs.SelStart);
 					fwrite (&len, 1, sizeof (int), file);
 					fwrite (egs.StringText + egs.SelStart, (truelen < len) ? truelen : len, sizeof (wchar_t), file);
 					truelen = (truelen < len) ? len - truelen : 0;
@@ -125,7 +125,7 @@ static void EditorSaveSelected (void)
 				}
 				else
 				{
-					len = egs.StringLength - egs.SelStart;
+					len = (int)(egs.StringLength - egs.SelStart);
 					fwrite (&len, 1, sizeof (int), file);
 					fwrite (egs.StringText + egs.SelStart, len, sizeof (wchar_t), file);
 				}
@@ -151,8 +151,7 @@ static void EditorSaveAll (void)
 		EditorGetStringEx egs;
 		EditorGetStr (&egs, i);
 
-		int len;
-		len = egs.StringLength;
+		int len = (int)egs.StringLength;
 		fwrite (&len, 1, sizeof (int), file);
 		fwrite (egs.StringText, len, sizeof (wchar_t), file);
 	}

@@ -371,12 +371,12 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						listBox[i].Items = new FarListItem[ic];
 					}
 
-					for (size_t j = 0; j < ic; j++)
+					for (intptr_t j = 0; j < ic; j++)
 					{
 						listBox[i].Items[j].Flags = (j == sel) ? LIF_SELECTED : 0;
 						listBox[i].Items[j].Reserved[0] = 0;
 						listBox[i].Items[j].Reserved[1] = 0;
-						unpackUserString (userString[i], ulist[i][j], (utypString[i] == USER_COMBO) ? j : 3 * j);
+						unpackUserString (userString[i], ulist[i][j], (size_t)((utypString[i] == USER_COMBO) ? j : 3 * j));
 						listBox[i].Items[j].Text = ulist[i][j];
 					}
 
@@ -458,12 +458,12 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						listBox[i].Items = new FarListItem[ic];
 					}
 
-					for (size_t j = 0; j < ic; j++)
+					for (intptr_t j = 0; j < ic; j++)
 					{
 						listBox[i].Items[j].Flags = (j == sel) ? LIF_SELECTED : 0;
 						listBox[i].Items[j].Reserved[0] = 0;
 						listBox[i].Items[j].Reserved[1] = 0;
-						unpackUserString (userString[i], ulist[i][j], 3 * j);
+						unpackUserString(userString[i], ulist[i][j], 3 * (size_t)j);
 						listBox[i].Items[j].Text = ulist[i][j];
 					}
 
