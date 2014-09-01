@@ -4,19 +4,19 @@ static inline wchar_t *StrLower (wchar_t *str)
 	return (str);
 }
 
-static int strMatch
+static bool strMatch
 (
 	wchar_t	*s,
 	wchar_t	*pattern,
 	wchar_t	*prefix,
 	wchar_t	*suffix,
 	int		nb,
-	int		bounds[][2] = NULL,
-	int		regn[] = NULL
+	intptr_t		bounds[][2] = NULL,
+	intptr_t		regn[] = NULL
 )
 {
-	int		ret = false;
-	int		l = wcslen (prefix) + wcslen (pattern) + wcslen (suffix);
+	bool    ret = false;
+	size_t  l = wcslen (prefix) + wcslen (pattern) + wcslen (suffix);
 	wchar_t	*slashPattern = (wchar_t *) malloc ((l + 1) * sizeof(wchar_t));
 
 	if (slashPattern)
@@ -29,7 +29,7 @@ static int strMatch
 		if (reg.SetExpr (slashPattern))
 		{
 			reg.SetNoMoves (slashPattern[1] == L'^' ? true : false);
-			ret = reg.Parse (s, &m) ? true : false;
+			ret = reg.Parse (s, &m);
 			if (ret)
 			{
 				if (bounds && regn)
@@ -49,7 +49,8 @@ static int strMatch
 
 bool wcscmpi2 (wchar_t *szStr1, wchar_t *szStr2)
 {
-	for (size_t i = 0; i < wcslen (szStr2); i++)
+	size_t len = wcslen (szStr2);
+	for (size_t i = 0; i < len; i++)
 	{
 		if (!szStr1[i] || (((szStr1[i] ^ szStr2[i]) & 0xDF) != 0)) return ((i + 1) != 0);
 	}
@@ -96,13 +97,13 @@ static wchar_t *getWord (wchar_t * &line, wchar_t *kwd)
 	return (kwd);
 }
 
-wchar_t *makeSubstr (int n, const wchar_t *origStr, int bounds[][2], int nBounds)
+wchar_t *makeSubstr(size_t n, const wchar_t *origStr, intptr_t bounds[][2], size_t nBounds)
 {
 	wchar_t	*s = NULL;
 
 	if (origStr && bounds && n < nBounds)
 	{
-		int len = bounds[n][1] - bounds[n][0] + 1;
+    	intptr_t len = bounds[n][1] - bounds[n][0] + 1;
 		s = (wchar_t *) malloc ((len + 1) * sizeof(wchar_t));
 		if (s)
 		{

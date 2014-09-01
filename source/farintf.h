@@ -117,7 +117,7 @@ struct InitDialogItem
 struct InitDialogItemEx
 {
  int Type;
- int X1,Y1,X2,Y2;
+ intptr_t X1, Y1, X2, Y2;
  int Focus;
  int Selected;
  DWORD Flags;
@@ -126,12 +126,12 @@ struct InitDialogItemEx
  const wchar_t *History;
 };
 
-inline const wchar_t *GetMsg(int MsgId)
+inline const wchar_t *GetMsg(intptr_t MsgId)
 {
   return Info.GetMsg(&MainGuid, MsgId);
 }
 
-extern void InitDialogItems(struct InitDialogItem*, struct FarDialogItem*, int);
-extern void InitDialogItemsEx(const struct InitDialogItemEx*, struct FarDialogItem*,int);
+extern void InitDialogItems(struct InitDialogItem*, struct FarDialogItem*, size_t);
+extern void InitDialogItemsEx(const struct InitDialogItemEx*, struct FarDialogItem*, size_t);
 
 #endif

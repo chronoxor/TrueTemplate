@@ -82,7 +82,7 @@ static wchar_t *GetOsName ()
 			break;
 		}
 
-		wsprintf (szWindows, L"Windows %s build %i %s", szName, ovi.dwBuildNumber, ovi.szCSDVersion);
+		wsprintf (szWindows, L"Windows %s build %u %s", szName, ovi.dwBuildNumber, ovi.szCSDVersion);
 		return (szWindows);
 	}
 
@@ -115,8 +115,8 @@ static wchar_t *GetOsType ()
 	return (NULL);
 }
 
-static int		curlength = 0;
-static int		fullength = 0;
+static size_t	curlength = 0;
+static size_t	fullength = 0;
 static wchar_t		*output = NULL;
 
 static bool		RunFlag = false;
@@ -134,7 +134,7 @@ static DWORD WINAPI StdOutputThreadFunction (LPVOID lpParameter)
 		OkFlag = ReadFile (PipeStdOutputDup, Buffer, 4096, &ReadCount, NULL);
 		if ((OkFlag) && (ReadCount > 0))
 		{
-			if (curlength + (int)ReadCount > fullength - 1)
+			if (curlength + ReadCount + 1 > fullength)
 			{
 				wchar_t	*temp = new wchar_t[fullength + MAX_STR_LEN];
 				wmemcpy (temp, output, curlength);
@@ -156,7 +156,6 @@ static DWORD WINAPI StdOutputThreadFunction (LPVOID lpParameter)
 
 static void ParseExec (wchar_t *pf, const wchar_t *path)
 {
-	int i;
 	if (!pf) return ;
 	output = new wchar_t[MAX_STR_LEN];
 	curlength = 0;
@@ -203,7 +202,7 @@ static void ParseExec (wchar_t *pf, const wchar_t *path)
 	si.hStdOutput = GetStdHandle (STD_OUTPUT_HANDLE);
 	si.hStdInput = GetStdHandle (STD_INPUT_HANDLE);
 	si.hStdError = GetStdHandle (STD_ERROR_HANDLE);
-	if (CreateProcess (NULL, pf, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, path, &si, &pi) == TRUE)
+	if (CreateProcess (NULL, pf, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, path, &si, &pi))
 	{
 		RunFlag = true;
 		WaitForSingleObject (pi.hProcess, INFINITE);
@@ -219,18 +218,18 @@ static void ParseExec (wchar_t *pf, const wchar_t *path)
 	CloseHandle (PipeStdOutputDup);
 
 	//CharToOemBuff(output,output,curlength);
-	for (i = 0; i < curlength; i++)
+	for (size_t i = 0; i < curlength; i++)
 	{
 		if (output[i] == 0x0A)
 		{
-			for (int j = i; j < curlength - 1; j++) output[j] = output[j + 1];
+			for (size_t j = i; j + 1 < curlength; j++) output[j] = output[j + 1];
 			curlength--;
 			output[curlength] = L'\0';
 		}
 	}
 
 	EditorInsertText (output);
-	for (i = 0; i < curlength; i++)
+	for (size_t i = 0; i < curlength; i++)
 		if ((i > 0) && (output[i - 1] == L'\0')) EditorInsertText (output + i);
 	delete[] output;
 }
@@ -294,14 +293,14 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos);
 
 static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 {
-	const wchar_t		fmtTime[] = L"HH:mm:ss";
-	const wchar_t		fmtDate[] = L"dd.MM.yyyy";
-	const wchar_t		fmtDateTime[] = L"HH:mm:ss dd.MM.yyyy";
-	wchar_t					szDate[128];
-	wchar_t					szString[10240] = L"";
-	wchar_t					*clip = NULL, *psz = NULL, *szParam1, *szParam2, *szParam3;
+	const wchar_t	fmtTime[] = L"HH:mm:ss";
+	const wchar_t	fmtDate[] = L"dd.MM.yyyy";
+	const wchar_t	fmtDateTime[] = L"HH:mm:ss dd.MM.yyyy";
+	wchar_t				szDate[128];
+	wchar_t				szString[10240] = L"";
+	wchar_t				*clip = NULL, *psz = NULL, *szParam1, *szParam2, *szParam3;
 	bool					toup = false;
-	unsigned long l;
+	unsigned long	l;
 	szParam1 = szParam;
 	szParam2 = GetParamParam (szParam1);
 	switch (eCmd)
@@ -316,14 +315,14 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_EditorPos:
 		{
 			TEditorPos	pos = EditorGetPos ();
-			FSF.itoa (pos.Row + 1, szString, 10);
+			FSF.itoa64 (pos.Row + 1, szString, 10);
 			psz = szString;
 		}
 		break;
 	case CMD_EditorCol:
 		{
 			TEditorPos	pos = EditorGetPos ();
-			FSF.itoa (pos.Col + 1, szString, 10);
+			FSF.itoa64 (pos.Col + 1, szString, 10);
 			psz = szString;
 		}
 		break;
@@ -334,7 +333,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 		break;
 	case CMD_ClipBoard:
 		{
-			int count = FSF.PasteFromClipboard (FCT_ANY, NULL, 0);
+			size_t count = FSF.PasteFromClipboard (FCT_ANY, NULL, 0);
 			if (count > 0)
 			{
 				clip = (wchar_t *) malloc ((count + 1) * sizeof(wchar_t));
@@ -398,7 +397,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_File:
 	case CMD_FileUp:
 		{
-			GetFilePathName(szString, 10240);
+			GetFilePathName(szString, _countof(szString));
 			psz = szString;
 			toup = (eCmd == CMD_FileUp);
 		}
@@ -406,7 +405,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_FileExt:
 	case CMD_FileExtUp:
 		{
-			GetFilePathName(szString, 10240);
+			GetFilePathName(szString, _countof(szString));
 			psz = Point2FileExt(szString);
 			toup = (eCmd == CMD_FileExtUp);
 		}
@@ -414,7 +413,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_FileName:
 	case CMD_FileNameUp:
 		{
-			GetFilePathName(szString, 10240);
+			GetFilePathName(szString, _countof(szString));
 			psz = Point2FileExt(szString);
 			*(Point2FileExt (psz) - 1) = 0;
 			toup = (eCmd == CMD_FileNameUp);
@@ -423,7 +422,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_FilePath:
 	case CMD_FilePathUp:
 		{
-			GetFilePathName(szString, 10240);
+			GetFilePathName(szString, _countof(szString));
 			psz = szString;
 			*Point2FileName (psz) = 0;
 			toup = (eCmd == CMD_FilePathUp);
@@ -432,7 +431,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_FileNameExt:
 	case CMD_FileNameExtUp:
 		{
-			GetFilePathName(szString, 10240);
+			GetFilePathName(szString, _countof(szString));
 			psz = Point2FileName(szString);
 			toup = (eCmd == CMD_FileNameExtUp);
 		}
@@ -509,7 +508,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 			HANDLE hDlg = Info.DialogInit(&MainGuid, &DoCommandGuid, -1, -1, 59, 8, NULL, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
 			if (hDlg != INVALID_HANDLE_VALUE)
 			{
-				int n = Info.DialogRun(hDlg);
+				intptr_t n = Info.DialogRun(hDlg);
 				if (n == 4)
 				{
 					wchar_t temp[10240];
@@ -625,7 +624,6 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 
 static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 {
-	static int	iCnt[10];
 	wchar_t				szFilePath[_MAX_PATH + 1];
 	wchar_t				szFileName[_MAX_FNAME + 1];
 	TCOMMAND		eCommand;
@@ -850,7 +848,7 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 	}
 }
 
-static void RunMacro (TMacro *m, const wchar_t *origStr, int bounds[][2])
+static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 {
 	bool	firstsel = false;
 	for (wchar_t *p = m->MacroText; *p; p++)

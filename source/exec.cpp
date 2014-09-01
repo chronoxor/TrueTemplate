@@ -174,14 +174,14 @@ static wchar_t *makeCmdLine
 					else if (*(m + 1) == L'p')
 					{
 						TEditorPos	pos = EditorGetPos ();
-						FSF.itoa (pos.Row + 1, tmp, 10);
+						FSF.itoa64 (pos.Row + 1, tmp, 10);
 						wcscat (j, tmp);
 						m++;
 					}
 					else if (*(m + 1) == L'c')
 					{
 						TEditorPos	pos = EditorGetPos ();
-						FSF.itoa (pos.Col + 1, tmp, 10);
+						FSF.itoa64 (pos.Col + 1, tmp, 10);
 						wcscat (j, tmp);
 						m++;
 					}

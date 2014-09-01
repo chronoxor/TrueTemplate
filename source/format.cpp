@@ -50,7 +50,7 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 			epos_sel.Row = 0;
 			epos_sel.Col = 0;
 		}
-					
+
 		ExpandEnvironmentStrings (TEMP_TT_TMP, filename, NM);
 		srcfile = _wfopen (filename, L"rb");
 		if (srcfile == NULL) return ;
@@ -184,7 +184,7 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 				filepath,
 				&si,
 				&pi
-			) == TRUE
+			)
 	)
 	{
 		WaitForSingleObject (pi.hProcess, INFINITE);
@@ -231,7 +231,7 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 		TEditorPos	ep = EditorGetPos ();
 		Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 
-		int codeTable = EditorGetCodeTable ();
+		intptr_t codeTable = EditorGetCodeTable();
 		EditorSetCodeTable (1);					//set dos code table (for normal restoring non-latin text)
 
 		while ((c[0] = fgetwc (dstfile)) != WEOF)
@@ -292,14 +292,14 @@ static void SelectFormatting (TEInfo *te)
 				FarMenuItemEx *amenu = new FarMenuItemEx[lng->formatColl.getCount ()];
 				if (amenu)
 				{
-					for (unsigned i = 0; i < lng->formatColl.getCount (); i++)
+					for (size_t i = 0; i < lng->formatColl.getCount (); i++)
 					{
 						TFormat *mm = (TFormat *) (lng->formatColl[i]);
 						amenu[i].Text = mm->name;
 						amenu[i].Flags = 0;
 					}
 
-					int res = Info.Menu
+					intptr_t res = Info.Menu
 						(
 							&MainGuid,
 							&SelFmtGuid,
@@ -323,7 +323,7 @@ static void SelectFormatting (TEInfo *te)
 	}
 }
 
-static void FormatMenu (const wchar_t *Name, int lang)
+static void FormatMenu (const wchar_t *Name, intptr_t lang)
 {
 	TLang *lng = (TLang *) (langColl[lang]);
 	if (lng)
@@ -339,14 +339,14 @@ static void FormatMenu (const wchar_t *Name, int lang)
 			FarMenuItemEx *amenu = new FarMenuItemEx[lng->formatColl.getCount ()];
 			if (amenu)
 			{
-				for (unsigned i = 0; i < lng->formatColl.getCount (); i++)
+				for (size_t i = 0; i < lng->formatColl.getCount (); i++)
 				{
 					TFormat *mm = (TFormat *) (lng->formatColl[i]);
 					amenu[i].Text = mm->name;
 					amenu[i].Flags = 0;
 				}
 
-				int res = Info.Menu
+				intptr_t res = Info.Menu
 					(
 						&MainGuid,
 						&SelFmtGuid,

@@ -3,7 +3,7 @@
 //====================================================================================================================
 static wchar_t *Point2FileName (wchar_t *szPath)
 {
-	int i = wcslen (szPath);
+	intptr_t i = wcslen (szPath);
 	while (true)
 	{
 		i--;
@@ -20,8 +20,8 @@ static wchar_t *Point2FileName (wchar_t *szPath)
 //====================================================================================================================
 static wchar_t *Point2FileExt (wchar_t *szPath)
 {
-	int l;
-	int i = l = wcslen (szPath);
+	intptr_t i, l;
+	i = l = wcslen (szPath);
 	while (true)
 	{
 		i--;
@@ -41,8 +41,8 @@ static wchar_t *Point2FileExt (wchar_t *szPath)
 
 static wchar_t *addExt (wchar_t *path, wchar_t *defExt)
 {
-	int n = wcslen (path) - 1;
-	for (int i = n; i >= 0; i--)
+	intptr_t n = wcslen(path) - 1;
+	for (intptr_t i = n; i >= 0; i--)
 	{
 		if (path[i] == L'.')
 		{
@@ -222,8 +222,8 @@ static wchar_t *QuoteText (wchar_t *Str)
 {
 	if (*Str == L'-' || *Str == L'^' || wcspbrk (Str, L" &+,"))
 	{
-		unsigned	l = wcslen (Str);
-		for (int i = l; i > 0; i--) Str[i] = Str[i - 1];
+		intptr_t	l = wcslen(Str);
+		for (intptr_t i = l; i > 0; i--) Str[i] = Str[i - 1];
 		*Str = Str[l + 1] = L'\"';
 		Str[l + 2] = 0;
 	}
@@ -245,7 +245,7 @@ static bool isFile (const wchar_t *s)
 	return (res);
 }
 
-static inline int matched (const wchar_t *mask, const wchar_t *value)
+static inline size_t matched (const wchar_t *mask, const wchar_t *value)
 {
 	if (wcschr ((wchar_t *) mask, L'\\'))
 		return (FSF.ProcessName (mask, (wchar_t *) value, 0, PN_CMPNAMELIST));

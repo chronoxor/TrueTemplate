@@ -5,7 +5,7 @@
 #include "winmem.h"
 #include "eicoll.h"
 
-TEInfo::TEInfo(int aID, int aLang, const wchar_t *aFn, int aNewFile)
+TEInfo::TEInfo(intptr_t aID, intptr_t aLang, const wchar_t *aFn, bool aNewFile)
 {
   ID = aID;
   lang = aLang;
@@ -13,27 +13,27 @@ TEInfo::TEInfo(int aID, int aLang, const wchar_t *aFn, int aNewFile)
   wcscpy(fn, aFn);
 }
 
-unsigned TEICollection::insert(int aID, int aLang, const wchar_t *aFn, int aNewFile)
+size_t TEICollection::insert(intptr_t aID, intptr_t aLang, const wchar_t *aFn, bool aNewFile)
 {
   return TCollection::insert(new TEInfo(aID, aLang, aFn, aNewFile));
 }
 
 static int find_ID(void *it, void *data)
 {
-  return ((TEInfo*)it)->ID == *((int*)data);
+  return ((TEInfo*)it)->ID == *((intptr_t*)data);
 }
 
-TEICollection::TEICollection(unsigned aLimit, unsigned aDelta) :
+TEICollection::TEICollection(size_t aLimit, size_t aDelta) :
   TCollection(aLimit, aDelta, NULL)
 {
 }
 
-int TEICollection::findID(int aID)
+ptrdiff_t TEICollection::findID(intptr_t aID)
 {
   return findIndex(find_ID, &aID);
 }
 
-int TEICollection::findLang(int aID)
+ptrdiff_t TEICollection::findLang(intptr_t aID)
 {
   TEInfo *i = (TEInfo*)find(find_ID, &aID);
   if ( i )
@@ -41,7 +41,7 @@ int TEICollection::findLang(int aID)
   return -1;
 }
 
-const wchar_t *TEICollection::findFile(int aID)
+const wchar_t *TEICollection::findFile(intptr_t aID)
 {
   TEInfo *i = (TEInfo*)find(find_ID, &aID);
   if ( i )
@@ -49,9 +49,9 @@ const wchar_t *TEICollection::findFile(int aID)
   return NULL;
 }
 
-unsigned TEICollection::removeID(int aID)
+size_t TEICollection::removeID(intptr_t aID)
 {
-  int i = findIndex(find_ID, &aID);
+  ptrdiff_t i = findIndex(find_ID, &aID);
   if ( i != -1 )
     return remove(i);
   return getCount();

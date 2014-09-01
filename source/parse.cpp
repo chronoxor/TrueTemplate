@@ -107,7 +107,7 @@ static wchar_t *parseItem (TCollection *dc, wchar_t * &line, wchar_t *kwd, wchar
 															///'
 						for (size_t i = 0; i < dc->getCount (); ++i)
 						{
-							TDefine *d = (TDefine *) ((*dc)[(int)i]);
+							TDefine *d = (TDefine *) ((*dc)[i]);
 							if (0 == wcscmp (d->name, name))
 							{
 								for (const wchar_t *pdv = d->value; *pdv;) *pv++ = *pdv++;

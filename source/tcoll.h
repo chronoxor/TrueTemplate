@@ -4,25 +4,25 @@
 class TCollection
 {
   public:
-    TCollection(unsigned, unsigned, void (*)(void*));
+    TCollection(size_t, size_t, void(*)(void*));
     TCollection();
     TCollection(const TCollection &coll);
     TCollection& operator=(const TCollection &coll);
     virtual ~TCollection();
-    void init(unsigned = 0, unsigned = 5, void (*)(void*) = 0);
+    void init(size_t = 0, size_t = 5, void(*)(void*) = 0);
     void done(void);
-    inline void *operator[](unsigned i) { return at(i);};
-    unsigned insert(void*);
+    inline void *operator[](size_t i) { return at(i); };
+    size_t insert(void*);
     void removeAll(void);
-    unsigned remove(unsigned);
-    virtual void setLimit(unsigned);
-    unsigned getCount() { return count; }
+    size_t remove(size_t);
+    virtual void setLimit(size_t);
+    size_t getCount() { return count; }
     void *find(int (*)(void*, void*), void*);
-    int findIndex(int (*)(void*, void*), void*);
+    ptrdiff_t findIndex(int (*)(void*, void*), void*);
   protected:
-    void *at(unsigned);
+    void *at(size_t);
     void **items;
-    unsigned count, limit, delta;
+    size_t count, limit, delta;
     void (*delItem)(void*);
 };
 #endif

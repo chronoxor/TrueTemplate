@@ -18,16 +18,16 @@ static void nullUserStrings (void)
 {
 	for (int i = 0; i < 10; i++) utypString[i] = *userString[i] = *uttlString[i] = 0;
 	for (int i = 0; i < 1000; i++) *uformat[i] = 0;
-        for (int i = 0; i < 10; i++) 
-                for (int j = 0; j < 10; j++) 
+        for (int i = 0; i < 10; i++)
+                for (int j = 0; j < 10; j++)
                         *ulist[i][j] = 0;
 }
 
-void unpackUserString (const wchar_t *userStr, wchar_t *format, int index)
+void unpackUserString (const wchar_t *userStr, wchar_t *format, size_t index)
 {
 	const wchar_t	*tmp = userStr;
 	wchar_t				*tmpname = format;
-	int					curindex = 0;
+	size_t				curindex = 0;
 	*tmpname = L'\0';
 	while (*tmp)
 	{
@@ -76,7 +76,7 @@ void unpackUserString (const wchar_t *userStr, wchar_t *format, int index)
 
 static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText, const wchar_t *title = NULL)
 {
-	int count = 0;
+	size_t count = 0;
 	nullUserStrings ();
 	for (wchar_t *p = (wchar_t *) MacroText; *p; p++)
 	{
@@ -192,9 +192,9 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 	}
 
 	//Calculating dialog items count
-	int addlength = 0;
-	int itemscount = 4;
-	for (int i = 0; i < count; i++)
+	intptr_t addlength = 0;
+	intptr_t itemscount = 4;
+	for (size_t i = 0; i < count; i++)
 	{
 		switch (utypString[i])
 		{
@@ -254,7 +254,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 	struct FarDialogItem		*DialogItems = new FarDialogItem[itemscount];
 	struct FarList					*listBox = new FarList[count];
 	bool	*needFreeLists = new bool[count];
-	for (int i = 0; i < count; i++)
+	for (size_t i = 0; i < count; i++)
 	{
 		needFreeLists[i] = false;
 		listBox[i].ItemsNumber = 0;
@@ -263,8 +263,8 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 
 	if (DialogItems != NULL)
 	{
-		int curDlgItem = 0;
-		int curDlgPos = 2;
+    	intptr_t curDlgItem = 0;
+    	intptr_t curDlgPos = 2;
 
 		//Dialog frame
 		InitItem.Type = DI_DOUBLEBOX;
@@ -281,7 +281,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 		InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
 
 		bool	gainfocus = true;
-		for (int i = 0; i < count; i++)
+		for (size_t i = 0; i < count; i++)
 		{
 			switch (utypString[i])
 			{
@@ -346,8 +346,8 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					InitItem.History = NULL;
 					InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
 
-					int		ic = 0;
-					int		sel = -1;
+					intptr_t	ic = 0;
+					intptr_t	sel = -1;
 					wchar_t	*tmp = userString[i];
 					while (*tmp)
 					{
@@ -371,7 +371,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						listBox[i].Items = new FarListItem[ic];
 					}
 
-					for (int j = 0; j < ic; j++)
+					for (size_t j = 0; j < ic; j++)
 					{
 						listBox[i].Items[j].Flags = (j == sel) ? LIF_SELECTED : 0;
 						listBox[i].Items[j].Reserved[0] = 0;
@@ -433,8 +433,8 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 
 			case USER_LIST:
 				{
-					int		ic = 0;
-					int		sel = -1;
+					intptr_t	ic = 0;
+					intptr_t	sel = -1;
 					wchar_t	*tmp = userString[i];
 					while (*tmp)
 					{
@@ -458,7 +458,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						listBox[i].Items = new FarListItem[ic];
 					}
 
-					for (int j = 0; j < ic; j++)
+					for (size_t j = 0; j < ic; j++)
 					{
 						listBox[i].Items[j].Flags = (j == sel) ? LIF_SELECTED : 0;
 						listBox[i].Items[j].Reserved[0] = 0;
@@ -485,7 +485,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 
 			case USER_RADIO:
 				{
-					int		ic = 0;
+					intptr_t	ic = 0;
 					wchar_t	*tmp = userString[i];
 					while (*tmp)
 					{
@@ -604,11 +604,11 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 		HANDLE hDlg = Info.DialogInit(&MainGuid, &UserExecGuid, -1, -1, 59, itemscount + addlength + 2, NULL, DialogItems, itemscount, 0, 0, Info.DefDlgProc, 0);
 		if (hDlg != INVALID_HANDLE_VALUE)
 		{
-			int n = Info.DialogRun(hDlg);
+			intptr_t n = Info.DialogRun(hDlg);
 			if (n == itemscount - 2)
 			{
-				int curdialogitem = 1;
-				for (int i = 0; i < count; i++)
+				intptr_t curdialogitem = 1;
+				for (size_t i = 0; i < count; i++)
 				{
 					switch (utypString[i])
 					{
@@ -616,7 +616,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						wcscpy (userString[i], L"");
 						curdialogitem += 1;
 						break;
-					case USER_CHECK:                                 
+					case USER_CHECK:
 						unpackUserString (userString[i], uformat[curdialogitem], (Info.SendDlgMessage(hDlg,DM_GETCHECK,curdialogitem,NULL) == BSTATE_CHECKED) ? 0 : 1);
 						wcscpy (userString[i], uformat[curdialogitem]);
 						curdialogitem += 1;
@@ -627,7 +627,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 							FarDialogItemDataEx item;
 							item.PtrLength = 512;
 							item.PtrData = userString[i];
-							Info.SendDlgMessage(hDlg,DM_GETTEXT,curdialogitem + 1,(void*)&item);
+							Info.SendDlgMessage(hDlg, DM_GETTEXT, curdialogitem + 1, (void*)&item);
 							curdialogitem += 2;
 							break;
 						}
@@ -636,7 +636,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 							FarDialogItemDataEx item;
 							item.PtrLength = 512;
 							item.PtrData = userString[i];
-							Info.SendDlgMessage(hDlg,DM_GETTEXT,curdialogitem + 1,(void*)&item);
+							Info.SendDlgMessage(hDlg, DM_GETTEXT, curdialogitem + 1, (void*)&item);
 							curdialogitem += 2;
 							break;
 						}
@@ -645,7 +645,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 							FarDialogItemDataEx item;
 							item.PtrLength = 512;
 							item.PtrData = userString[i];
-							Info.SendDlgMessage(hDlg,DM_GETTEXT,curdialogitem + 1,(void*)&item);
+							Info.SendDlgMessage(hDlg, DM_GETTEXT, curdialogitem + 1, (void*)&item);
 							curdialogitem += 2;
 							break;
 						}
@@ -653,7 +653,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						{
 							wchar_t	tmpList[USER_INPUT_LENGTH];
 							wchar_t	*tmp = userString[i];
-							int		ic = 0;
+							intptr_t	ic = 0;
 							wcscpy (tmpList, L"");
 							while (*tmp)
 							{
@@ -689,7 +689,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						{
 							wchar_t	tmpRadio[USER_INPUT_LENGTH];
 							wchar_t	*tmp = userString[i];
-							int		ic = 0;
+							intptr_t	ic = 0;
 							wcscpy (tmpRadio, L"");
 							while (*tmp)
 							{
@@ -702,7 +702,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 									unpackUserString
 									(
 										userString[i],
-										uformat[curdialogitem],    
+										uformat[curdialogitem],
 										ic * 3 + ((Info.SendDlgMessage(hDlg,DM_GETCHECK,curdialogitem + ic + 1,NULL) == BSTATE_CHECKED) ? 1 : 2)
 									);
 									wcscat (tmpRadio, uformat[curdialogitem]);
@@ -721,14 +721,14 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 			}
 			else
 			{
-				for (int i = 0; i < count; i++) wcscpy (userString[i], L"");
+				for (size_t i = 0; i < count; i++) wcscpy(userString[i], L"");
 				res = false;
-			}				
+			}
 			Info.DialogFree(hDlg);
 		}
 	}
 
-	for (int i = 0; i < count; i++)
+	for (size_t i = 0; i < count; i++)
 		if (!needFreeLists[i]) delete[] listBox[i].Items;
 	delete[] needFreeLists;
 	delete[] listBox;

@@ -5,20 +5,21 @@
 
 struct TEInfo
 {
-  int ID, lang, newFile;
+  intptr_t ID, lang;
+  bool newFile;
   wchar_t fn[260];
-  TEInfo() { ID = lang = -1; *fn = 0; newFile = 0; }
-  TEInfo(int, int, const wchar_t*, int);
+  TEInfo() { ID = lang = -1; *fn = L'\0'; newFile = false; }
+  TEInfo(intptr_t, intptr_t, const wchar_t*, bool);
 };
 
 class TEICollection: public TCollection
 {
   public:
-    TEICollection(unsigned = 0, unsigned = 5);
-    unsigned insert(int, int, const wchar_t*, int);
-    unsigned removeID(int);
-    int findID(int);
-    int findLang(int);
-    const wchar_t *findFile(int);
+    TEICollection(size_t = 0, size_t = 5);
+    size_t insert(intptr_t, intptr_t, const wchar_t*, bool);
+    size_t removeID(intptr_t);
+    ptrdiff_t findID(intptr_t);
+    ptrdiff_t findLang(intptr_t);
+    const wchar_t *findFile(intptr_t);
 };
 #endif

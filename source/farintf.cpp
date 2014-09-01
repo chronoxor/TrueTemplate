@@ -10,9 +10,9 @@ struct PluginStartupInfo Info;
 struct FarStandardFunctions FSF;
 wchar_t PluginRootKey[80];
 
-void InitDialogItems(InitDialogItem *Init, FarDialogItem *Item, int ItemsNumber)
+void InitDialogItems(InitDialogItem *Init, FarDialogItem *Item, size_t ItemsNumber)
 {
-  for (int I = 0 ; I < ItemsNumber ; I++ )
+  for (size_t I = 0 ; I < ItemsNumber ; I++ )
   {
     Item[I].Type = (FARDIALOGITEMTYPES)Init[I].Type;
     Item[I].X1 = Init[I].X1;
@@ -44,12 +44,11 @@ void InitDialogItems(InitDialogItem *Init, FarDialogItem *Item, int ItemsNumber)
   }
 }
 
-void InitDialogItemsEx(const struct InitDialogItemEx *Init,struct FarDialogItem *Item,int ItemsNumber)
+void InitDialogItemsEx(const struct InitDialogItemEx *Init, struct FarDialogItem *Item, size_t ItemsNumber)
 {
- int I;
  struct FarDialogItem *PItem=Item;
  const struct InitDialogItemEx *PInit=Init;
- for (I=0;I<ItemsNumber;I++,PItem++,PInit++)
+ for (size_t I = 0; I < ItemsNumber; I++, PItem++, PInit++)
  {
   PItem->Type=(FARDIALOGITEMTYPES)PInit->Type;
   PItem->X1=PInit->X1;

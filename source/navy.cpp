@@ -2,7 +2,7 @@ struct TNavy
 {
 	TNavy();
 	wchar_t	mask[MAX_REG_LEN], path[MAX_STR_LEN], suffixes[MAX_STR_LEN];
-	int		pos, rect[4];
+	intptr_t	pos, rect[4];
 	bool	viewer;
 };
 
@@ -19,12 +19,12 @@ TNavy::TNavy ()
 	this->viewer = false;
 }
 
-static void NavyInsert (const wchar_t *file, const wchar_t *suffixes, const int rect[4], bool viewer, TCollection &coll)
+static void NavyInsert(const wchar_t *file, const wchar_t *suffixes, const intptr_t rect[4], bool viewer, TCollection &coll)
 {
 	struct nav
 	{
 		wchar_t	*file;
-		int		rect[4];
+		intptr_t	rect[4];
 		bool	viewer;
 	};
 
@@ -39,7 +39,7 @@ static void NavyInsert (const wchar_t *file, const wchar_t *suffixes, const int 
 	{
 		if (IsFile (filename))
 		{
-			for (unsigned i = 0; i < coll.getCount (); i++)
+			for (size_t i = 0; i < coll.getCount (); i++)
 				if (_wcsicmp (((nav *) (coll[i]))->file, filename) == 0) return ;
 
 			nav *tmp = new nav;
@@ -73,15 +73,15 @@ static void NavyInsert (const wchar_t *file, const wchar_t *suffixes, const int 
 	} while (*filename);
 }
 
-static void NavyFind (const wchar_t	*path, const wchar_t *file, const wchar_t *suffixes, const int rect[4], bool viewer, TCollection &coll)
+static void NavyFind(const wchar_t	*path, const wchar_t *file, const wchar_t *suffixes, const intptr_t rect[4], bool viewer, TCollection &coll)
 {
 	wchar_t	testFile[2 * NM];
 	wcscpy(testFile, path);
 	wcscat(testFile, file);
 	NavyInsert (testFile, suffixes, rect, viewer, coll);
 
-	int n = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
-	for (int i = 0; i < n; i++)
+	intptr_t n = Info.AdvControl(&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
+	for (intptr_t i = 0; i < n; i++)
 	{
 		wchar_t	witypename[NM];
 		wchar_t	winame[NM];
@@ -110,7 +110,7 @@ static void NavyCollect
 	const wchar_t	*filename,
 	const wchar_t	*includepath,
 	const wchar_t	*suffixes,
-	const int		rect[4],
+	const intptr_t	rect[4],
 	bool			viewer,
 	TCollection &coll
 )
@@ -126,7 +126,7 @@ static void NavyCollect
 		if (*tmpPath == L';')
 		{
 			*tmpDir = L'\0';
-			*tmpPath++;
+			tmpPath++;
 			tmpDir = curdir;
 			if ((curdir[0] == L'.') && (curdir[1] == L'\0'))
 				NavyFind (path, filename, suffixes, rect, viewer, coll);
@@ -155,26 +155,26 @@ static void NavyCollect
 	}
 }
 
-static void Navigate (TLang *lng, const wchar_t *path, wchar_t *realLine, DWORD pos, DWORD start, DWORD end)
+static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_t pos, intptr_t start, intptr_t end)
 {
 	wchar_t				filename[2 * _MAX_PATH + 1];
 	TCollection found;
-	for (unsigned i = 0; i < lng->navyColl.getCount (); i++)
+	for (size_t i = 0; i < lng->navyColl.getCount (); i++)
 	{
 		TNavy *nav = (TNavy *) (lng->navyColl[i]);
-		int		bounds[1][2] = { { 0, 0 } };
+		intptr_t	bounds[1][2] = { { 0, 0 } };
 		if (start != -1)
 		{
-			int len = min (end - start, _MAX_PATH);
+			intptr_t len = min(end - start, _MAX_PATH);
 			wcsncpy (filename, realLine + start, len);
             filename[len] = 0;
 			NavyCollect (path, filename, nav->path, nav->suffixes, nav->rect, nav->viewer, found);
 		}
 		else if (strMatch (realLine, nav->mask, L"/^\\s*", (lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/"), 1, bounds, &nav->pos))
 		{
-			if (((int)pos >= bounds[0][0]) && ((int)pos <= bounds[0][1]))
+			if ((pos >= bounds[0][0]) && (pos <= bounds[0][1]))
 			{
-				int len = min (bounds[0][1] - bounds[0][0], _MAX_PATH);
+				intptr_t len = min(bounds[0][1] - bounds[0][0], _MAX_PATH);
 				wcsncpy (filename, realLine + bounds[0][0], len);
                 filename[len] = 0;
 				NavyCollect (path, filename, nav->path, nav->suffixes, nav->rect, nav->viewer, found);
@@ -191,7 +191,7 @@ static void Navigate (TLang *lng, const wchar_t *path, wchar_t *realLine, DWORD 
 
 	FarMenuItemEx *mMenu = NULL;
 	if (found.getCount () > 1) mMenu = new FarMenuItemEx[found.getCount ()];
-	for (unsigned i = 0; ((i < found.getCount ()) && (found.getCount () > 1)); i++)
+	for (size_t i = 0; ((i < found.getCount()) && (found.getCount() > 1)); i++)
 	{
 		mMenu[i].Text = ((nav *) (found[i]))->file;
 	}
@@ -203,7 +203,7 @@ static void Navigate (TLang *lng, const wchar_t *path, wchar_t *realLine, DWORD 
 	BreakKeys[1].ControlKeyState = 0;
 
 	intptr_t BreakCode;
-	int ExitCode = 0;
+	intptr_t ExitCode = 0;
 	while (found.getCount () > 1)
 	{
 		ExitCode = Info.Menu
@@ -301,7 +301,7 @@ static void Navigate (TLang *lng, const wchar_t *path, wchar_t *realLine, DWORD 
 		}
 	}
 
-	for (unsigned i = 0; i < found.getCount (); i++) delete[]((nav *) (found[i]))->file;
+	for (size_t i = 0; i < found.getCount(); i++) delete[]((nav *)(found[i]))->file;
 	found.removeAll ();
 }
 
@@ -337,18 +337,18 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 			TCollection found;
 			EditorInfoEx	ei;
 			Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
-			for (int l = 0; l < ei.TotalLines; l++)
+			for (intptr_t l = 0; l < ei.TotalLines; l++)
 			{
 				EditorGetStringEx egs;
 				EditorGetStr (&egs, l);
 				wcsncpy (line, egs.StringText, egs.StringLength + 1);
-				for (unsigned i = 0; i < lng->navyColl.getCount (); i++)
+				for (size_t i = 0; i < lng->navyColl.getCount(); i++)
 				{
 					TNavy *nav = (TNavy *) (lng->navyColl[i]);
-					int		bounds[1][2] = { { 0, 0 } };
+					intptr_t	bounds[1][2] = { { 0, 0 } };
 					if (strMatch (line, nav->mask, L"/^\\s*", (lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/"), 1, bounds, &nav->pos))
 					{
-						int len = min (bounds[0][1] - bounds[0][0], _MAX_PATH);
+						intptr_t len = min(bounds[0][1] - bounds[0][0], _MAX_PATH);
 						wcsncpy (filename, line + bounds[0][0], len);
 						filename[len] = 0;
 						NavyCollect (path, filename, nav->path, nav->suffixes, nav->rect, nav->viewer, found);
@@ -365,7 +365,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 
 			FarMenuItemEx *mMenu = NULL;
 			if (found.getCount () > 0) mMenu = new FarMenuItemEx[found.getCount ()];
-			for (unsigned i = 0; ((i < found.getCount ()) && (found.getCount () > 1)); i++)
+			for (size_t i = 0; ((i < found.getCount()) && (found.getCount() > 1)); i++)
 			{
 				mMenu[i].Text = ((nav *) (found[i]))->file;
 			}
@@ -374,10 +374,10 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 			BreakKeys[0].VirtualKeyCode = VK_F3;
 			BreakKeys[0].ControlKeyState = 0;
 			BreakKeys[1].VirtualKeyCode = 0;
-			BreakKeys[1].ControlKeyState = 0;	
+			BreakKeys[1].ControlKeyState = 0;
 
 			intptr_t BreakCode;
-			int ExitCode = 0;
+			intptr_t ExitCode = 0;
 			while (found.getCount () > 0)
 			{
 				ExitCode = Info.Menu
@@ -475,7 +475,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 				}
 			}
 
-			for (unsigned i = 0; i < found.getCount (); i++) delete[]((nav *) (found[i]))->file;
+			for (size_t i = 0; i < found.getCount(); i++) delete[]((nav *)(found[i]))->file;
 			found.removeAll ();
 		}
 	}
