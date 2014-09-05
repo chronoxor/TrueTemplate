@@ -7,7 +7,7 @@
 
 #define MAXCOLLECTIONSIZE 0x7FFFFFFF
 
-TCollection::TCollection(unsigned aLimit, unsigned aDelta, void (*aDelItem)(void*))
+TCollection::TCollection(size_t aLimit, size_t aDelta, void(*aDelItem)(void*))
 {
   init(aLimit, aDelta, aDelItem);
 }
@@ -17,7 +17,25 @@ TCollection::TCollection()
   init(0, 5, NULL);
 }
 
-void TCollection::init(unsigned aLimit, unsigned aDelta, void (*aDelItem)(void*))
+TCollection::TCollection(const TCollection &coll)
+{
+  *this = coll;
+}
+
+TCollection& TCollection::operator=(const TCollection &coll)
+{
+  if (this != &coll)
+  {
+    items = coll.items;
+    count = coll.count;
+    limit = coll.limit;
+    delta = coll.delta;
+    delItem = coll.delItem;
+  }
+	return *this;
+}
+
+void TCollection::init(size_t aLimit, size_t aDelta, void(*aDelItem)(void*))
 {
   count = limit = 0;
   items = NULL;
@@ -41,7 +59,7 @@ void TCollection::done(void)
   }
 }
 
-void *TCollection::at(unsigned index)
+void *TCollection::at(size_t index)
 {
   if ( index >= count )
     return NULL;
@@ -52,25 +70,25 @@ void *TCollection::find(int (*ff)(void*, void*), void *data)
 {
   if ( items )
   {
-    for ( unsigned i =  0; i < count; i++ )
+    for ( size_t i = 0; i < count; i++ )
       if ( items[i] && ff(items[i], data) )
         return items[i];
   }
   return NULL;
 }
 
-int TCollection::findIndex(int (*ff)(void*, void*), void *data)
+ptrdiff_t TCollection::findIndex(int (*ff)(void*, void*), void *data)
 {
   if ( items )
   {
-    for ( unsigned i =  0; i < count; i++ )
+    for ( size_t i = 0; i < count; i++ )
       if ( items[i] && ff(items[i], data) )
         return i;
   }
   return -1;
 }
 
-unsigned TCollection::insert(void *item)
+size_t TCollection::insert(void *item)
 {
   if ( count == limit )
     setLimit(count+delta);
@@ -78,7 +96,7 @@ unsigned TCollection::insert(void *item)
   return count++;
 }
 
-unsigned TCollection::remove(unsigned index)
+size_t TCollection::remove(size_t index)
 {
   if ( items && ( index < limit ) && count )
   {
@@ -96,7 +114,7 @@ void TCollection::removeAll(void)
 {
   if ( items )
   {
-    for ( unsigned i = 0 ; i < count ; i++ )
+    for ( size_t i = 0 ; i < count ; i++ )
       if ( items[i] )
       {
         if ( delItem )
@@ -109,7 +127,7 @@ void TCollection::removeAll(void)
   setLimit(count = 0);
 }
 
-void TCollection::setLimit(unsigned aLimit)
+void TCollection::setLimit(size_t aLimit)
 {
   if ( aLimit < count )
     aLimit =  count;

@@ -133,7 +133,6 @@ intptr_t WINAPI ConfigureW(const struct ConfigureInfo *Info)
 intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 {
 	wchar_t filename[NM];
-	static INPUT_RECORD dummy;
 	EditorInfoEx					ei;
 	initEList ();
 	switch (Info->Event)
@@ -142,10 +141,6 @@ intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 		::Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 		::Info.EditorControl (ei.EditorID, ECTL_GETFILENAME, NM, filename);
 		eListInsert (ei.EditorID, filename);
-		memset (&dummy, 0, sizeof (dummy));
-		dummy.EventType = KEY_EVENT;
-		dummy.Event.KeyEvent.bKeyDown = true;
-		::Info.EditorControl (-1, ECTL_PROCESSINPUT, 0, &dummy);
 		return (0);
 	case EE_CLOSE:
 		eList->removeID (Info->EditorID);
@@ -171,8 +166,8 @@ static void SelectTemplate (TEInfo *te)
 		TLang *lng = (TLang *) (langColl[te->lang]);
 		if (lng)
 		{
-			unsigned	count = 0;
-			for (unsigned i = 0; i < lng->macroColl.getCount (); i++)
+			size_t	count = 0;
+			for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 			{
 				TMacro	*mm = (TMacro *) (lng->macroColl[i]);
 				if (mm->Name[0] && !mm->submenu) count++;
@@ -184,7 +179,7 @@ static void SelectTemplate (TEInfo *te)
 				if (amenu)
 				{
 					count = 0;
-					for (unsigned i = 0; i < lng->macroColl.getCount (); i++)
+					for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 					{
 						TMacro	*mm = (TMacro *) (lng->macroColl[i]);
 						if (mm->Name[0] && !mm->submenu)
@@ -195,7 +190,7 @@ static void SelectTemplate (TEInfo *te)
 						}
 					}
 
-					int res = Info.Menu
+					intptr_t res = Info.Menu
 						(
 							&MainGuid,
 							&SelectTemplateGuid,
@@ -214,7 +209,7 @@ static void SelectTemplate (TEInfo *te)
 					if (res != -1)
 					{
 						count = 0;
-						for (unsigned i = 0; i < lng->macroColl.getCount (); i++)
+						for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 						{
 							TMacro	*mm = (TMacro *) (lng->macroColl[i]);
 							if (mm->Name[0] && !mm->submenu)
@@ -267,15 +262,15 @@ static void SelectTemplate (TEInfo *te)
 
 static void SelectTemplateSet (TEInfo *te)
 {
-	unsigned		lc = langColl.getCount ();
+	size_t		lc = langColl.getCount ();
 	FarMenuItemEx *amenu = new FarMenuItemEx[lc + 2];
 	if (amenu)
 	{
-		for (unsigned i = 0; i < lc; i++)
+		for (size_t i = 0; i < lc; i++)
 		{
 			amenu[i].Text = ((TLang *) langColl[i])->desc;
 			amenu[i].Flags &= ~(MIF_CHECKED | MIF_SEPARATOR);
-			amenu[i].Flags |= ((unsigned) (te->lang) == i) ? MIF_SELECTED : 0;
+			amenu[i].Flags |= ((size_t) (te->lang) == i) ? MIF_SELECTED : 0;
 		}
 
 		amenu[lc].Flags &= ~(MIF_SELECTED | MIF_CHECKED);
@@ -285,7 +280,7 @@ static void SelectTemplateSet (TEInfo *te)
 		amenu[lc + 1].Flags &= ~(MIF_CHECKED | MIF_SEPARATOR);
 		amenu[lc + 1].Flags |= (te->lang == -1) ? MIF_SELECTED : 0;
 
-		int res = Info.Menu
+		intptr_t res = Info.Menu
 			(
 				&MainGuid,
 				&SelectTemplateSetGuid,
@@ -303,7 +298,7 @@ static void SelectTemplateSet (TEInfo *te)
 			);
 		if (res != -1)
 		{
-			te->lang = ((unsigned) res < lc) ? res : -1;
+			te->lang = ((size_t) res < lc) ? res : -1;
 		}
 
 		delete[] amenu;
@@ -314,7 +309,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 {
 	if (!IsOldFar)
 	{
-		int					n;
+    	ptrdiff_t 		n;
 		EditorInfoEx	ei;
 		wchar_t filepath[NM];
 		wchar_t filename[NM];
@@ -391,7 +386,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 				if (te)
 				{
 					FarMenuItemEx mMenu[9];
-					int						count = dimOf (mMenu);
+					int						count = _countof (mMenu);
 					for (int i = 0; i < count; i++) mMenu[i].Flags = 0;
 					mMenu[0].Text = GetMsg (MMenuTemplates);
 					mMenu[1].Text = GetMsg (MFormatting);
@@ -404,7 +399,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 					mMenu[7].Flags |= MIF_SEPARATOR;
 					if (!compilerOut) mMenu[8].Flags |= MIF_DISABLE;
 
-					int mode = ::Info.Menu
+					intptr_t mode = ::Info.Menu
 						(
 							&MainGuid,
 							&OpenEditorGuid,
@@ -453,13 +448,13 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 		case OPEN_PLUGINSMENU:
 			FarMenuItemEx mMenu[3];
 
-			int count = dimOf (mMenu);
+			int count = _countof (mMenu);
 			mMenu[0].Text = GetMsg (MMenuCompile);
 			mMenu[2].Text = GetMsg (MShowOutput);
 			mMenu[1].Flags |= MIF_SEPARATOR;
 			if (!compilerOut) mMenu[2].Flags |= MIF_DISABLE;
 
-			int mode = ::Info.Menu
+			intptr_t mode = ::Info.Menu
 				(
 					&MainGuid,
 					&OpenMenuGuid,

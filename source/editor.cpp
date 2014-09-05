@@ -4,8 +4,8 @@ struct TEditorPos
 	{
 		Default();
 	}
-	int Row, Col;
-	int TopRow, LeftCol;
+	intptr_t Row, Col;
+	intptr_t TopRow, LeftCol;
 	void Default (void)
 	{
 		Row = Col = TopRow = LeftCol = -1;
@@ -24,7 +24,7 @@ static TEditorPos EditorGetPos (void)
 	return (r);
 }
 
-static void EditorSetPos (TEditorPos pos)
+static void EditorSetPos (const TEditorPos &pos)
 {
 	EditorSetPositionEx sp;
 	sp.CurLine = pos.Row;
@@ -35,7 +35,7 @@ static void EditorSetPos (TEditorPos pos)
 	Info.EditorControl (-1, ECTL_SETPOSITION, 0, &sp);
 }
 
-void EditorSetPos (int line, int col, int topline = -1, int leftcol = -1)
+void EditorSetPos (intptr_t line, intptr_t col, intptr_t topline = -1, intptr_t leftcol = -1)
 {
 	EditorSetPositionEx sp;
 	sp.CurLine = (line < -1) ? -1 : line;
@@ -62,13 +62,13 @@ static void EditorSetCodeTable (intptr_t iCodeTable = 1)
 	Info.EditorControl (-1, ECTL_SETPARAM, 0, &etp);
 }
 
-static void EditorGetStr (EditorGetStringEx *gs, int line = -1)
+static void EditorGetStr (EditorGetStringEx *gs, intptr_t line = -1)
 {
 	gs->StringNumber = line;
 	Info.EditorControl (-1, ECTL_GETSTRING, 0, gs);
 }
 
-static void EditorSetStr (wchar_t *src, int line = -1)
+static void EditorSetStr (wchar_t *src, intptr_t line = -1)
 {
 	EditorSetStringEx st;
 	st.StringNumber = line;
@@ -80,17 +80,17 @@ static void EditorSetStr (wchar_t *src, int line = -1)
 
 static void EditorSaveSelected (void)
 {
-	int					vblock;
-	int					selstart = 0;
-	int					sellength = 0;
+	int				vblock;
+	intptr_t	selstart = 0;
+	int				sellength = 0;
 	EditorInfoEx	ei;
 	Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 	vblock = (ei.BlockType == BTYPE_COLUMN) ? 1 : 0;
 	selstart = ei.BlockStartLine;
 	if (ei.BlockType != BTYPE_NONE)
 	{
-		int		curpos;
-		wchar_t	filename[NM];
+		intptr_t  curpos;
+		wchar_t   filename[NM];
 		ExpandEnvironmentStrings(TEMP_TT_TMP, filename, NM);
 
 		FILE *file = _wfopen (filename, L"wb");
@@ -115,9 +115,9 @@ static void EditorSaveSelected (void)
 				int len;
 				if (egs.SelEnd != -1)
 				{
-					wchar_t	tmp = L' ';
-					int		truelen = ((egs.StringLength - egs.SelStart) > 0) ? (egs.StringLength - egs.SelStart) : 0;
-					len = egs.SelEnd - egs.SelStart;
+					wchar_t tmp = L' ';
+					int	    truelen = ((egs.StringLength - egs.SelStart) > 0) ? (int)(egs.StringLength - egs.SelStart) : 0;
+					len = (int)(egs.SelEnd - egs.SelStart);
 					fwrite (&len, 1, sizeof (int), file);
 					fwrite (egs.StringText + egs.SelStart, (truelen < len) ? truelen : len, sizeof (wchar_t), file);
 					truelen = (truelen < len) ? len - truelen : 0;
@@ -125,7 +125,7 @@ static void EditorSaveSelected (void)
 				}
 				else
 				{
-					len = egs.StringLength - egs.SelStart;
+					len = (int)(egs.StringLength - egs.SelStart);
 					fwrite (&len, 1, sizeof (int), file);
 					fwrite (egs.StringText + egs.SelStart, len, sizeof (wchar_t), file);
 				}
@@ -146,13 +146,12 @@ static void EditorSaveAll (void)
 	Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 	fwrite (&vblock, 1, sizeof (int), file);
 	fwrite (&ei.TotalLines, 1, sizeof (int), file);
-	for (int i = 0; i < ei.TotalLines; i++)
+	for (intptr_t i = 0; i < ei.TotalLines; i++)
 	{
 		EditorGetStringEx egs;
 		EditorGetStr (&egs, i);
 
-		int len;
-		len = egs.StringLength;
+		int len = (int)egs.StringLength;
 		fwrite (&len, 1, sizeof (int), file);
 		fwrite (egs.StringText, len, sizeof (wchar_t), file);
 	}
@@ -229,15 +228,15 @@ static void EditorSaveRemove (void)
 	_wunlink (filename);
 }
 
-static void EditorSetPosEx (EditorInfoEx *ei, int line, int initCol, const wchar_t *colSearch)
+static void EditorSetPosEx(EditorInfoEx *ei, intptr_t line, intptr_t initCol, const wchar_t *colSearch)
 {
-	int col = (initCol < 0) ? -1 : initCol;
+	intptr_t col = (initCol < 0) ? -1 : initCol;
 	EditorSetPos (line, col);
 
 	TEditorPos	pos = EditorGetPos ();
 	if (pos.Row == pos.TopRow)
 	{
-		int tl = line - 5;
+		intptr_t tl = line - 5;
 		if (tl < 1) tl = 1;
 		EditorSetPos (line, -1, tl);
 	}
@@ -254,7 +253,7 @@ static void EditorSetPosEx (EditorInfoEx *ei, int line, int initCol, const wchar
 			wchar_t	*found = wcsstr(s, colSearch);
 			if (found)
 			{
-				int newCol = (int)(found - s);
+				intptr_t newCol = (intptr_t)(found - s);
 				if (newCol != col) EditorSetPos (-1, newCol);
 			}
 
@@ -286,7 +285,7 @@ static inline void insIns (wchar_t *ins, int &insPos)
 	}
 }
 
-static void selectBlock (int X1, int Y1, int X2, int Y2)
+static void selectBlock (intptr_t X1, intptr_t Y1, intptr_t X2, intptr_t Y2)
 {
 	EditorSelectEx	es;
 	es.BlockType = BTYPE_STREAM;
@@ -297,7 +296,7 @@ static void selectBlock (int X1, int Y1, int X2, int Y2)
 	Info.EditorControl (-1, ECTL_SELECT, 0, (void *) &es);
 }
 
-static void GetFilePathName (wchar_t* filename, int size)
+static void GetFilePathName (wchar_t* filename, size_t size)
 {
 	Info.EditorControl (-1, ECTL_GETFILENAME, size, filename);
 }
@@ -350,7 +349,7 @@ static void EditorProcessReturnKey (int before = -1, int after = -1)
 	if (after != -1) pluginBusy = after;
 }
 
-static void EditorGetDirectory (wchar_t* path, int size)
+static void EditorGetDirectory (wchar_t* path, size_t size)
 {
 	GetFilePathName(path, size);
 	*Point2FileName (path) = 0;

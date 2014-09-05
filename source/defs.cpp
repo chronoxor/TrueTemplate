@@ -1,7 +1,9 @@
 struct TIndent
 {
-	wchar_t	mask[MAX_REG_LEN], relative[MAX_REG_LEN], immChar;
-	int		indent[2], start, BracketsMode, bracketLink;
+	wchar_t		mask[MAX_REG_LEN], relative[MAX_REG_LEN], immChar;
+	intptr_t	indent[2], start;
+	size_t		bracketLink;
+	int				BracketsMode;
 };
 
 struct TBracket

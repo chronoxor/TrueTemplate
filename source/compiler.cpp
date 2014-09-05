@@ -2,9 +2,10 @@ struct TCompiler
 {
 	TCompiler();
 	TCompiler (const TCompiler &);
-	wchar_t	title[MAX_REG_LEN], err[MAX_STR_LEN];
-	int		line, col, fileMatch;
-	bool	searchCol;
+	TCompiler& operator= (const TCompiler &);
+	wchar_t		title[MAX_REG_LEN], err[MAX_STR_LEN];
+	intptr_t	line, col, fileMatch;
+	bool		searchCol;
 	void defaults (void)
 	{
 		*title = *err = 0;
@@ -20,12 +21,21 @@ TCompiler::TCompiler ()
 
 TCompiler::TCompiler (const TCompiler &e)
 {
-	wcscpy (title, e.title);
-	wcscpy (err, e.err);
-	line = e.line;
-	col = e.col;
-	searchCol = e.searchCol;
-	fileMatch = e.fileMatch;
+	*this = e;
+}
+
+TCompiler& TCompiler::operator= (const TCompiler &e)
+{
+	if (&e != this)
+	{
+		wcscpy (title, e.title);
+		wcscpy (err, e.err);
+		line = e.line;
+		col = e.col;
+		searchCol = e.searchCol;
+		fileMatch = e.fileMatch;
+	}
+	return *this;
 }
 
 TEICollection *eList = NULL;
@@ -35,9 +45,9 @@ static void initEList (void)
 	if (eList == NULL) eList = new TEICollection;
 }
 
-static int findLngID (const wchar_t *fn)
+static ptrdiff_t findLngID(const wchar_t *fn)
 {
-	for (unsigned i = 0; i < langColl.getCount (); i++)
+	for (size_t i = 0; i < langColl.getCount (); i++)
 	{
 		TLang *lng = (TLang *) (langColl[i]);
 		if (matched (lng->mask, fn)) return (i);
@@ -46,30 +56,30 @@ static int findLngID (const wchar_t *fn)
 	return (-1);
 }
 
-static int eListInsert (int EditorID, wchar_t* filename)
+static size_t eListInsert(intptr_t EditorID, wchar_t* filename)
 {
-	int newFile = !isFile (filename);
+	bool newFile = !isFile (filename);
 	return (eList->insert (EditorID, findLngID (filename), filename, newFile));
 }
 
 static TCollection 		*compilerColl = NULL;
 static FarMenuItemEx		*compilerOut = NULL;
 static TCollection		*errColl = NULL;
-static int						compilerOutN = 0;
-static int						compilerOutP = -1;
+static intptr_t 			compilerOutN = 0;
+static intptr_t				compilerOutP = -1;
 
 struct TErrData
 {
 	wchar_t	fn[NM];
-	int		line, col, msgCount;
+	intptr_t	line, col, msgCount;
 	wchar_t	message[64][64];
 	wchar_t	colSearch[MAX_REG_LEN];
 };
 
-static bool showErrorMsgBox (int res)
+static bool showErrorMsgBox(intptr_t res)
 {
-	int n = (int) compilerOut[res].UserData - 1;
-	if (errColl && (n >= 0) && (n < (int) errColl->getCount ()))
+	intptr_t n = compilerOut[res].UserData - 1;
+	if (errColl && (n >= 0) && (n < (intptr_t)errColl->getCount()))
 	{
 		TErrData		*err = (TErrData *) ((*errColl)[n]);
 		const wchar_t	*MsgItems[] =
@@ -87,15 +97,15 @@ static bool showErrorMsgBox (int res)
 	return (false);
 }
 
-static void jumpToError (EditorInfoEx *ei, const wchar_t* path, int aj, bool showMsgBox)
+static void jumpToError( EditorInfoEx *ei, const wchar_t* path, intptr_t aj, bool showMsgBox )
 {
 	if (compilerOut && (aj >= 0) && (aj <= compilerOutN))
 	{
-		int n = (int) compilerOut[aj].UserData - 1;
-		if (errColl && (n >= 0) && (n < (int) errColl->getCount ()))
+		intptr_t n = compilerOut[aj].UserData - 1;
+		if (errColl && (n >= 0) && (n < (intptr_t)errColl->getCount()))
 		{
 			TErrData	*err = (TErrData *) ((*errColl)[n]);
-			int				nLine = -1, nCol = -1, sLine = -1;
+			intptr_t	nLine = -1, nCol = -1, sLine = -1;
 			if (err->line > 0) nLine = err->line - 1;
 			if (err->col > 0) nCol = err->col - 1;
 
@@ -109,9 +119,9 @@ static void jumpToError (EditorInfoEx *ei, const wchar_t* path, int aj, bool sho
 			wi.TypeNameSize = NM;
 			wi.Name = winame;
 			wi.NameSize = NM;
-			bool				found = false;
-			int					n = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
-			for (int i = -1; i < n; i++)
+			bool			found = false;
+			intptr_t	wcnt = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
+			for (intptr_t i = -1; i < wcnt; i++)
 			{
 				wi.Pos = i;
 				Info.AdvControl (&MainGuid, ACTL_GETWINDOWINFO, 0, (void *) &wi);
@@ -146,24 +156,24 @@ static void showCompileOut (EditorInfoEx *ei, const wchar_t* path)
 	{
 		FarMenuItemEx *errOut = NULL;
 		bool					ErrOnly = (filterring != 0);
-		int						ErrCount = 0;
-		intptr_t				Code;
+		intptr_t			ErrCount = 0;
+		intptr_t			Code;
 		if (compilerOutP >= 0 && compilerOutP < compilerOutN)
 		{
-			for (int i = 0; i < compilerOutN; i++) compilerOut[i].Flags &= ~MIF_SELECTED;
+			for (intptr_t i = 0; i < compilerOutN; i++) compilerOut[i].Flags &= ~MIF_SELECTED;
 			compilerOut[compilerOutP].Flags |= MIF_SELECTED;
 		}
 
-		for (int i = 0; i < compilerOutN; i++)
+		for (intptr_t i = 0; i < compilerOutN; i++)
 		{
 			if (!(compilerOut[i].Flags & MIF_DISABLE)) ErrCount++;
 		}
 
 		if (ErrCount > 0)
 		{
-			int j = 0;
+			intptr_t j = 0;
 			errOut = new FarMenuItemEx[ErrCount];
-			for (int i = 0; i < compilerOutN; i++)
+			for (intptr_t i = 0; i < compilerOutN; i++)
 			{
 				if (!(compilerOut[i].Flags & MIF_DISABLE)) errOut[j++] = compilerOut[i];
 			}
@@ -180,7 +190,7 @@ static void showCompileOut (EditorInfoEx *ei, const wchar_t* path)
 		BreakKeys[3].ControlKeyState = 0;
 		BreakKeys[4].VirtualKeyCode = 0;
 		BreakKeys[4].ControlKeyState = 0;
-	
+
 		for (;;)
 		{
 			compilerOutP = Info.Menu
@@ -201,8 +211,8 @@ static void showCompileOut (EditorInfoEx *ei, const wchar_t* path)
 				);
 			if (ErrOnly)
 			{
-				int j = 0;
-				for (int i = 0; i < compilerOutN; i++)
+				intptr_t j = 0;
+				for (intptr_t i = 0; i < compilerOutN; i++)
 				{
 					if (!(compilerOut[i].Flags & MIF_DISABLE))
 						if (j == compilerOutP)
@@ -220,7 +230,7 @@ static void showCompileOut (EditorInfoEx *ei, const wchar_t* path)
 			{
 				if (compilerOutP <= compilerOutN && showErrorMsgBox (compilerOutP))
 				{
-					for (int i = 0; i < compilerOutN; i++) compilerOut[i].Flags &= ~MIF_SELECTED;
+					for (intptr_t i = 0; i < compilerOutN; i++) compilerOut[i].Flags &= ~MIF_SELECTED;
 					compilerOut[compilerOutP].Flags |= MIF_SELECTED;
 				}
 			}
@@ -252,9 +262,9 @@ static bool SaveAll ()
 	wi.Pos = -1;
 	Info.AdvControl (&MainGuid, ACTL_GETWINDOWINFO, 0, (void *) &wi);
 
-	int home = wi.Pos;
-	int n = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
-	for (int i = 0; i < n; i++)
+	intptr_t home = wi.Pos;
+	intptr_t n = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
+	for (intptr_t i = 0; i < n; i++)
 	{
 		wi.Pos = i;
 		Info.AdvControl (&MainGuid, ACTL_GETWINDOWINFO, 0, (void *) &wi);
@@ -277,9 +287,9 @@ static bool SaveAll ()
 
 static bool findBaseFile (const wchar_t *path, const wchar_t *file, wchar_t *baseFile)
 {
-	bool	found = false;
-	wchar_t	testFile[NM];
-	int		n = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
+	bool			found = false;
+	wchar_t		testFile[NM];
+	intptr_t	n = Info.AdvControl(&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
 	wcscpy(testFile, path);
 	FSF.AddEndSlash (testFile);
 	wcscat (testFile, FSF.PointToName (file));
@@ -291,7 +301,7 @@ static bool findBaseFile (const wchar_t *path, const wchar_t *file, wchar_t *bas
 
 	if (!found)
 	{
-		for (int i = -1; i < n; i++)
+		for (intptr_t i = -1; i < n; i++)
 		{
 			wchar_t	witypename[NM];
 			wchar_t	winame[NM];
@@ -341,22 +351,22 @@ static wchar_t *makeTitle (const wchar_t *line, size_t size, const wchar_t *path
 {
 	static wchar_t temp[MAX_STR_LEN];
 	makeCmdLine (false, temp, line, path, fn);
-	return FSF.TruncStr (temp, (int)size);
+	return FSF.TruncStr (temp, size);
 }
 
-static bool parseError (TLang *lng, const wchar_t *compiler, const wchar_t *path, const wchar_t *fn, wchar_t *line, unsigned ci, int &aj)
+static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path, const wchar_t *fn, wchar_t *line, uintptr_t ci, intptr_t &aj)
 {
-	int				lineBounds[2], colBounds[2], fileBounds[2];
+	intptr_t	lineBounds[2], colBounds[2], fileBounds[2];
 	TCompiler *e = NULL;
 	bool			found = false, res = false;
-	for (unsigned i = 0; i < lng->compilerColl.getCount (); i++)
+	for (size_t i = 0; i < lng->compilerColl.getCount (); i++)
 	{
 		e = (TCompiler *) (lng->compilerColl[i]);
 		if (e && e->err[0] && !FSF.LStricmp (compiler, e->title))
 		{
-			int		bounds[3][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 } };
-			int		pos[3] = { e->line, e->col, e->fileMatch };
-			wchar_t	lineRE[MAX_REG_LEN];
+			intptr_t	bounds[3][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 } };
+			intptr_t	pos[3] = { e->line, e->col, e->fileMatch };
+			wchar_t		lineRE[MAX_REG_LEN];
 			wcsncpy (lineRE, line, MAX_REG_LEN);
 			lineRE[MAX_REG_LEN - 1] = 0;
 			if (strMatch (lineRE, e->err, L"/", L".*/i", 3, bounds, pos))
@@ -376,7 +386,7 @@ static bool parseError (TLang *lng, const wchar_t *compiler, const wchar_t *path
 
 	if (found && e && e->err[0])
 	{
-		int len, lineNo = -1, colNo = -1;
+    	intptr_t len, lineNo = -1, colNo = -1;
 		compilerOut[ci].Flags = 0;
 
 		wchar_t	fileName[NM], colSearch[MAX_REG_LEN] = L"";
@@ -462,7 +472,7 @@ static bool parseError (TLang *lng, const wchar_t *compiler, const wchar_t *path
 		if (aj < 0)
 		{
 			compilerOut[ci].Flags = MIF_SELECTED;
-			aj = (int) ci;
+			aj = (intptr_t)ci;
 		}
 
 		res = true;
@@ -510,7 +520,7 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 			if (!SaveAll ())
 			{
 				const wchar_t *MsgItems[] = { GetMsg (MTitle), GetMsg (MSaveError), GetMsg (MContinue) };
-				if (Info.Message (&MainGuid, &RunCompilerGuid, FMSG_MB_YESNO, NULL, MsgItems, dimOf (MsgItems), 0)) return (false);
+				if (Info.Message (&MainGuid, &RunCompilerGuid, FMSG_MB_YESNO, NULL, MsgItems, _countof (MsgItems), 0)) return (false);
 			}
 		}
 	}
@@ -543,12 +553,12 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 	compilerOutP = -1;
 	execute (compilerColl, cmd, e->echo);
 
-	unsigned	n = compilerColl->getCount ();
+	size_t	n = compilerColl->getCount ();
 	if (n)
 	{
-		int nErr = 0, aj = -1;
+		intptr_t nErr = 0, aj = -1;
 		compilerOut = new FarMenuItemEx[compilerOutN = n + 1];
-		for (unsigned i = 0; i < n; i++)
+		for (size_t i = 0; i < n; i++)
 		{
 			wchar_t	*line = (wchar_t *) ((*compilerColl)[i]);
 			compilerOut[i].Text = line;
@@ -611,7 +621,7 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 
 static bool sep = true;
 
-static void addToCompilerMenu (const wchar_t *line, FarMenuItemEx *amenu, int &i, DWORD j, const wchar_t *path, const wchar_t *fn, FarKey AccelKey)
+static void addToCompilerMenu (const wchar_t *line, FarMenuItemEx *amenu, intptr_t &i, intptr_t j, const wchar_t *path, const wchar_t *fn, FarKey AccelKey)
 {
 	wcscpy (const_cast<wchar_t*>(amenu[i].Text), makeTitle (line, NM - 1, path, fn));
 	amenu[i].UserData = j;
@@ -634,22 +644,21 @@ static void addToCompilerMenu (const wchar_t *line, FarMenuItemEx *amenu, int &i
 	}
 }
 
-static void CompilerMenu (EditorInfoEx *ei, const wchar_t *Name, const wchar_t *Path, int lang)
+static void CompilerMenu (EditorInfoEx *ei, const wchar_t *Name, const wchar_t *Path, ptrdiff_t lang)
 {
 	wchar_t	top[NM], FileName[NM];
 	wcscpy (FileName, Name);
 	wcscpy (top, GetMsg (MTitle));
 
 	TLang			*lng = (TLang *) (langColl[lang]);
-	unsigned	ec = 0;
-	if (lng) ec = lng->execColl.getCount ();
+	size_t	ec = (lng) ? lng->execColl.getCount () : 0;
 	if ((!ec) && (!outputmenu)) return ;
 	if (autocompile)
 	{
-		int i, count = 0;
+		size_t i, count = 0;
 		if (ec)
 		{
-			for (unsigned j = 0; j < ec; j++)
+			for (size_t j = 0; j < ec; j++)
 			{
 				TExec *ex = ((TExec *) lng->execColl[j]);
 				if (validMenuItem (Path, FileName, ex))
@@ -672,15 +681,15 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *Name, const wchar_t *
 	FarMenuItemEx *amenu = new FarMenuItemEx[ec + 2];
 	if (amenu)
 	{
-	    for (unsigned int ii = 0; ii < ec + 2; ii++)
+		for (size_t ii = 0; ii < ec + 2; ii++)
 			amenu[ii].Text = new wchar_t[NM];
 
-		const DWORD scId = -1;
-		int	i = 0;
+		const intptr_t scId = -1;
+		intptr_t	i = 0;
 		sep = true;
 		if (ec)
 		{
-			for (unsigned j = 0; j < ec; j++)
+			for (size_t j = 0; j < ec; j++)
 			{
 				TExec *ex = ((TExec *) lng->execColl[j]);
 				if (validMenuItem (Path, FileName, ex)) addToCompilerMenu (ex->title, amenu, i, j, Path, FileName, FarKey());
@@ -694,14 +703,14 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *Name, const wchar_t *
 		Key.ControlKeyState = 0;
 		addToCompilerMenu (GetMsg (MShowOutput), amenu, i, scId, Path, FileName, Key);
 		if (!compilerOut) amenu[i - 1].Flags = MIF_DISABLE;
-		for (int k = 0; k < i; k++)
+		for (intptr_t k = 0; k < i; k++)
 			if (!(amenu[k].Flags & (MIF_DISABLE | MIF_SEPARATOR)))
 			{
 				amenu[k].Flags |= MIF_SELECTED;
 				break;
 			}
 
-		int res = Info.Menu
+		intptr_t res = Info.Menu
 			(
 				&MainGuid,
 				&CompMenuGuid,
@@ -719,7 +728,7 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *Name, const wchar_t *
 			);
 		if (res != -1)
 		{
-			DWORD id = amenu[res].UserData;
+			intptr_t id = amenu[res].UserData;
 			if (id == scId)
 				showCompileOut (ei, Path);
 			else if (lng)
@@ -729,7 +738,7 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *Name, const wchar_t *
 			}
 		}
 
-		for (unsigned int ii = 0; ii < ec + 2; ii++)
+		for (size_t ii = 0; ii < ec + 2; ii++)
 			delete[] amenu[ii].Text;
 
 		delete[] amenu;

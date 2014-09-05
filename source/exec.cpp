@@ -1,7 +1,8 @@
 struct TExec
 {
-	TExec();
+	TExec ();
 	TExec (const TExec &);
+	TExec& operator= (const TExec &);
 	wchar_t			title[MAX_REG_LEN], cmd[MAX_STR_LEN], compiler[MAX_STR_LEN];
 	wchar_t			enable[NM], disable[NM];
 	TJumpType jumpType;
@@ -24,18 +25,27 @@ TExec::TExec ()
 	defaults ();
 }
 
-TExec::TExec (const TExec &e)
+TExec::TExec(const TExec &e)
 {
-	wcscpy (title, e.title);
-	wcscpy (cmd, e.cmd);
-	wcscpy (compiler, e.compiler);
-	wcscpy (enable, e.enable);
-	wcscpy (disable, e.disable);
-	jumpType = e.jumpType;
-	saveType = e.saveType;
-	cd = e.cd;
-	echo = e.echo;
-	searchBase = e.searchBase;
+	*this = e;
+}
+
+TExec& TExec::operator= (const TExec &e)
+{
+	if (this != &e)
+	{
+    	wcscpy(title, e.title);
+    	wcscpy(cmd, e.cmd);
+    	wcscpy(compiler, e.compiler);
+    	wcscpy(enable, e.enable);
+    	wcscpy(disable, e.disable);
+    	jumpType = e.jumpType;
+    	saveType = e.saveType;
+    	cd = e.cd;
+    	echo = e.echo;
+    	searchBase = e.searchBase;
+	}
+	return *this;
 }
 
 static wchar_t cmd[MAX_STR_LEN];
@@ -164,14 +174,14 @@ static wchar_t *makeCmdLine
 					else if (*(m + 1) == L'p')
 					{
 						TEditorPos	pos = EditorGetPos ();
-						FSF.itoa (pos.Row + 1, tmp, 10);
+						FSF.itoa64 (pos.Row + 1, tmp, 10);
 						wcscat (j, tmp);
 						m++;
 					}
 					else if (*(m + 1) == L'c')
 					{
 						TEditorPos	pos = EditorGetPos ();
-						FSF.itoa (pos.Col + 1, tmp, 10);
+						FSF.itoa64 (pos.Col + 1, tmp, 10);
 						wcscat (j, tmp);
 						m++;
 					}
@@ -234,7 +244,7 @@ static void execute (TCollection *coll, const wchar_t *title, bool showExec)
 	if (!showExec)
 	{
 		const wchar_t	*MsgItems[] = { GetMsg (MTitle), title };
-		Info.Message (&MainGuid, &ExecGuid, 0, NULL, MsgItems, dimOf (MsgItems), 0);
+		Info.Message (&MainGuid, &ExecGuid, 0, NULL, MsgItems, _countof (MsgItems), 0);
 	}
 
 	ExecConsoleApp (cmd, cmdpath, coll, true, showExec);

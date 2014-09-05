@@ -35,7 +35,7 @@ int CLocale::cl_stricmp(wchar_t *c1, wchar_t *c2)
 {
 	return _wcsicmp(c1, c2);
 };
-int CLocale::cl_strnicmp(wchar_t *c1, wchar_t *c2, int len)
+int CLocale::cl_strnicmp(wchar_t *c1, wchar_t *c2, size_t len)
 {
 	return _wcsnicmp(c1, c2, len);
 };

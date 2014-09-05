@@ -1,22 +1,23 @@
-static int inComment (TLang *lng, const wchar_t *text_line, unsigned pos)
+static int inComment (TLang *lng, const wchar_t *text_line, intptr_t pos)
 {
 	if (text_line)
 	{
-		for (unsigned i = 0; i < lng->commentColl.getCount (); i++)
+		size_t len = wcslen(text_line);
+		for (size_t i = 0; i < lng->commentColl.getCount(); i++)
 		{
-			TComment	*tmpc = (TComment *) (lng->commentColl[i]);
-			wchar_t			*line = (wchar_t *) malloc ((wcslen (text_line) + 1) * sizeof(wchar_t));
+			TComment	*tmpc = (TComment *)(lng->commentColl[i]);
+			wchar_t		*line = (wchar_t *)malloc((len + 1) * sizeof(wchar_t));
 
 			if (line)
 			{
-				wcscpy (line, text_line);
-				if (lng->ignoreCase) StrLower (line); /*!?*/
+				wcscpy(line, text_line);
+				if (lng->ignoreCase) StrLower(line); /*!?*/
 
-				int		bounds[2], zero = 0;
-				bool	blMatched = (strMatch (line, tmpc->mask, L"/", lng->ignoreCase ? L"/i" : L"/", 1, &bounds, &zero) != 0);
-				free (line);
+				intptr_t	bounds[2], zero = 0;
+				bool	blMatched = strMatch(line, tmpc->mask, L"/", lng->ignoreCase ? L"/i" : L"/", 1, &bounds, &zero);
+				free(line);
 
-				if (blMatched && pos >= (unsigned) bounds[0] && pos <= (unsigned) bounds[1])
+				if (blMatched && pos >= bounds[0] && pos <= bounds[1])
 				{
 					return (1);
 				}
@@ -27,9 +28,9 @@ static int inComment (TLang *lng, const wchar_t *text_line, unsigned pos)
 	return (0);
 }
 
-static int FindIndent (wchar_t c, TLang *lng, wchar_t *str, int foundBounds[2])
+static intptr_t FindIndent (wchar_t c, TLang *lng, wchar_t *str, intptr_t foundBounds[2])
 {
-	for (unsigned j = 0; j < lng->indentColl.getCount (); j++)
+	for (size_t j = 0; j < lng->indentColl.getCount(); j++)
 	{
 		TIndent *tmpi = (TIndent *) (lng->indentColl[j]);
 		wchar_t		ic = ((TIndent *) (lng->indentColl[j]))->immChar;
@@ -42,8 +43,8 @@ static int FindIndent (wchar_t c, TLang *lng, wchar_t *str, int foundBounds[2])
 			{
 				wcscpy (line, tmpi->mask);
 
-				int		bounds[2];
-				bool	blMatched = (strMatch (str, line, L"/^", lng->ignoreCase ? L"$/i" : L"$/", 1, &bounds, &tmpi->start) != 0);
+				intptr_t	bounds[2];
+				bool		blMatched = strMatch (str, line, L"/^", lng->ignoreCase ? L"$/i" : L"$/", 1, &bounds, &tmpi->start);
 				free (line);
 
 				if (blMatched)
@@ -59,11 +60,11 @@ static int FindIndent (wchar_t c, TLang *lng, wchar_t *str, int foundBounds[2])
 	return (-1);
 }
 
-static int FindBrackets (TLang *lng, wchar_t *str, wchar_t **foundBrackets)
+static size_t FindBrackets (TLang *lng, wchar_t *str, wchar_t **foundBrackets)
 {
-	int foundBracketsNum = 0;
+	size_t foundBracketsNum = 0;
 
-	for (unsigned j = 0; j < lng->indentColl.getCount (); j++)
+	for (size_t j = 0; j < lng->indentColl.getCount(); j++)
 	{
 		TIndent *tmpi = (TIndent *) (lng->indentColl[j]);
 		wchar_t		*line = (wchar_t *) malloc ((wcslen (tmpi->mask) + 1) * sizeof(wchar_t));
@@ -73,8 +74,8 @@ static int FindBrackets (TLang *lng, wchar_t *str, wchar_t **foundBrackets)
 			wcscpy (line, tmpi->mask);
 			if (lng->ignoreCase) StrLower (line) /* ?! */ ;
 
-			int		bounds[2];
-			bool	blMatched = (strMatch (str, line, L"/^", lng->ignoreCase ? L"$/i" : L"$/", 1, &bounds, &tmpi->start) != 0);
+			intptr_t	bounds[2];
+			bool	blMatched = strMatch (str, line, L"/^", lng->ignoreCase ? L"$/i" : L"$/", 1, &bounds, &tmpi->start);
 			free (line);
 
 			if (blMatched)
@@ -91,11 +92,11 @@ static int FindBrackets (TLang *lng, wchar_t *str, wchar_t **foundBrackets)
 	return (foundBracketsNum);
 }
 
-static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng, wchar_t **openBr, int nOpenBr)
+static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng, wchar_t **openBr, size_t nOpenBr)
 {
 	static wchar_t							*c, buff[MAX_STR_LEN];
 	static EditorGetStringEx	gs;
-	int		ret = -1;
+	ptrdiff_t	ret = -1;
 	wchar_t	*closeReg = lng->ignoreCase ? L"$/i" : L"$/";
 	while (--p.Row >= 0)
 	{
@@ -108,26 +109,26 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 			{
 				FSF.Trim (wcscpy (buff, c));
 				if (lng->ignoreCase) StrLower (buff);
-				for (int i = 0; i < nOpenBr; i++)
+				for (size_t i = 0; i < nOpenBr; i++)
 				{
 					if (strMatch (buff, openBr[i], L"/^", closeReg, NULL, 0))
 					{
-						ret = (int)(c - gs.StringText);
+						ret = (ptrdiff_t)(c - gs.StringText);
 						break;
 					}
 				}
 
 				if (ret != -1) break;
 
-				unsigned	n = lng->bracketColl.getCount ();
+				size_t	n = lng->bracketColl.getCount ();
 				{
-					for (unsigned i = 0; i < n; i++)
+					for (size_t i = 0; i < n; i++)
 					{
 						TBracket	*br = (TBracket *) (lng->bracketColl[i]);
 						if (strMatch (buff, br->close, L"/^", closeReg, NULL, 0))
 						{
 							wchar_t	*result = NULL, **br4look = new wchar_t *[n];
-							int		nbr4look = FindBrackets (lng, buff, br4look);
+							size_t nbr4look = FindBrackets (lng, buff, br4look);
 							if (nbr4look) result = LookForOpenBracket (ei, p, lng, br4look, nbr4look);
 							delete[] br4look;
 							if (result) break;
@@ -141,7 +142,7 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 
 	if (ret != -1)
 	{
-		memcpy (buff, gs.StringText, ret);
+		wmemcpy (buff, gs.StringText, ret);
 		buff[ret] = 0;
 		return (buff);
 	}
@@ -149,7 +150,7 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 	return (NULL);
 }
 
-static wchar_t *FindOpenBracket (EditorInfoEx *ei, TLang *lng, wchar_t **openBr, int n)
+static wchar_t *FindOpenBracket (EditorInfoEx *ei, TLang *lng, wchar_t **openBr, size_t n)
 {
 	TEditorPos	p, o = EditorGetPos ();
 	p.Default ();
@@ -162,10 +163,10 @@ static wchar_t *FindOpenBracket (EditorInfoEx *ei, TLang *lng, wchar_t **openBr,
 
 static wchar_t *prevStringIndent (void)
 {
-	static wchar_t			buff[MAX_STR_LEN];
-	EditorGetStringEx gs;
-	int							ret = 0;
-	TEditorPos			p, o = EditorGetPos ();
+	static wchar_t		buff[MAX_STR_LEN];
+	EditorGetStringEx	gs;
+	ptrdiff_t					ret = 0;
+	TEditorPos				p, o = EditorGetPos ();
 	p.Default ();
 	p.Row = o.Row;
 	while (--p.Row >= 0)
@@ -177,32 +178,34 @@ static wchar_t *prevStringIndent (void)
 			const wchar_t	*c = FirstNonSpace (gs.StringText);
 			if (c)
 			{
-				ret = (int)(c - gs.StringText);
+				ret = (ptrdiff_t)(c - gs.StringText);
 				break;
 			}
 		}
 	}
 
 	EditorSetPos (o);
-	memcpy (buff, gs.StringText, ret);
+	wmemcpy (buff, gs.StringText, ret);
 	buff[ret] = 0;
 	return (buff);
 }
 
-static int shiftLine (int i)
+static intptr_t shiftLine(intptr_t i)
 {
 	TEditorPos	pos = EditorGetPos ();
 	pluginBusy = 1;
 	if (i > 0)
-		for (int j = 0; j < i; j++)
+	{
+		for (intptr_t j = 0; j < i; j++)
 			EditorProcessFARKey (VK_TAB, false);
+	}
 	else if (i < 0)
 	{
 		EditorInfoEx	ei;
 		Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 
-		int ind = -i * ei.TabSize;
-		for (int j = 0; j < ind; j++) EditorProcessFARKey (VK_BACK, false);
+		intptr_t ind = -i * ei.TabSize;
+		for (intptr_t j = 0; j < ind; j++) EditorProcessFARKey(VK_BACK, false);
 	}
 
 	TEditorPos	pos2 = EditorGetPos ();
@@ -213,18 +216,18 @@ static int shiftLine (int i)
 static int TryIndent
 (
 	EditorInfoEx	*ei,
-	int					ret,
-	TLang				*lng,
-	int					j,
+	int						ret,
+	TLang					*lng,
+	intptr_t			j,
 	wchar_t				*str,
 	wchar_t				*realStr,
-	int					oldIndent,
-	int					foundBounds[2]
+	intptr_t			oldIndent,
+	intptr_t			foundBounds[2]
 )
 {
-	TIndent *tmpi = (TIndent *) (lng->indentColl[j]);
-	int			iCurr = tmpi->indent[0];
-	int			iNext = tmpi->indent[1];
+	TIndent		*tmpi = (TIndent *) (lng->indentColl[j]);
+	intptr_t	iCurr = tmpi->indent[0];
+	intptr_t	iNext = tmpi->indent[1];
 	if (iCurr != 0xFFFF)
 	{
 		bool				processIndent = true;
@@ -237,9 +240,9 @@ static int TryIndent
 		}
 		else if (tmpi->BracketsMode)
 		{
-			unsigned	n = lng->bracketColl.getCount ();
-			wchar_t			**br4look = new wchar_t *[n];
-			int				nbr4look = FindBrackets (lng, str, br4look);
+			size_t	n = lng->bracketColl.getCount ();
+			wchar_t	**br4look = new wchar_t *[n];
+			size_t	nbr4look = FindBrackets (lng, str, br4look);
 			processIndent = false;
 			if (nbr4look) opencol = FindOpenBracket (ei, lng, br4look, nbr4look);
 			if (opencol) processIndent = true;
@@ -250,14 +253,14 @@ static int TryIndent
 		{
 			if (opencol == NULL) opencol = prevStringIndent ();
 
-			size_t	olen = wcslen (opencol);
+			intptr_t	olen = wcslen(opencol);
 			wchar_t		*ptr = new wchar_t[olen + wcslen (str) + 1];
 			wcscat (wcscpy (ptr, opencol), realStr);
 			EditorSetStr (ptr);
-			EditorSetPos (-1, (int)olen);
+			EditorSetPos (-1, olen);
 
-			int sh = shiftLine (iCurr);
-			EditorSetPos (-1, (int)(pos.Col + olen - oldIndent + sh));
+			intptr_t sh = shiftLine(iCurr);
+			EditorSetPos (-1, pos.Col + olen - oldIndent + sh);
 		}
 	}
 
@@ -267,7 +270,7 @@ static int TryIndent
 		if (tmpi->start)
 		{
 			pluginBusy = 1;
-			for (int k = foundBounds[0]; k < foundBounds[1]; k++) EditorProcessKey (realStr[k]);
+			for (intptr_t k = foundBounds[0]; k < foundBounds[1]; k++) EditorProcessKey(realStr[k]);
 			pluginBusy = 0;
 		}
 
@@ -278,14 +281,14 @@ static int TryIndent
 	return (IGNORE_EVENT);
 }
 
-static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wchar_t *after, int len, int bounds[][2])
+static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wchar_t *after, intptr_t len, intptr_t bounds[][2])
 {
 	const wchar_t	*menuPrefix = L"\\~";
-	unsigned		pl = wcslen (menuPrefix);
-	if ((unsigned) wcslen (mc->MacroText) > pl && !FSF.LStrnicmp (mc->MacroText, menuPrefix, pl))
+	size_t	pl = wcslen (menuPrefix);
+	if (wcslen (mc->MacroText) > pl && !FSF.LStrnicmp (mc->MacroText, menuPrefix, pl))
 	{
-		unsigned	lc = 0;
-		wchar_t			*p = mc->MacroText;
+		size_t	lc = 0;
+		wchar_t	*p = mc->MacroText;
 		while (*p)
 		{
 			if (p[0] == L'\\')
@@ -314,7 +317,7 @@ static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wcha
 			TMacro			**amacro = new TMacro *[lc];
 			if (amenu)
 			{
-				unsigned	i;
+				size_t	i;
 				p = mc->MacroText;
 				for (i = 0; ((i < lc) && (*p));)
 				{
@@ -377,7 +380,7 @@ static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wcha
 					}
 				}
 
-				int		res = Info.Menu
+				intptr_t res = Info.Menu
 					(
 						&MainGuid,
 						&CheckMultChoiseGuid,
@@ -419,9 +422,9 @@ static int TryMacro (EditorInfoEx *ei, TLang *lng, EditorGetStringEx &gs, TEdito
 	{
 		if (gs.StringLength != 0)
 		{
-			int l = gs.StringLength;
+			intptr_t l = gs.StringLength;
 			wcsncpy (line, gs.StringText, l + 1);
-			for (int i = l; i < MAX_STR_LEN; i++) line[i] = L' ';
+			for (intptr_t i = l; i < MAX_STR_LEN; i++) line[i] = L' ';
 			line[MAX_STR_LEN - 1] = L'\0';
 		}
 
@@ -431,20 +434,21 @@ static int TryMacro (EditorInfoEx *ei, TLang *lng, EditorGetStringEx &gs, TEdito
 			wchar_t	*after = line + ep.Col;
 			wcscpy (before, line);
 
-			int len = before[ep.Col] = 0;
+			intptr_t len = 0;
+			before[ep.Col] = 0;
 			if (expChar)
 			{
 				before[ep.Col] = expChar;
 				before[ep.Col + 1] = 0;
 			}
 
-			int			bounds[16][2];
+			intptr_t	bounds[16][2];
 			TMacro	*mc = FindMacro (lng, before, after, expChar, &len, bounds);
 			if (mc && checkMultipleChoice (lng, mc, before, after, len, bounds))
 			{
 				if (expChar) len--;
 				pluginBusy = 1;
-				for (int i = 0; i < len; i++) EditorProcessFARKey (VK_BACK, false);
+				for (intptr_t i = 0; i < len; i++) EditorProcessFARKey (VK_BACK, false);
 				pluginBusy = 0;
 				RunMacro (mc, before, bounds);
 				redraw ();
@@ -474,11 +478,11 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 	::Info.EditorControl (ei.EditorID, ECTL_GETFILENAME, NM, filename);
 	initEList ();
 
-	int edId = eList->findID (ei.EditorID);
+	ptrdiff_t edId = eList->findID (ei.EditorID);
 	if (edId == -1) edId = eListInsert (ei.EditorID, filename);
 
-	TEInfo	*te = (TEInfo *) (*eList)[edId];
-	int			id = te->lang;
+	TEInfo	  *te = (TEInfo *) (*eList)[edId];
+	intptr_t	id = te->lang;
 	if (id != -1)
 	{
 		TLang *lng = (TLang *) (langColl[id]);
@@ -487,7 +491,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 			//! NEW FILE - START
 			if (te->newFile)
 			{
-				te->newFile = 0;
+				te->newFile = false;
 				if (!Info->Rec.Event.KeyEvent.wVirtualKeyCode)
 				{
 					if (lng->setCP)
@@ -499,9 +503,9 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 					}
 
 					//Execute init macros
-					unsigned	l = 0;
-					unsigned	n = 0;
-					for (unsigned i = 0; i < lng->macroColl.getCount (); i++)
+					size_t	l = 0;
+					size_t	n = 0;
+					for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 						if ((((TMacro *) (lng->macroColl[i]))->atStartup))
 						{
 							l = i;
@@ -523,7 +527,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 						l = 0;
 
 						FarMenuItemEx *pMenu = new FarMenuItemEx[n];
-						for (unsigned i = 0; i < lng->macroColl.getCount (); i++)
+						for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 						{
 							if ((((TMacro *) (lng->macroColl[i]))->atStartup))
 							{
@@ -535,7 +539,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 							}
 						}
 
-						unsigned	res = ::Info.Menu
+						intptr_t	res = ::Info.Menu
 							(
 								&MainGuid,
 								&EditorInputGuid,
@@ -554,7 +558,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 						if (res != -1)
 						{
 							n = 0;
-							for (unsigned i = 0; i < lng->macroColl.getCount (); i++)
+							for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 								if ((((TMacro *) (lng->macroColl[i]))->atStartup))
 								{
 									if (n == res)
@@ -600,9 +604,9 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 
 				if (gs.StringLength != 0)
 				{
-					int l = gs.StringLength;
+					intptr_t l = gs.StringLength;
 					wcsncpy (line, gs.StringText, l + 1);
-					for (int i = l; i < MAX_STR_LEN; i++) line[i] = L' ';
+					for (intptr_t i = l; i < MAX_STR_LEN; i++) line[i] = L' ';
 					line[MAX_STR_LEN - 1] = L'\0';
 				}
 
@@ -658,14 +662,14 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 			}
 			else
 			{
-				int							ret = PROCESS_EVENT;
+				intptr_t					ret = PROCESS_EVENT;
 				EditorGetStringEx gs;
 				EditorGetStr (&gs);
 				if (gs.StringLength != 0)
 				{
-					int l = gs.StringLength;
+					intptr_t l = gs.StringLength;
 					wcsncpy (line, gs.StringText, l + 1);
-					for (int i = l; i < MAX_STR_LEN; i++) line[i] = L' ';
+					for (intptr_t i = l; i < MAX_STR_LEN; i++) line[i] = L' ';
 					line[MAX_STR_LEN - 1] = L'\0';
 				}
 
@@ -680,9 +684,9 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 						EditorGetStr (&gs);
 						if (gs.StringLength != 0)
 						{
-							int l = gs.StringLength;
+							intptr_t l = gs.StringLength;
 							wcsncpy (line, gs.StringText, l + 1);
-							for (int i = l; i < MAX_STR_LEN; i++) line[i] = L' ';
+							for (intptr_t i = l; i < MAX_STR_LEN; i++) line[i] = L' ';
 							line[MAX_STR_LEN - 1] = L'\0';
 						}
 					}
@@ -690,11 +694,11 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 					wchar_t	*pstrText = FirstNonSpace (gs.StringText);
 					if (pstrText == NULL) return (ret);
 
-					int		lstr = wcslen (pstrText);
+					size_t	lstr = wcslen (pstrText);
 					wchar_t	*str = (wchar_t *) malloc ((lstr + 1) * sizeof(wchar_t));
 					if (str)
 					{
-						int spacesCount = (int)(pstrText - gs.StringText);
+						intptr_t spacesCount = (intptr_t)(pstrText - gs.StringText);
 						wcsncpy (str, pstrText, lstr + 1);
 						FSF.Trim (line);
 
@@ -704,8 +708,8 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 							vChar = (wchar_t) FSF.LLower (vChar);
 						}
 
-						int bounds[2];
-						int j = FindIndent (spORret ? L'\0' : vChar, lng, line, bounds);
+						intptr_t bounds[2];
+						intptr_t j = FindIndent (spORret ? L'\0' : vChar, lng, line, bounds);
 						if (j != -1) ret = TryIndent (&ei, spORret, lng, j, line, str, spacesCount, bounds);
 						free (str);
 					}

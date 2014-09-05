@@ -7,8 +7,6 @@
 #define memcpy(dst,src,n) MyMemcpy(dst,src,n)
 #define memset(dst,src,n) MyMemset(dst,src,n)
 
-#define dimOf(x) (sizeof(x)/sizeof(*(x)))
-
 //extern HANDLE heap;
 
 //inline void initMem(void)

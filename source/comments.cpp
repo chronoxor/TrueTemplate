@@ -15,7 +15,7 @@ static void BlockComments (TEInfo *te)
 		cmenu[1].Text = GetMsg (MBlockUnComment);
 		cmenu[0].Flags |= MIF_SELECTED;
 
-		int m = Info.Menu (&MainGuid, &BlockCommentsGuid, -1, -1, 0, 0, GetMsg (MTitle), 0, 0, 0, 0, cmenu, micount);
+		intptr_t m = Info.Menu(&MainGuid, &BlockCommentsGuid, -1, -1, 0, 0, GetMsg(MTitle), 0, 0, 0, 0, cmenu, micount);
 		switch (m)
 		{
 		case 0:
@@ -31,14 +31,14 @@ static void BlockComments (TEInfo *te)
 
 		delete[] cmenu;
 		if (action == eNone) return ;
-		int							iStartString, iStringsCnt, iStringPos;
+		intptr_t					iStartString, iStringsCnt, iStringPos;
 		wchar_t						line[MAX_STR_LEN];
 		EditorInfoEx			ei;
-		EditorGetStringEx gs;
-		TEditorPos			epos = EditorGetPos ();
+		EditorGetStringEx	gs;
+		TEditorPos				epos = EditorGetPos ();
 		wchar_t						pComment[MAX_REG_LEN];
-		int							iComment = 0;
-		TLang						*lng = (TLang *) (langColl[te->lang]);
+		intptr_t					iComment = 0;
+		TLang							*lng = (TLang *) (langColl[te->lang]);
 		if (lng)
 		{
 			wcsncpy (pComment, lng->blockcomment, MAX_REG_LEN);
@@ -62,8 +62,8 @@ static void BlockComments (TEInfo *te)
 		else
 			iStringPos = 0;
 
-		int		i = 0;
-		wchar_t	*pc;
+		intptr_t	i = 0;
+		wchar_t		*pc;
 		while (true)
 		{
 			pc = NULL;

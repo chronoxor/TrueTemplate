@@ -14,7 +14,7 @@ static void InitMacro ()
 
 	HANDLE			hScreen = Info.SaveScreen (0, 0, -1, -1);
 	const wchar_t	*MsgItems[] = { GetMsg (MTitle), GetMsg (MLoading) };
-	Info.Message (&MainGuid, &InitMacroGuid, 0, NULL, MsgItems, dimOf (MsgItems), 0);
+	Info.Message (&MainGuid, &InitMacroGuid, 0, NULL, MsgItems, _countof (MsgItems), 0);
 
 	wchar_t	path[NM];
 	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
@@ -27,7 +27,7 @@ static void InitMacro ()
 		TLang				*lng = NULL;
 		bool				group;
 		TCollection dummyLang;
-		memcpy (&langColl, &dummyLang, sizeof (TLangCollection));
+		langColl = dummyLang;
 		findSectionInXML (p);
 		while ((item = getItem (p, name, group)) != NULL)
 		{
@@ -169,7 +169,7 @@ static void InitMacro ()
 					tmpm->atStartup = false;
 					tmpm->submenu = false;
 
-					int validTag = false;
+					bool validTag = false;
 					while (parseItem (&(lng->defineColl), item, name, value))
 					{
 						if (!FSF.LStricmp (name, L"Pattern"))
@@ -232,7 +232,7 @@ static void InitMacro ()
 						}
 						else if (!FSF.LStricmp (name, L"SubMenu"))
 						{
-							tmpm->submenu = ((value[0] != L'\0')) && ((value[0] == L'1') && (value[1] == L'\0'));
+							tmpm->submenu = (value[0] == L'1') && (value[1] == L'\0');
 						}
 					}
 
@@ -253,7 +253,7 @@ static void InitMacro ()
 						{
 							if (!wcschr (lng->immExp, tmpm->immChar))
 							{
-								int len = wcslen (lng->immExp);
+								size_t len = wcslen (lng->immExp);
 								lng->immExp[len++] = tmpm->immChar;
 								lng->immExp[len] = 0;
 							}
@@ -304,7 +304,9 @@ static void InitMacro ()
 				{
 					TIndent *tmpi = new TIndent;
 					tmpi->mask[0] = tmpi->relative[0] = 0;
-					tmpi->BracketsMode = tmpi->start = tmpi->immChar = 0;
+					tmpi->BracketsMode = 0;
+					tmpi->start = 0;
+					tmpi->immChar = L'\0';
 					for (int i = 0; i < 2; i++) tmpi->indent[i] = 0xFFFF;
 					while (parseItem (&(lng->defineColl), item, name, value))
 					{
@@ -328,7 +330,7 @@ static void InitMacro ()
 						{
 							if (!wcsrchr (lng->imm, tmpi->immChar))
 							{
-								int len = wcslen (lng->imm);
+								size_t len = wcslen (lng->imm);
 								lng->imm[len++] = tmpi->immChar;
 								lng->imm[len] = 0;
 							}
@@ -382,7 +384,7 @@ static void InitMacro ()
 						{
 							if (!wcschr (lng->imm, tmp0->immChar))
 							{
-								int len = wcslen (lng->imm);
+								size_t len = wcslen (lng->imm);
 								lng->imm[len++] = tmp0->immChar;
 								lng->imm[len] = 0;
 							}
@@ -392,7 +394,7 @@ static void InitMacro ()
 						{
 							if (!wcschr (lng->imm, tmp1->immChar))
 							{
-								int len = wcslen (lng->imm);
+								size_t len = wcslen (lng->imm);
 								lng->imm[len++] = tmp1->immChar;
 								lng->imm[len] = 0;
 							}
@@ -433,14 +435,13 @@ static TMacro *FindMacro
 	wchar_t	*before,
 	wchar_t	*after,
 	wchar_t	expChar,
-	int		*delCount,
-	int		bounds[][2],
+	intptr_t	*delCount,
+	intptr_t	bounds[][2],
 	bool	frommenu = false
 )
 {
-	unsigned	i;
 	wchar_t			*regEnd = lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/";
-	for (i = 0; i < lng->macroColl.getCount (); i++)
+	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
 		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
 		if (expChar && (expChar != mm->immChar)) continue;
@@ -448,7 +449,7 @@ static TMacro *FindMacro
 		if (frommenu && mm->Name[0] && (wcscmp (mm->Name, before) == 0)) return (mm);
 	}
 
-	for (i = 0; i < lng->macroColl.getCount (); i++)
+	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
 		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
 		if (expChar && (expChar != mm->immChar)) continue;
@@ -462,7 +463,7 @@ static TMacro *FindMacro
 				{
 					regEnd = lng->ignoreCase ? L")$/i" : L")$/";
 
-					int zero[16] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15 };
+					intptr_t zero[16] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15 };
 					if (strMatch (before, mm->Word, L"/.*(", regEnd, 16, bounds, zero))
 						*delCount = bounds[1][1] - bounds[1][0];
 					else
@@ -481,7 +482,7 @@ static TMacro *FindMacroKey (TLang *lng, const INPUT_RECORD *Rec)
 {
 	wchar_t rKeyp[MAX_STR_LEN];
 	FSF.FarInputRecordToName (Rec, rKeyp, MAX_STR_LEN);
-	for (unsigned i = 0; i < lng->macroColl.getCount (); i++)
+	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
 		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
 		if (wcscmp(mm->FARKey, rKeyp) == 0) return (mm);

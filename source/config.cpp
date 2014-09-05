@@ -1,4 +1,4 @@
-int Config (void)
+bool Config (void)
 {
 	wchar_t	navRectLeft[32];
 	wchar_t	navRectRight[32];
@@ -21,26 +21,26 @@ int Config (void)
 		{ /* 5 */ DI_CHECKBOX, 5, 6, 0, 0, ignoreposn, 0, (wchar_t *) MIgnorePos },
 		{ /* 6 */ DI_CHECKBOX, 5, 7, 0, 0, outputmenu, 0, (wchar_t *) MOutputMenu },
 		{ /* 7 */ DI_CHECKBOX, 5, 8, 0, 0, filterring, 0, (wchar_t *) MFiltering },
-		{ /* 8 */ DI_TEXT, 5, 9, 0, 255, 0, 0, NULL }, 
+		{ /* 8 */ DI_TEXT, 5, 9, 0, 255, 0, 0, NULL },
 		{ /* 9 */ DI_TEXT, 5, 10, 0, 0, 0, 0, (wchar_t *) MKey },
-		{ /* 10 */ DI_EDIT, 25, 10, 63, 0, 0, 0, defExpandFKey }, 
+		{ /* 10 */ DI_EDIT, 25, 10, 63, 0, 0, 0, defExpandFKey },
 		{ /* 11 */ DI_TEXT, 5, 11, 0, 255, 0, 0, NULL },
 		{ /* 12 */ DI_BUTTON, 5, 12, 63, 0, 0, DIF_CENTERGROUP, (wchar_t *) MNavConfig },
-		{ /* 13 */ DI_TEXT, 5, 13, 0, 255, 0, 0, NULL }, 
+		{ /* 13 */ DI_TEXT, 5, 13, 0, 255, 0, 0, NULL },
 		{ /* 14 - OK */ DI_BUTTON, 0, 14, 0, 0, 0, DIF_CENTERGROUP, (wchar_t *) MOK },
 		{ /* 15 */ DI_BUTTON, 0, 14, 0, 0, 0, DIF_CENTERGROUP, (wchar_t *) MCancel }
 	};
 	struct FarDialogItem		DialogItems[(sizeof (InitItems) / sizeof (InitItems[0]))];
 	InitDialogItems (InitItems, DialogItems, (sizeof (InitItems) / sizeof (InitItems[0])));
 
-	const int				NV = 12;
-	const int				OK = 14;
+	const intptr_t		NV = 12;
+	const intptr_t		OK = 14;
 	while (true)
 	{
 		HANDLE hDlg1 = Info.DialogInit(&MainGuid, &ConfigGuid, -1, -1, 69, OK + 3, NULL, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
 		if (hDlg1 != INVALID_HANDLE_VALUE)
 		{
-			int n = Info.DialogRun(hDlg1);
+			intptr_t n = Info.DialogRun(hDlg1);
 			if (n == NV)
 			{
 				struct InitDialogItemEx InitItems[] =
@@ -64,7 +64,7 @@ int Config (void)
 				HANDLE hDlg2 = Info.DialogInit(&MainGuid, &ConfigGuidEx, -1, -1, 59, 14, NULL, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
 				if (hDlg2 != INVALID_HANDLE_VALUE)
 				{
-					int n = Info.DialogRun(hDlg2);
+					intptr_t n = Info.DialogRun(hDlg2);
 					if (n == 10)
 					{
 						FarDialogItemDataEx item;

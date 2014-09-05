@@ -17,7 +17,7 @@ public:
   wchar_t static cl_lowcase(wchar_t c);
   wchar_t static cl_upcase(wchar_t c);
   int static cl_stricmp(wchar_t *c1, wchar_t *c2);
-  int static cl_strnicmp(wchar_t *c1, wchar_t *c2, int len);
+  int static cl_strnicmp(wchar_t *c1, wchar_t *c2, size_t len);
 };
 
 ////////////////////////////////////////////////////////////////////////////
