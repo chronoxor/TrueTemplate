@@ -14,7 +14,6 @@
 #include "farintf.h"
 #include "console.h"
 #include "stdio.h"
-#include "cregexp.h"
 #include "syslog.h"
 #include "objbase.h"
 #include "process.h"
@@ -88,6 +87,7 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		FSF=*Info->FSF;
 		::Info.FSF=&FSF;
 		IsOldFar = false;
+		::Info.RegExpControl(nullptr, RECTL_CREATE, 0, &RegExpHandle);
 
 		PluginSettings settings(MainGuid, ::Info.SettingsControl);
 		autocompile=settings.Get(0,L"AutoCompile",1);
@@ -547,6 +547,8 @@ void WINAPI ExitFARW(const struct ExitInfo *Info)
 		errColl->done ();
 		delete errColl;
 	}
+
+	::Info.RegExpControl(RegExpHandle, RECTL_FREE, 0, nullptr);
 }
 
 BOOL WINAPI DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)

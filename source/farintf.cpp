@@ -8,6 +8,7 @@
 
 struct PluginStartupInfo Info;
 struct FarStandardFunctions FSF;
+HANDLE RegExpHandle;
 wchar_t PluginRootKey[80];
 
 void InitDialogItems(InitDialogItem *Init, FarDialogItem *Item, size_t ItemsNumber)

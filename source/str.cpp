@@ -10,36 +10,41 @@ static bool strMatch
 	wchar_t	*pattern,
 	wchar_t	*prefix,
 	wchar_t	*suffix,
-	int		nb,
+	size_t	nb,
 	intptr_t		bounds[][2] = NULL,
 	intptr_t		regn[] = NULL
 )
 {
+	const size_t MATCHESNUM = 16;
 	bool    ret = false;
 	size_t  l = wcslen (prefix) + wcslen (pattern) + wcslen (suffix);
 	wchar_t	*slashPattern = (wchar_t *) malloc ((l + 1) * sizeof(wchar_t));
 
 	if (slashPattern)
 	{
-		static CRegExp	reg;
-		SMatches				m;
-
 		wcscat (lstrcat (lstrcpy (slashPattern, prefix), pattern), suffix);
 
-		if (reg.SetExpr (slashPattern))
+		RegExpSearch rs;
+		rs.Text = s;
+		rs.Position = 0;
+		rs.Length = wcslen(s);
+		rs.Match = new RegExpMatch[nb != 0 ? nb : MATCHESNUM];
+		rs.Count = nb;
+		rs.Reserved = nullptr;
+		ret = ::Info.RegExpControl(RegExpHandle, RECTL_COMPILE, 0, slashPattern) &&
+			::Info.RegExpControl(RegExpHandle, RECTL_MATCHEX, 0, &rs);
+		if (ret)
 		{
-			reg.SetNoMoves (slashPattern[1] == L'^' ? true : false);
-			ret = reg.Parse (s, &m);
-			if (ret)
+			if (bounds && regn)
 			{
-				if (bounds && regn)
-					for (int i = 0; i < nb; i++)
-					{
-						bounds[i][0] = m.s[regn[i]];
-						bounds[i][1] = m.e[regn[i]];
-					}
+				for (size_t i = 0; i < nb; i++)
+				{
+					bounds[i][0] = rs.Match[regn[i]].start;
+					bounds[i][1] = rs.Match[regn[i]].end;
+				}
 			}
 		}
+		delete[] rs.Match;
 
 		free (slashPattern);
 	}
