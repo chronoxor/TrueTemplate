@@ -49,11 +49,6 @@ class TLangCollection : public TCollection
 			*this = coll;
 		}
 
-		TLangCollection(const TCollection &coll)
-		{
-			TCollection::operator=(coll);
-		}
-
 		TLangCollection& operator=(const TLangCollection &coll)
 		{
 			TCollection::operator=(coll);

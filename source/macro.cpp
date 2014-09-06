@@ -26,8 +26,7 @@ static void InitMacro ()
 		wchar_t				name[MAX_STR_LEN], value[MAX_STR_LEN];
 		TLang				*lng = NULL;
 		bool				group;
-		TCollection dummyLang;
-		langColl = dummyLang;
+
 		findSectionInXML (p);
 		while ((item = getItem (p, name, group)) != NULL)
 		{
