@@ -15,7 +15,6 @@ static bool strMatch
 	intptr_t		regn[] = NULL
 )
 {
-	const size_t MATCHESNUM = 16;
 	bool    ret = false;
 	size_t  l = wcslen (prefix) + wcslen (pattern) + wcslen (suffix);
 	wchar_t	*slashPattern = (wchar_t *) malloc ((l + 1) * sizeof(wchar_t));
@@ -28,8 +27,8 @@ static bool strMatch
 		rs.Text = s;
 		rs.Position = 0;
 		rs.Length = wcslen(s);
-		rs.Match = new RegExpMatch[nb != 0 ? nb : MATCHESNUM];
-		rs.Count = nb;
+		rs.Match = new RegExpMatch[nb + 1];
+		rs.Count = nb + 1;
 		rs.Reserved = nullptr;
 		ret = ::Info.RegExpControl(RegExpHandle, RECTL_COMPILE, 0, slashPattern) &&
 			::Info.RegExpControl(RegExpHandle, RECTL_MATCHEX, 0, &rs);
