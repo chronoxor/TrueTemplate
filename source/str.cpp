@@ -6,10 +6,10 @@ static inline wchar_t *StrLower (wchar_t *str)
 
 static bool strMatch
 (
-	wchar_t	*s,
-	wchar_t	*pattern,
-	wchar_t	*prefix,
-	wchar_t	*suffix,
+	const wchar_t	*s,
+	const wchar_t	*pattern,
+	const wchar_t	*prefix,
+	const wchar_t	*suffix,
 	size_t	nb,
 	intptr_t		bounds[][2] = NULL,
 	intptr_t		regn[] = NULL

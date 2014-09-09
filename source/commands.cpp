@@ -851,7 +851,7 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 {
 	bool	firstsel = false;
-	for (wchar_t *p = m->MacroText; *p; p++)
+	for (const wchar_t *p = m->MacroText; *p; p++)
 	{
 		if (*p == L'\\')
 		{
@@ -879,9 +879,9 @@ static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 		wchar_t				ins[MAX_STR_LEN] = L"";
 		TEditorPos	pos, curPos, selStart, selEnd;
 		pluginBusy = 1;
-		for (wchar_t *p = m->MacroText; *p; p++)
+		for (const wchar_t *p = m->MacroText; *p; p++)
 		{
-			wchar_t	*cb;
+			const wchar_t	*cb;
 			if (*p == L'\\')
 			{
 				insIns (ins, insPos);
@@ -1003,9 +1003,9 @@ static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 					else
 					{
 						wchar_t	ch = *cb;
-						*cb = 0;
+						*(wchar_t *)cb = 0;
 						EditorProcessGlobalFARKey (p + 1);
-						*cb = ch;
+						*(wchar_t *)cb = ch;
 						p = cb;
 					}
 					break;

@@ -1,17 +1,16 @@
 struct TExec
 {
 	TExec ();
-	TExec (const TExec &);
-	TExec& operator= (const TExec &);
-	wchar_t			title[MAX_REG_LEN], cmd[MAX_STR_LEN], compiler[MAX_STR_LEN];
-	wchar_t			enable[NM], disable[NM];
+	String		title, cmd, compiler;
+	String		enable, disable;
 	TJumpType jumpType;
 	TSaveType saveType;
 	TCDType		cd;
 	bool			searchBase, echo;
 	void defaults (void)
 	{
-		*title = *cmd = *compiler = *enable = *disable = 0;
+		title.clear(); cmd.clear(); compiler.clear(); 
+		enable.clear(); disable.clear();
 		saveType = saCurrent;
 		jumpType = jtSmart;
 		cd = cdNone;
@@ -23,29 +22,6 @@ struct TExec
 TExec::TExec ()
 {
 	defaults ();
-}
-
-TExec::TExec(const TExec &e)
-{
-	*this = e;
-}
-
-TExec& TExec::operator= (const TExec &e)
-{
-	if (this != &e)
-	{
-    	wcscpy(title, e.title);
-    	wcscpy(cmd, e.cmd);
-    	wcscpy(compiler, e.compiler);
-    	wcscpy(enable, e.enable);
-    	wcscpy(disable, e.disable);
-    	jumpType = e.jumpType;
-    	saveType = e.saveType;
-    	cd = e.cd;
-    	echo = e.echo;
-    	searchBase = e.searchBase;
-	}
-	return *this;
 }
 
 static wchar_t cmd[MAX_STR_LEN];

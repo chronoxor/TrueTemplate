@@ -1,6 +1,7 @@
 struct TIndent
 {
-	wchar_t		mask[MAX_REG_LEN], relative[MAX_REG_LEN], immChar;
+	String		mask, relative;
+	wchar_t		immChar;
 	intptr_t	indent[2], start;
 	size_t		bracketLink;
 	int				BracketsMode;
@@ -8,24 +9,23 @@ struct TIndent
 
 struct TBracket
 {
-	wchar_t	open[MAX_REG_LEN], close[MAX_REG_LEN];
+	String	open, close;
 };
 
 struct TComment
 {
-	wchar_t	mask[MAX_REG_LEN];
+	String	mask;
 };
 
 struct TDefine
 {
 	TDefine (const wchar_t *, const wchar_t *);
-	wchar_t	name[MAX_REG_LEN], value[MAX_STR_LEN];
+	String	name, value;
 };
 
 TDefine::TDefine (const wchar_t *aName, const wchar_t *aValue)
+	: name(aName), value(aValue)
 {
-	wcscpy (name, aName);
-	wcscpy (value, aValue);
 }
 
 enum TJumpType

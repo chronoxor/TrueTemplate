@@ -1,23 +1,19 @@
 struct TFormat
 {
 	TFormat();
-	wchar_t	name[MAX_STR_LEN];
-	wchar_t	comm[MAX_STR_LEN];
+	String	name;
+	String	comm;
 	bool	echo;
 };
 
-TFormat::TFormat ()
+TFormat::TFormat() : echo(true)
 {
-	wcscpy (this->name, L"");
-	wcscpy (this->comm, L"");
-	this->echo = true;
 }
 
 static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 {
-	wchar_t	old_cmd[MAX_STR_LEN];
+	String	old_cmd(tf->comm);
 	wchar_t	new_cmd[MAX_STR_LEN];
-	wcscpy (old_cmd, tf->comm);
 	nullUserStrings ();
 	if (!scanUserInput (false, L'=', old_cmd)) return ;
 
@@ -82,7 +78,7 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 		CopyFile (Name, filename, FALSE);
 	}
 
-	wchar_t	*p_old = old_cmd;
+	const wchar_t	*p_old = old_cmd;
 	wchar_t	*p_new = new_cmd;
 	*p_new = L'\0';
 	wcscat (p_new, L"%COMSPEC% /C ");

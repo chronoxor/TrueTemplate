@@ -1,7 +1,7 @@
 struct TLang
 {
 	TLang();
-	wchar_t				mask[MAX_REG_LEN], desc[MAX_REG_LEN], imm[MAX_REG_LEN], immExp[MAX_REG_LEN], blockcomment[MAX_REG_LEN];
+	String			mask, desc, imm, immExp, blockcomment;
 	bool				ignoreCase;
 	int					setCP;
 	TExec				defExec;
@@ -11,7 +11,6 @@ struct TLang
 
 TLang::TLang ()
 {
-	wcscpy (blockcomment, L"");
 	defineColl.insert (new TDefine (L"lt", L"<"));
 	defineColl.insert (new TDefine (L"gt", L">"));
 	defineColl.insert (new TDefine (L"quot", L"\""));

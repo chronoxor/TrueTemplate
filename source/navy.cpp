@@ -1,16 +1,13 @@
 struct TNavy
 {
 	TNavy();
-	wchar_t	mask[MAX_REG_LEN], path[MAX_STR_LEN], suffixes[MAX_STR_LEN];
+	String	mask, path, suffixes;
 	intptr_t	pos, rect[4];
 	bool	viewer;
 };
 
 TNavy::TNavy ()
 {
-	wcscpy (this->mask, L"");
-	wcscpy (this->path, L"");
-	wcscpy (this->suffixes, L"");
 	this->pos = 0;
 	this->rect[0] = -1;
 	this->rect[1] = -1;

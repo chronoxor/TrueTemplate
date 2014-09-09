@@ -8,6 +8,7 @@
 #include <PluginSettings.hpp>
 
 #include "guid.h"
+#include "mystring.h"
 #include "eicoll.h"
 #include "true-tpl.h"
 #include "ttpl-lng.h"
@@ -68,7 +69,7 @@ static int				autoformat = 0;
 
 void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
-	Info->StructSize=sizeof(struct PluginInfo);
+	Info->StructSize = sizeof(struct PluginInfo);
 	Info->MinFarVersion=MAKEFARVERSION(3,0,0,3835,VS_RELEASE);
 	Info->Version=MAKEFARVERSION(3,0,1,3,VS_RC);
 	Info->Guid=MainGuid;
@@ -170,7 +171,7 @@ static void SelectTemplate (TEInfo *te)
 			for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 			{
 				TMacro	*mm = (TMacro *) (lng->macroColl[i]);
-				if (mm->Name[0] && !mm->submenu) count++;
+				if (!mm->Name.empty() && !mm->submenu) count++;
 			}
 
 			if (count > 0)
@@ -182,7 +183,7 @@ static void SelectTemplate (TEInfo *te)
 					for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 					{
 						TMacro	*mm = (TMacro *) (lng->macroColl[i]);
-						if (mm->Name[0] && !mm->submenu)
+						if (!mm->Name.empty() && !mm->submenu)
 						{
 							amenu[count].Text = mm->Name;
 							amenu[count].Flags &= ~(MIF_SELECTED | MIF_CHECKED | MIF_SEPARATOR);
@@ -212,7 +213,7 @@ static void SelectTemplate (TEInfo *te)
 						for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 						{
 							TMacro	*mm = (TMacro *) (lng->macroColl[i]);
-							if (mm->Name[0] && !mm->submenu)
+							if (!mm->Name.empty() && !mm->submenu)
 							{
 								if (count == res)
 								{

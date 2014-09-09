@@ -3,12 +3,13 @@ struct TCompiler
 	TCompiler();
 	TCompiler (const TCompiler &);
 	TCompiler& operator= (const TCompiler &);
-	wchar_t		title[MAX_REG_LEN], err[MAX_STR_LEN];
+	String		title, err;
 	intptr_t	line, col, fileMatch;
 	bool		searchCol;
 	void defaults (void)
 	{
-		*title = *err = 0;
+		title.clear(); 
+		err.clear();
 		line = col = fileMatch = -1;
 		searchCol = false;
 	}
@@ -17,25 +18,6 @@ struct TCompiler
 TCompiler::TCompiler ()
 {
 	defaults ();
-}
-
-TCompiler::TCompiler (const TCompiler &e)
-{
-	*this = e;
-}
-
-TCompiler& TCompiler::operator= (const TCompiler &e)
-{
-	if (&e != this)
-	{
-		wcscpy (title, e.title);
-		wcscpy (err, e.err);
-		line = e.line;
-		col = e.col;
-		searchCol = e.searchCol;
-		fileMatch = e.fileMatch;
-	}
-	return *this;
 }
 
 TEICollection *eList = NULL;
@@ -73,7 +55,7 @@ struct TErrData
 	wchar_t	fn[NM];
 	intptr_t	line, col, msgCount;
 	wchar_t	message[64][64];
-	wchar_t	colSearch[MAX_REG_LEN];
+	String	colSearch;
 };
 
 static bool showErrorMsgBox(intptr_t res)
@@ -336,22 +318,23 @@ static bool validMenuItem (const wchar_t *path, const wchar_t *fn, TExec *e)
 {
 	wchar_t	baseFile[NM] = L"";
 	bool	enable = true;
-	if (e->enable[0])
+	if (!e->enable.empty())
 	{
 		makeCmdLine (false, baseFile, e->enable, path, fn);
 		enable = isFile (baseFile);
 		if (!enable && e->searchBase) enable = findBaseFile (path, baseFile, NULL);
 	}
 
-	if (enable && e->disable[0]) enable = !isFile (makeCmdLine (false, baseFile, e->disable, path, fn));
+	if (enable && !e->disable.empty()) 
+		enable = !isFile (makeCmdLine (false, baseFile, e->disable, path, fn));
 	return (enable);
 }
 
-static wchar_t *makeTitle (const wchar_t *line, size_t size, const wchar_t *path, const wchar_t *fn)
+static String makeTitle (const wchar_t *line, size_t size, const wchar_t *path, const wchar_t *fn)
 {
-	static wchar_t temp[MAX_STR_LEN];
+	wchar_t temp[MAX_STR_LEN];
 	makeCmdLine (false, temp, line, path, fn);
-	return FSF.TruncStr (temp, size);
+	return String(FSF.TruncStr(temp, size));
 }
 
 static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path, const wchar_t *fn, wchar_t *line, uintptr_t ci, intptr_t &aj)
@@ -362,14 +345,11 @@ static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path,
 	for (size_t i = 0; i < lng->compilerColl.getCount (); i++)
 	{
 		e = (TCompiler *) (lng->compilerColl[i]);
-		if (e && e->err[0] && !FSF.LStricmp (compiler, e->title))
+		if (e && !e->err.empty() && !FSF.LStricmp (compiler, e->title))
 		{
 			intptr_t	bounds[3][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 } };
 			intptr_t	pos[3] = { e->line, e->col, e->fileMatch };
-			wchar_t		lineRE[MAX_REG_LEN];
-			wcsncpy (lineRE, line, MAX_REG_LEN);
-			lineRE[MAX_REG_LEN - 1] = 0;
-			if (strMatch (lineRE, e->err, L"/", L".*/i", 3, bounds, pos))
+			if (strMatch (line, e->err, L"/", L".*/i", 3, bounds, pos))
 			{
 				for (int j = 0; j < 2; j++)
 				{
@@ -384,12 +364,13 @@ static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path,
 		}
 	}
 
-	if (found && e && e->err[0])
+	if (found && e && !e->err.empty())
 	{
     	intptr_t len, lineNo = -1, colNo = -1;
 		compilerOut[ci].Flags = 0;
 
-		wchar_t	fileName[NM], colSearch[MAX_REG_LEN] = L"";
+		wchar_t	fileName[NM];
+		String colSearch;
 		if (e->line >= 0)
 		{
 			len = lineBounds[1] - lineBounds[0];
@@ -408,7 +389,7 @@ static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path,
 				if (e->searchCol)
 				{
 					colNo = -2;
-					wcscpy (colSearch, fileName);
+					colSearch = fileName;
 				}
 				else
 					colNo = FSF.atoi (fileName);
@@ -466,7 +447,7 @@ static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path,
 
 		errData->line = lineNo;
 		errData->col = colNo;
-		wcscpy (errData->colSearch, colSearch);
+		errData->colSearch = colSearch;
 		errColl->insert (errData);
 		compilerOut[ci].UserData = errColl->getCount ();
 		if (aj < 0)
@@ -484,7 +465,7 @@ static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path,
 static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const wchar_t *path, const wchar_t *title, TExec *e)
 {
 	wchar_t	cwd[NM] = L"", baseFile[NM] = L"";
-	if (e->enable[0])
+	if (!e->enable.empty())
 	{
 		wchar_t	temp[NM];
 		makeCmdLine (false, baseFile, e->enable, path, fn);

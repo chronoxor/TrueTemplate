@@ -210,6 +210,7 @@
     <ClInclude Include="eicoll.h" />
     <ClInclude Include="farintf.h" />
     <ClInclude Include="guid.h" />
+    <ClInclude Include="mystring.h" />
     <ClInclude Include="process.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="syslog.h" />

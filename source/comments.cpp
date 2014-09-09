@@ -36,13 +36,13 @@ static void BlockComments (TEInfo *te)
 		EditorInfoEx			ei;
 		EditorGetStringEx	gs;
 		TEditorPos				epos = EditorGetPos ();
-		wchar_t						pComment[MAX_REG_LEN];
+		String						sComment;
 		intptr_t					iComment = 0;
 		TLang							*lng = (TLang *) (langColl[te->lang]);
 		if (lng)
 		{
-			wcsncpy (pComment, lng->blockcomment, MAX_REG_LEN);
-			iComment = wcslen (pComment);
+			sComment = lng->blockcomment;
+			iComment = sComment.length();
 			if (iComment == 0) return ;
 		}
 		Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
@@ -74,14 +74,14 @@ static void BlockComments (TEInfo *te)
 					pc = wcsncpy (line, gs.StringText, min (iStringPos, gs.StringLength) + 1) + iStringPos;
 					if (gs.StringLength > iStringPos)
 					{
-						pc = wcscpy (pc, pComment) + iComment;
+						pc = wcscpy (pc, sComment) + iComment;
 						wcsncpy (pc, gs.StringText + iStringPos, gs.StringLength - iStringPos + 1);
 					}
 				}
 				break;
 			case eUnComment:
 				{
-					if (!memcmp (gs.StringText + iStringPos, pComment, iComment))
+					if (!memcmp (gs.StringText + iStringPos, sComment, iComment))
 					{
 						pc = wcsncpy (line, gs.StringText, iStringPos + 1) + iStringPos;
 						if (gs.StringLength > (iStringPos + iComment))

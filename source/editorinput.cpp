@@ -37,22 +37,12 @@ static intptr_t FindIndent (wchar_t c, TLang *lng, wchar_t *str, intptr_t foundB
 		if (lng->ignoreCase) ic = (wchar_t) FSF.LLower (ic);
 		if ((c == L'\0') || (c == ic))
 		{
-			wchar_t	*line = (wchar_t *) malloc ((wcslen (tmpi->mask) + 1) * sizeof(wchar_t));
-
-			if (line)
+			intptr_t	bounds[2];
+			if (strMatch(str, tmpi->mask, L"/^", lng->ignoreCase ? L"$/i" : L"$/", 1, &bounds, &tmpi->start))
 			{
-				wcscpy (line, tmpi->mask);
-
-				intptr_t	bounds[2];
-				bool		blMatched = strMatch (str, line, L"/^", lng->ignoreCase ? L"$/i" : L"$/", 1, &bounds, &tmpi->start);
-				free (line);
-
-				if (blMatched)
-				{
-					foundBounds[0] = bounds[0];
-					foundBounds[1] = bounds[1];
-					return (j);
-				}
+				foundBounds[0] = bounds[0];
+				foundBounds[1] = bounds[1];
+				return (j);
 			}
 		}
 	}
@@ -60,14 +50,14 @@ static intptr_t FindIndent (wchar_t c, TLang *lng, wchar_t *str, intptr_t foundB
 	return (-1);
 }
 
-static size_t FindBrackets (TLang *lng, wchar_t *str, wchar_t **foundBrackets)
+static size_t FindBrackets (TLang *lng, const wchar_t *str, const wchar_t **foundBrackets)
 {
 	size_t foundBracketsNum = 0;
 
 	for (size_t j = 0; j < lng->indentColl.getCount(); j++)
 	{
 		TIndent *tmpi = (TIndent *) (lng->indentColl[j]);
-		wchar_t		*line = (wchar_t *) malloc ((wcslen (tmpi->mask) + 1) * sizeof(wchar_t));
+		wchar_t	*line = new wchar_t[tmpi->mask.length() + 1];
 
 		if (line)
 		{
@@ -76,7 +66,7 @@ static size_t FindBrackets (TLang *lng, wchar_t *str, wchar_t **foundBrackets)
 
 			intptr_t	bounds[2];
 			bool	blMatched = strMatch (str, line, L"/^", lng->ignoreCase ? L"$/i" : L"$/", 1, &bounds, &tmpi->start);
-			free (line);
+			delete[] line;
 
 			if (blMatched)
 			{
@@ -92,7 +82,7 @@ static size_t FindBrackets (TLang *lng, wchar_t *str, wchar_t **foundBrackets)
 	return (foundBracketsNum);
 }
 
-static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng, wchar_t **openBr, size_t nOpenBr)
+static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng, const wchar_t **openBr, size_t nOpenBr)
 {
 	static wchar_t							*c, buff[MAX_STR_LEN];
 	static EditorGetStringEx	gs;
@@ -127,7 +117,8 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 						TBracket	*br = (TBracket *) (lng->bracketColl[i]);
 						if (strMatch (buff, br->close, L"/^", closeReg, NULL, 0))
 						{
-							wchar_t	*result = NULL, **br4look = new wchar_t *[n];
+							wchar_t	*result = NULL;
+							const wchar_t **br4look = new const wchar_t *[n];
 							size_t nbr4look = FindBrackets (lng, buff, br4look);
 							if (nbr4look) result = LookForOpenBracket (ei, p, lng, br4look, nbr4look);
 							delete[] br4look;
@@ -150,7 +141,7 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 	return (NULL);
 }
 
-static wchar_t *FindOpenBracket (EditorInfoEx *ei, TLang *lng, wchar_t **openBr, size_t n)
+static wchar_t *FindOpenBracket (EditorInfoEx *ei, TLang *lng, const wchar_t **openBr, size_t n)
 {
 	TEditorPos	p, o = EditorGetPos ();
 	p.Default ();
@@ -233,15 +224,15 @@ static int TryIndent
 		bool				processIndent = true;
 		wchar_t				*opencol = NULL;
 		TEditorPos	pos = EditorGetPos ();
-		if (*(tmpi->relative))
+		if (!tmpi->relative.empty())
 		{
-			wchar_t	*rel = tmpi->relative;
+			const wchar_t	*rel = tmpi->relative;
 			if ((opencol = FindOpenBracket (ei, lng, &rel, 1)) == NULL) processIndent = false;
 		}
 		else if (tmpi->BracketsMode)
 		{
 			size_t	n = lng->bracketColl.getCount ();
-			wchar_t	**br4look = new wchar_t *[n];
+			const wchar_t	**br4look = new const wchar_t *[n];
 			size_t	nbr4look = FindBrackets (lng, str, br4look);
 			processIndent = false;
 			if (nbr4look) opencol = FindOpenBracket (ei, lng, br4look, nbr4look);
@@ -285,10 +276,10 @@ static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wcha
 {
 	const wchar_t	*menuPrefix = L"\\~";
 	size_t	pl = wcslen (menuPrefix);
-	if (wcslen (mc->MacroText) > pl && !FSF.LStrnicmp (mc->MacroText, menuPrefix, pl))
+	if (mc->MacroText.length() > pl && !FSF.LStrnicmp (mc->MacroText, menuPrefix, pl))
 	{
 		size_t	lc = 0;
-		wchar_t	*p = mc->MacroText;
+		const wchar_t	*p = mc->MacroText;
 		while (*p)
 		{
 			if (p[0] == L'\\')
@@ -531,7 +522,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 						{
 							if ((((TMacro *) (lng->macroColl[i]))->atStartup))
 							{
-								if (wcscmp (((TMacro *) (lng->macroColl[i]))->Name, L"") == 0)
+								if (((TMacro *) (lng->macroColl[i]))->Name.empty())
 									pMenu[l].Text = GetMsg (MUnnamed);
 								else
 									pMenu[l].Text = ((TMacro *) (lng->macroColl[i]))->Name;
