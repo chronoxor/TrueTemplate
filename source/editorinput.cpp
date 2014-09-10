@@ -472,7 +472,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 	ptrdiff_t edId = eList->findID (ei.EditorID);
 	if (edId == -1) edId = eListInsert (ei.EditorID, filename);
 
-	TEInfo	  *te = (TEInfo *) (*eList)[edId];
+	TEInfo	  *te = (*eList)[edId];
 	intptr_t	id = te->lang;
 	if (id != -1)
 	{

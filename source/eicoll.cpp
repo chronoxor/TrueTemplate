@@ -5,14 +5,6 @@
 #include "winmem.h"
 #include "eicoll.h"
 
-TEInfo::TEInfo(intptr_t aID, intptr_t aLang, const wchar_t *aFn, bool aNewFile)
-{
-  ID = aID;
-  lang = aLang;
-  newFile = aNewFile;
-  wcscpy(fn, aFn);
-}
-
 size_t TEICollection::insert(intptr_t aID, intptr_t aLang, const wchar_t *aFn, bool aNewFile)
 {
   return TCollection::insert(new TEInfo(aID, aLang, aFn, aNewFile));
@@ -41,7 +33,7 @@ ptrdiff_t TEICollection::findLang(intptr_t aID)
   return -1;
 }
 
-const wchar_t *TEICollection::findFile(intptr_t aID)
+const String &TEICollection::findFile(intptr_t aID)
 {
   TEInfo *i = (TEInfo*)find(find_ID, &aID);
   if ( i )

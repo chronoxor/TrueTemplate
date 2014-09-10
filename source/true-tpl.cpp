@@ -383,7 +383,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 			if (n == -1) n = eListInsert (ei.EditorID, filename);
 			if (n != -1)
 			{
-				TEInfo	*te = (TEInfo *) (*eList)[n];
+				TEInfo	*te = (*eList)[n];
 				if (te)
 				{
 					FarMenuItemEx mMenu[9];
