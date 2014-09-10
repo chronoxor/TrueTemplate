@@ -42,17 +42,6 @@ class TLangCollection : public TCollection
 		TCollection(5, 5, delLang)
 		{
 		}
-
-		TLangCollection(const TLangCollection &coll)
-		{
-			*this = coll;
-		}
-
-		TLangCollection& operator=(const TLangCollection &coll)
-		{
-			TCollection::operator=(coll);
-			return *this;
-		}
 };
 
 static TLangCollection	langColl;

@@ -17,24 +17,6 @@ TCollection::TCollection()
   init(0, 5, NULL);
 }
 
-TCollection::TCollection(const TCollection &coll)
-{
-  *this = coll;
-}
-
-TCollection& TCollection::operator=(const TCollection &coll)
-{
-  if (this != &coll)
-  {
-    items = coll.items;
-    count = coll.count;
-    limit = coll.limit;
-    delta = coll.delta;
-    delItem = coll.delItem;
-  }
-	return *this;
-}
-
 void TCollection::init(size_t aLimit, size_t aDelta, void(*aDelItem)(void*))
 {
   count = limit = 0;
@@ -66,7 +48,7 @@ void *TCollection::at(size_t index)
   return items[index];
 }
 
-void *TCollection::find(int (*ff)(void*, void*), void *data)
+void *TCollection::find(bool (*ff)(void*, void*), void *data)
 {
   if ( items )
   {
@@ -77,7 +59,7 @@ void *TCollection::find(int (*ff)(void*, void*), void *data)
   return NULL;
 }
 
-ptrdiff_t TCollection::findIndex(int (*ff)(void*, void*), void *data)
+ptrdiff_t TCollection::findIndex(bool (*ff)(void*, void*), void *data)
 {
   if ( items )
   {

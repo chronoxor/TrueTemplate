@@ -10,7 +10,7 @@ size_t TEICollection::insert(intptr_t aID, intptr_t aLang, const wchar_t *aFn, b
   return TCollection::insert(new TEInfo(aID, aLang, aFn, aNewFile));
 }
 
-static int find_ID(void *it, void *data)
+static bool find_ID(void *it, void *data)
 {
   return ((TEInfo*)it)->ID == *((intptr_t*)data);
 }
