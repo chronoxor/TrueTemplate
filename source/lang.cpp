@@ -1,4 +1,4 @@
-struct TLang
+struct TLang : TCollectionItem
 {
 	TLang();
 	String			mask, desc, imm, immExp, blockcomment;
@@ -18,28 +18,11 @@ TLang::TLang ()
 	defineColl.insert (new TDefine (L"nbsp", L" "));
 }
 
-static void delLang (void *it)
-{
-	TLang *lng = (TLang *) it;
-	lng->macroColl.removeAll ();
-	lng->indentColl.removeAll ();
-	lng->bracketColl.removeAll ();
-	lng->commentColl.removeAll ();
-	lng->execColl.removeAll ();
-	lng->compilerColl.removeAll ();
-	lng->defineColl.removeAll ();
-	lng->navyColl.removeAll ();
-	lng->formatColl.removeAll ();
-}
-
 class TLangCollection : public TCollection
 {
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	public:
-
 		TLangCollection () :
-		TCollection(5, 5, delLang)
+			TCollection(5, 5)
 		{
 		}
 };

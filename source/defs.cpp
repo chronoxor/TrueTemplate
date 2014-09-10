@@ -1,4 +1,4 @@
-struct TIndent
+struct TIndent : TCollectionItem
 {
 	String		mask, relative;
 	wchar_t		immChar;
@@ -7,26 +7,24 @@ struct TIndent
 	int				BracketsMode;
 };
 
-struct TBracket
+struct TBracket : TCollectionItem
 {
 	String	open, close;
 };
 
-struct TComment
+struct TComment : TCollectionItem
 {
 	String	mask;
 };
 
-struct TDefine
+struct TDefine : TCollectionItem
 {
-	TDefine (const wchar_t *, const wchar_t *);
 	String	name, value;
+	TDefine(const wchar_t *aName, const wchar_t *aValue)
+		: name(aName), value(aValue)
+	{
+	}
 };
-
-TDefine::TDefine (const wchar_t *aName, const wchar_t *aValue)
-	: name(aName), value(aValue)
-{
-}
 
 enum TJumpType
 {
