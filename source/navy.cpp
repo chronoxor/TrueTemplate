@@ -254,7 +254,7 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 		settings.Get(0,L"NavigationRectBottom", navRectBottom, 32, L"100");
 
 		const TFoundNav *exitFound = static_cast<TFoundNav *>(found[ExitCode]);
-		WORD	x1, y1, x2, y2;
+		intptr_t	x1, y1, x2, y2;
 		x1 = ((exitFound->rect[0] >= 0) && (exitFound->rect[0] <= 100)) ? exitFound->rect[0] : FSF.atoi(navRectLeft);
 		y1 = ((exitFound->rect[1] >= 0) && (exitFound->rect[1] <= 100)) ? exitFound->rect[1] : FSF.atoi(navRectTop);
 		x2 = ((exitFound->rect[2] >= 0) && (exitFound->rect[2] <= 100)) ? exitFound->rect[2] : FSF.atoi(navRectRight);
@@ -421,7 +421,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 				settings.Get(0,L"NavigationRectBottom", navRectBottom, 32, L"100");
 
 				const TFoundNav *exitFound = static_cast<TFoundNav *>(found[ExitCode]);
-				WORD	x1, y1, x2, y2;
+				intptr_t	x1, y1, x2, y2;
 				x1 = ((exitFound->rect[0] >= 0) && (exitFound->rect[0] <= 100)) ? exitFound->rect[0] : FSF.atoi(navRectLeft);
 				y1 = ((exitFound->rect[1] >= 0) && (exitFound->rect[1] <= 100)) ? exitFound->rect[1] : FSF.atoi(navRectTop);
 				x2 = ((exitFound->rect[2] >= 0) && (exitFound->rect[2] <= 100)) ? exitFound->rect[2] : FSF.atoi(navRectRight);

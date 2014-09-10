@@ -28,7 +28,7 @@ ptrdiff_t TEICollection::findLang(intptr_t aID)
 	return -1;
 }
 
-const String &TEICollection::findFile(intptr_t aID)
+const wchar_t *TEICollection::findFile(intptr_t aID)
 {
 	TCollectionItem *i = find(find_ID, &aID);
 	if (i)

@@ -20,7 +20,7 @@ static String ExpandEnv(const wchar_t *env)
 	{
 		delete[] buf;
 		buf = new wchar_t[nChars];
-		ExpandEnvironmentStrings(env, buf, nChars);
+		ExpandEnvironmentStrings(env, buf, (DWORD)nChars);
 	}
 	String result(buf);
 	delete[] buf;

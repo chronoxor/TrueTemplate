@@ -29,7 +29,7 @@ public:
 	size_t removeID(intptr_t);
 	ptrdiff_t findID(intptr_t);
 	ptrdiff_t findLang(intptr_t);
-	const String &findFile(intptr_t);
+	const wchar_t *findFile(intptr_t);
 	TEInfo *operator[](size_t i) { return (TEInfo *)at(i); };
 };
 #endif
