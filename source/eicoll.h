@@ -4,14 +4,15 @@
 #include "mystring.h"
 #include "tcoll.h"
 
-struct TEInfo
+class TEInfo : public TCollectionItem
 {
+public:
 	intptr_t ID, lang;
 	bool newFile;
 	String fn;
   
 	TEInfo() 
-		: ID(-1), lang(-1), newFile(false) 
+		: ID(-1), lang(-1), newFile(false)
 	{
 	}
 	
@@ -24,7 +25,6 @@ struct TEInfo
 class TEICollection: public TCollection
 {
 public:
-	TEICollection(size_t = 0, size_t = 5);
 	size_t insert(intptr_t, intptr_t, const wchar_t*, bool);
 	size_t removeID(intptr_t);
 	ptrdiff_t findID(intptr_t);

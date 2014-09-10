@@ -533,7 +533,6 @@ void WINAPI ExitFARW(const struct ExitInfo *Info)
 	DoneMacro ();
 	if (eList)
 	{
-		eList->done ();
 		delete eList;
 	}
 
@@ -545,7 +544,6 @@ void WINAPI ExitFARW(const struct ExitInfo *Info)
 
 	if (errColl)
 	{
-		errColl->done ();
 		delete errColl;
 	}
 

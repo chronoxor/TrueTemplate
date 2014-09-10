@@ -1,8 +1,7 @@
-struct TCompiler
+class TCompiler : public TCollectionItem
 {
+public:
 	TCompiler();
-	TCompiler (const TCompiler &);
-	TCompiler& operator= (const TCompiler &);
 	String		title, err;
 	intptr_t	line, col, fileMatch;
 	bool		searchCol;
@@ -45,13 +44,14 @@ static size_t eListInsert(intptr_t EditorID, wchar_t* filename)
 }
 
 static TCollection 		*compilerColl = NULL;
-static FarMenuItemEx		*compilerOut = NULL;
+static FarMenuItemEx	*compilerOut = NULL;
 static TCollection		*errColl = NULL;
 static intptr_t 			compilerOutN = 0;
 static intptr_t				compilerOutP = -1;
 
-struct TErrData
+class TErrData : public TCollectionItem
 {
+public:
 	wchar_t	fn[NM];
 	intptr_t	line, col, msgCount;
 	wchar_t	message[64][64];
@@ -337,7 +337,8 @@ static String makeTitle (const wchar_t *line, size_t size, const wchar_t *path, 
 	return String(FSF.TruncStr(temp, size));
 }
 
-static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path, const wchar_t *fn, wchar_t *line, uintptr_t ci, intptr_t &aj)
+static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path, const wchar_t *fn, 
+	const wchar_t *line, uintptr_t ci, intptr_t &aj)
 {
 	intptr_t	lineBounds[2], colBounds[2], fileBounds[2];
 	TCompiler *e = NULL;
@@ -409,7 +410,7 @@ static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path,
 		TErrData	*errData = new TErrData;
 		fExpand (wcscpy (errData->fn, fileName), path);
 
-		wchar_t	*p = line;
+		const wchar_t	*p = line;
 		errData->msgCount = 0;
 		for (;;)
 		{
@@ -541,7 +542,8 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 		compilerOut = new FarMenuItemEx[compilerOutN = n + 1];
 		for (size_t i = 0; i < n; i++)
 		{
-			wchar_t	*line = (wchar_t *) ((*compilerColl)[i]);
+			const TOutputLine *outData = static_cast<TOutputLine *>((*compilerColl)[i]);
+			const wchar_t	*line = outData->line;
 			compilerOut[i].Text = line;
 			compilerOut[i].Flags = MIF_DISABLE;
 			compilerOut[i].UserData = 0;
@@ -589,9 +591,8 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 	}
 	else if (compilerOut)
 	{
-	    compilerColl->done();
 		delete compilerColl;
-        compilerColl = NULL;
+		compilerColl = NULL;
 		delete[] compilerOut;
 		compilerOut = NULL;
 	}

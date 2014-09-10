@@ -30,21 +30,20 @@ static void cls(HANDLE& StdOutput)
 
 static void OutputLine(HANDLE& h, TCollection *AppOutput, bool showExec)
 {
-  const wchar_t *crlf = L"\r\n";
-  wchar_t *eos = wcspbrk(LineBuf, crlf);
-  LineBuf[LineBufPtr] = 0;
-  if ( eos )
-    *eos = 0;
-  wchar_t *p = new wchar_t[wcslen(LineBuf)+1];
-  wcscpy(p, LineBuf);
-  AppOutput->insert(p);
-  LineBufPtr = 0;
-  DWORD dummy;
-  if ( showExec )
-  {
-    WriteConsole(h, p, (DWORD)wcslen(p), &dummy, NULL);
-    WriteConsole(h, crlf, (DWORD)wcslen(crlf), &dummy, NULL);
-  }
+	const wchar_t crlf[] = L"\r\n";
+	wchar_t *eos = wcspbrk(LineBuf, crlf);
+	LineBuf[LineBufPtr] = 0;
+	if (eos)
+		*eos = 0;
+	TOutputLine *outLine = new TOutputLine(LineBuf);
+	AppOutput->insert(outLine);
+	LineBufPtr = 0;
+	DWORD dummy;
+	if (showExec)
+	{
+		WriteConsole(h, static_cast<const wchar_t*>(outLine->line), (DWORD)outLine->line.length(), &dummy, NULL);
+		WriteConsole(h, crlf, (DWORD)wcslen(crlf), &dummy, NULL);
+	}
 }
 
 struct TShowOutputData

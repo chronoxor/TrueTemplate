@@ -1,6 +1,7 @@
-struct TExec
+class TExec : public TCollectionItem
 {
-	TExec ();
+public:
+	TExec();
 	String		title, cmd, compiler;
 	String		enable, disable;
 	TJumpType jumpType;

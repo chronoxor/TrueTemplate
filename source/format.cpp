@@ -1,14 +1,14 @@
-struct TFormat
+class TFormat : public TCollectionItem
 {
-	TFormat();
+public:
 	String	name;
 	String	comm;
 	bool	echo;
-};
 
-TFormat::TFormat() : echo(true)
-{
-}
+	TFormat() : echo(true)
+	{
+	}
+};
 
 static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 {
