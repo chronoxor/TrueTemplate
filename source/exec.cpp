@@ -1,17 +1,16 @@
-struct TExec
+struct TExec : TCollectionItem
 {
-	TExec ();
-	TExec (const TExec &);
-	TExec& operator= (const TExec &);
-	wchar_t			title[MAX_REG_LEN], cmd[MAX_STR_LEN], compiler[MAX_STR_LEN];
-	wchar_t			enable[NM], disable[NM];
+	TExec();
+	String		title, cmd, compiler;
+	String		enable, disable;
 	TJumpType jumpType;
 	TSaveType saveType;
 	TCDType		cd;
 	bool			searchBase, echo;
 	void defaults (void)
 	{
-		*title = *cmd = *compiler = *enable = *disable = 0;
+		title.clear(); cmd.clear(); compiler.clear();
+		enable.clear(); disable.clear();
 		saveType = saCurrent;
 		jumpType = jtSmart;
 		cd = cdNone;
@@ -25,29 +24,6 @@ TExec::TExec ()
 	defaults ();
 }
 
-TExec::TExec(const TExec &e)
-{
-	*this = e;
-}
-
-TExec& TExec::operator= (const TExec &e)
-{
-	if (this != &e)
-	{
-    	wcscpy(title, e.title);
-    	wcscpy(cmd, e.cmd);
-    	wcscpy(compiler, e.compiler);
-    	wcscpy(enable, e.enable);
-    	wcscpy(disable, e.disable);
-    	jumpType = e.jumpType;
-    	saveType = e.saveType;
-    	cd = e.cd;
-    	echo = e.echo;
-    	searchBase = e.searchBase;
-	}
-	return *this;
-}
-
 static wchar_t cmd[MAX_STR_LEN];
 static wchar_t cmdpath[MAX_STR_LEN];
 
@@ -58,14 +34,14 @@ static wchar_t *makeCmdLine
 	const wchar_t	*mask,
 	const wchar_t	*dir,
 	const wchar_t	*fn,
-	const wchar_t	*title = NULL,
+	const wchar_t	*title = nullptr,
 	const wchar_t	macro = L'='
 )
 {
 	static wchar_t tmp[NM];
 	static wchar_t n1[NM], drv1[NM], dir1[NM], fil1[NM], ext1[NM];
 	static wchar_t n2[NM], drv2[NM], dir2[NM], fil2[NM], ext2[NM];
-	wchar_t				*i, *j, *e1 = ext1, *e2 = ext2, *smartQuote = NULL;
+	wchar_t				*i, *j, *e1 = ext1, *e2 = ext2, *smartQuote = nullptr;
 	fExpand (wcscpy (tmp, fn), dir);
 	GetFullPathName (tmp, sizeof n1, n1, &j);
 	fnSplit (n1, drv1, dir1, fil1, ext1);
@@ -79,7 +55,7 @@ static wchar_t *makeCmdLine
 	if (ask)
 	{
 		nullUserStrings ();
-		if (!scanUserInput (false, L'=', mask, title)) return (NULL);
+		if (!scanUserInput (false, L'=', mask, title)) return (nullptr);
 	}
 
 	*tmp = 0;
@@ -219,7 +195,7 @@ static wchar_t *makeCmdLine
 						for (wchar_t *p = smartQuote; *p; p++)
 							if (*p == L'\"') *p = L'\'';
 						quote (1, smartQuote);
-						smartQuote = NULL;
+						smartQuote = nullptr;
 					}
 					else
 						smartQuote = wcschr (j, 0);
@@ -244,11 +220,11 @@ static void execute (TCollection *coll, const wchar_t *title, bool showExec)
 	if (!showExec)
 	{
 		const wchar_t	*MsgItems[] = { GetMsg (MTitle), title };
-		Info.Message (&MainGuid, &ExecGuid, 0, NULL, MsgItems, _countof (MsgItems), 0);
+		Info.Message (&MainGuid, &ExecGuid, 0, nullptr, MsgItems, _countof (MsgItems), 0);
 	}
 
 	ExecConsoleApp (cmd, cmdpath, coll, true, showExec);
-	if (showExec) Info.PanelControl (0, FCTL_SETUSERSCREEN, 0, NULL);
+	if (showExec) Info.PanelControl (0, FCTL_SETUSERSCREEN, 0, nullptr);
 	Info.RestoreScreen (hScreen);
 	redraw ();
 }

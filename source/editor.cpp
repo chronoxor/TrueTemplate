@@ -68,7 +68,7 @@ static void EditorGetStr (EditorGetStringEx *gs, intptr_t line = -1)
 	Info.EditorControl (-1, ECTL_GETSTRING, 0, gs);
 }
 
-static void EditorSetStr (wchar_t *src, intptr_t line = -1)
+static void EditorSetStr (const wchar_t *src, intptr_t line = -1)
 {
 	EditorSetStringEx st;
 	st.StringNumber = line;

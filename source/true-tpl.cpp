@@ -8,13 +8,13 @@
 #include <PluginSettings.hpp>
 
 #include "guid.h"
+#include "mystring.h"
 #include "eicoll.h"
 #include "true-tpl.h"
 #include "ttpl-lng.h"
 #include "farintf.h"
 #include "console.h"
 #include "stdio.h"
-#include "cregexp.h"
 #include "syslog.h"
 #include "objbase.h"
 #include "process.h"
@@ -69,7 +69,7 @@ static int				autoformat = 0;
 
 void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
-	Info->StructSize=sizeof(struct PluginInfo);
+	Info->StructSize = sizeof(struct PluginInfo);
 	Info->MinFarVersion=MAKEFARVERSION(3,0,0,3835,VS_RELEASE);
 	Info->Version=MAKEFARVERSION(3,0,1,3,VS_RC);
 	Info->Guid=MainGuid;
@@ -88,6 +88,7 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		FSF=*Info->FSF;
 		::Info.FSF=&FSF;
 		IsOldFar = false;
+		::Info.RegExpControl(nullptr, RECTL_CREATE, 0, &RegExpHandle);
 
 		PluginSettings settings(MainGuid, ::Info.SettingsControl);
 		autocompile=settings.Get(0,L"AutoCompile",1);
@@ -170,7 +171,7 @@ static void SelectTemplate (TEInfo *te)
 			for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 			{
 				TMacro	*mm = (TMacro *) (lng->macroColl[i]);
-				if (mm->Name[0] && !mm->submenu) count++;
+				if (!mm->Name.empty() && !mm->submenu) count++;
 			}
 
 			if (count > 0)
@@ -182,7 +183,7 @@ static void SelectTemplate (TEInfo *te)
 					for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 					{
 						TMacro	*mm = (TMacro *) (lng->macroColl[i]);
-						if (mm->Name[0] && !mm->submenu)
+						if (!mm->Name.empty() && !mm->submenu)
 						{
 							amenu[count].Text = mm->Name;
 							amenu[count].Flags &= ~(MIF_SELECTED | MIF_CHECKED | MIF_SEPARATOR);
@@ -199,10 +200,10 @@ static void SelectTemplate (TEInfo *te)
 							0,
 							FMENU_WRAPMODE,
 							GetMsg (MSelectMacro),
-							NULL,
-							NULL,
-							NULL,
-							NULL,
+							nullptr,
+							nullptr,
+							nullptr,
+							nullptr,
 							amenu,
 							count
 						);
@@ -212,7 +213,7 @@ static void SelectTemplate (TEInfo *te)
 						for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 						{
 							TMacro	*mm = (TMacro *) (lng->macroColl[i]);
-							if (mm->Name[0] && !mm->submenu)
+							if (!mm->Name.empty() && !mm->submenu)
 							{
 								if (count == res)
 								{
@@ -232,16 +233,16 @@ static void SelectTemplate (TEInfo *te)
 										before[epos.Col] = 0;
 										if (ignoreposn)
 										{
-											if (checkMultipleChoice (lng, fm, L"", L"", 0, NULL))
+											if (checkMultipleChoice (lng, fm, L"", L"", 0, nullptr))
 											{
-												RunMacro (fm, NULL, NULL);
+												RunMacro (fm, nullptr, nullptr);
 												redraw ();
 											}
 										}
 										else if (CheckMacroPos (lng, fm, before, after))
-											if (checkMultipleChoice (lng, fm, before, after, 0, NULL))
+											if (checkMultipleChoice (lng, fm, before, after, 0, nullptr))
 											{
-												RunMacro (fm, NULL, NULL);
+												RunMacro (fm, nullptr, nullptr);
 												redraw ();
 											}
 									}
@@ -289,10 +290,10 @@ static void SelectTemplateSet (TEInfo *te)
 				0,
 				FMENU_WRAPMODE | FMENU_AUTOHIGHLIGHT,
 				GetMsg (MSelectLang),
-				NULL,
-				NULL,
-				NULL,
-				NULL,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
 				amenu,
 				lc + 2
 			);
@@ -323,7 +324,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 				wcscpy(filepath, filename);
 				*Point2FileName (filepath) = 0;
 				n = findLngID (filename);
-				if (n != -1) CompilerMenu (NULL, filename, filepath, n);
+				if (n != -1) CompilerMenu (nullptr, filename, filepath, n);
 				break;
 			}
 		case OPEN_COMMANDLINE:
@@ -337,7 +338,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 				wchar_t path[NM];
 				wcscpy(path, filename);
 				wchar_t* ch = wcsrchr(path, L'\\');
-				if (ch == NULL)
+				if (ch == nullptr)
 				{
 					FarPanelDirectory* dirInfo = (FarPanelDirectory*)malloc(sizeof(FarPanelDirectory) + NM);
 					if (dirInfo)
@@ -362,7 +363,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 				if (tmp[2] == L'l')
 				{
 					n = findLngID (file);
-					if (n != -1) CompilerMenu (NULL, file, path, n);
+					if (n != -1) CompilerMenu (nullptr, file, path, n);
 				}
 
 				if (tmp[2] == L'f')
@@ -382,7 +383,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 			if (n == -1) n = eListInsert (ei.EditorID, filename);
 			if (n != -1)
 			{
-				TEInfo	*te = (TEInfo *) (*eList)[n];
+				TEInfo	*te = (*eList)[n];
 				if (te)
 				{
 					FarMenuItemEx mMenu[9];
@@ -408,10 +409,10 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 							0,
 							FMENU_WRAPMODE,
 							GetMsg (MTitle),
-							NULL,
-							NULL,
-							NULL,
-							NULL,
+							nullptr,
+							nullptr,
+							nullptr,
+							nullptr,
 							(const FarMenuItemEx *) mMenu,
 							count
 						);
@@ -463,10 +464,10 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 					0,
 					FMENU_WRAPMODE,
 					GetMsg (MTitle),
-					NULL,
-					NULL,
-					NULL,
-					NULL,
+					nullptr,
+					nullptr,
+					nullptr,
+					nullptr,
 					(const FarMenuItemEx *) mMenu,
 					count
 				);
@@ -509,7 +510,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 								}
 
 								n = findLngID (buf);
-								if (n != -1) CompilerMenu (NULL, buf, path, n);
+								if (n != -1) CompilerMenu (nullptr, buf, path, n);
 							}
 							else if (mode == 2)
 							{
@@ -524,7 +525,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 		}
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 void WINAPI ExitFARW(const struct ExitInfo *Info)
@@ -532,21 +533,21 @@ void WINAPI ExitFARW(const struct ExitInfo *Info)
 	DoneMacro ();
 	if (eList)
 	{
-		eList->done ();
 		delete eList;
 	}
 
 	if (compilerOut)
 	{
 		delete[] compilerOut;
-		compilerOut = NULL;
+		compilerOut = nullptr;
 	}
 
 	if (errColl)
 	{
-		errColl->done ();
 		delete errColl;
 	}
+
+	::Info.RegExpControl(RegExpHandle, RECTL_FREE, 0, nullptr);
 }
 
 BOOL WINAPI DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)

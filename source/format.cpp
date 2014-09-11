@@ -1,23 +1,18 @@
-struct TFormat
+struct TFormat : TCollectionItem
 {
-	TFormat();
-	wchar_t	name[MAX_STR_LEN];
-	wchar_t	comm[MAX_STR_LEN];
+	String	name;
+	String	comm;
 	bool	echo;
+
+	TFormat() : echo(true)
+	{
+	}
 };
 
-TFormat::TFormat ()
+static void runFormatting (TFormat *tf, const wchar_t *Name = nullptr)
 {
-	wcscpy (this->name, L"");
-	wcscpy (this->comm, L"");
-	this->echo = true;
-}
-
-static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
-{
-	wchar_t	old_cmd[MAX_STR_LEN];
+	String	old_cmd(tf->comm);
 	wchar_t	new_cmd[MAX_STR_LEN];
-	wcscpy (old_cmd, tf->comm);
 	nullUserStrings ();
 	if (!scanUserInput (false, L'=', old_cmd)) return ;
 
@@ -32,7 +27,7 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 	EditorGetStringEx egs;
 
 	ExpandEnvironmentStrings (TEMP_TT, filepath, NM);
-	if (Name == NULL)
+	if (Name == nullptr)
 	{
 		Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 		if (ei.BlockType != BTYPE_NONE)
@@ -53,10 +48,10 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 
 		ExpandEnvironmentStrings (TEMP_TT_TMP, filename, NM);
 		srcfile = _wfopen (filename, L"rb");
-		if (srcfile == NULL) return ;
+		if (srcfile == nullptr) return ;
 		ExpandEnvironmentStrings (TEMP_TT_SRC_TMP, filename, NM);
 		dstfile = _wfopen (filename, L"wt");
-		if (dstfile == NULL) return ;
+		if (dstfile == nullptr) return ;
 		fread (&vblock, 1, sizeof (int), srcfile);
 		fread (&strcount, 1, sizeof (int), srcfile);
 		for (int i = 0; i < strcount; i++)
@@ -82,7 +77,7 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 		CopyFile (Name, filename, FALSE);
 	}
 
-	wchar_t	*p_old = old_cmd;
+	const wchar_t	*p_old = old_cmd;
 	wchar_t	*p_new = new_cmd;
 	*p_new = L'\0';
 	wcscat (p_new, L"%COMSPEC% /C ");
@@ -174,13 +169,13 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 	(
 		CreateProcess
 			(
-				NULL,
+				nullptr,
 				new_cmd,
-				NULL,
-				NULL,
+				nullptr,
+				nullptr,
 				TRUE,
 				CREATE_NO_WINDOW | NORMAL_PRIORITY_CLASS,
-				NULL,
+				nullptr,
 				filepath,
 				&si,
 				&pi
@@ -196,15 +191,15 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 	//ProcessUninstall ();
 
 	SetConsoleMode (GetStdHandle (STD_INPUT_HANDLE), OldConsoleMode);
-	if (ShowFlag) Info.PanelControl (PANEL_ACTIVE, FCTL_SETUSERSCREEN, NULL, NULL);
+	if (ShowFlag) Info.PanelControl (PANEL_ACTIVE, FCTL_SETUSERSCREEN, 0, nullptr);
 	Info.RestoreScreen (hScreen);
 	redraw ();
 
-	if (Name == NULL)
+	if (Name == nullptr)
 	{
 		if (ei.BlockType != BTYPE_NONE)
 		{
-			Info.EditorControl (-1, ECTL_DELETEBLOCK, NULL, NULL);
+			Info.EditorControl (-1, ECTL_DELETEBLOCK, 0, nullptr);
 			EditorSetPos (epos_sel);
 		}
 		else
@@ -219,13 +214,13 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = NULL)
 			es.BlockHeight = ei.TotalLines;
 			es.BlockWidth = last.StringLength;
 			Info.EditorControl (-1, ECTL_SELECT, 0, (void *) &es);
-			Info.EditorControl (-1, ECTL_DELETEBLOCK, NULL, NULL);
+			Info.EditorControl (-1, ECTL_DELETEBLOCK, 0, nullptr);
 			EditorSetPos (epos_sel);
 		}
 
 		ExpandEnvironmentStrings (TEMP_TT_DST_TMP, filename, NM);
 		dstfile = _wfopen (filename, L"rt");
-		if (dstfile == NULL) return ;
+		if (dstfile == nullptr) return ;
 
 		wchar_t				c[2] = L"x";
 		TEditorPos	ep = EditorGetPos ();
@@ -308,10 +303,10 @@ static void SelectFormatting (TEInfo *te)
 							0,
 							FMENU_WRAPMODE,
 							GetMsg (MSelectFormatter),
-							NULL,
-							NULL,
-							NULL,
-							NULL,
+							nullptr,
+							nullptr,
+							nullptr,
+							nullptr,
 							amenu,
 							lng->formatColl.getCount ()
 						);
@@ -355,10 +350,10 @@ static void FormatMenu (const wchar_t *Name, intptr_t lang)
 						0,
 						FMENU_WRAPMODE,
 						GetMsg (MSelectFormatter),
-						NULL,
-						NULL,
-						NULL,
-						NULL,
+						nullptr,
+						nullptr,
+						nullptr,
+						nullptr,
 						amenu,
 						lng->formatColl.getCount ()
 					);

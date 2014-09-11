@@ -1,12 +1,30 @@
-struct TMacro
+struct TMacro : TCollectionItem
 {
-	wchar_t	FARKey[MAX_STR_LEN];
-	bool	atStartup;
-	bool	submenu;
-	wchar_t	Name[MAX_REG_LEN];
-	wchar_t	Word[MAX_REG_LEN], At[MAX_REG_LEN], MacroText[MAX_STR_LEN];
-	wchar_t	before[MAX_REG_LEN], after[MAX_REG_LEN], immChar;
+	String	FARKey;
+	bool		atStartup;
+	bool		submenu;
+	String	Name;
+	String	At;
+	String	Word;
+	String	before, after, MacroText;
+	wchar_t	immChar;
 };
+
+static String ExpandEnv(const wchar_t *env)
+{
+	const size_t BufSize = 4096;
+	wchar_t *buf = new wchar_t[BufSize];
+	size_t nChars = ExpandEnvironmentStrings(env, buf, BufSize);
+	if (nChars > BufSize)
+	{
+		delete[] buf;
+		buf = new wchar_t[nChars];
+		ExpandEnvironmentStrings(env, buf, (DWORD)nChars);
+	}
+	String result(buf);
+	delete[] buf;
+	return result;
+}
 
 static void InitMacro ()
 {
@@ -14,7 +32,7 @@ static void InitMacro ()
 
 	HANDLE			hScreen = Info.SaveScreen (0, 0, -1, -1);
 	const wchar_t	*MsgItems[] = { GetMsg (MTitle), GetMsg (MLoading) };
-	Info.Message (&MainGuid, &InitMacroGuid, 0, NULL, MsgItems, _countof (MsgItems), 0);
+	Info.Message (&MainGuid, &InitMacroGuid, 0, nullptr, MsgItems, _countof (MsgItems), 0);
 
 	wchar_t	path[NM];
 	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
@@ -24,12 +42,11 @@ static void InitMacro ()
 	{
 		wchar_t				*item, *p = fileBuff;
 		wchar_t				name[MAX_STR_LEN], value[MAX_STR_LEN];
-		TLang				*lng = NULL;
+		TLang				*lng = nullptr;
 		bool				group;
-		TCollection dummyLang;
-		langColl = dummyLang;
+
 		findSectionInXML (p);
-		while ((item = getItem (p, name, group)) != NULL)
+		while ((item = getItem (p, name, group)) != nullptr)
 		{
 			if (group && !FSF.LStricmp (name, L"/True-Tpl"))
 				findSectionInXML (p);
@@ -38,7 +55,7 @@ static void InitMacro ()
 				wchar_t	incFile[NM];
 				*incFile = 0;
 
-				TCollection *dc = (lng == NULL) ? NULL : &(lng->defineColl);
+				TCollection *dc = (lng == nullptr) ? nullptr : &(lng->defineColl);
 				while (parseItem (dc, item, name, value))
 					if (!FSF.LStricmp (name, L"File")) wcscpy (incFile, value);
 				if (*incFile)
@@ -60,21 +77,25 @@ static void InitMacro ()
 				}
 			}
 			else if (group && !FSF.LStricmp (name, L"/Language"))
-				lng = NULL;
+				lng = nullptr;
 			else if (group && !FSF.LStricmp (name, L"Language"))
 			{
 				lng = new TLang;
 				lng->ignoreCase = false;
-				lng->setCP = lng->mask[0] = lng->desc[0] = lng->imm[0] = lng->immExp[0] = 0;
+				lng->setCP = 0;
+				lng->mask.clear();
+				lng->desc.clear();
+				lng->imm.clear();
+				lng->immExp.clear();
 				lng->defExec.defaults ();
 				while (parseItem (&(lng->defineColl), item, name, value))
 				{
 					if (!FSF.LStricmp (name, L"File"))
-							wcscpy (lng->mask, value);
+						lng->mask = value;
 					else if (!FSF.LStricmp (name, L"Desc"))
-						wcscpy (lng->desc, value);
+						lng->desc = value;
 					else if (!FSF.LStricmp (name, L"BlockComment"))
-						wcscpy (lng->blockcomment, value);
+						lng->blockcomment = value;
 					else if (!FSF.LStricmp (name, L"CP"))
 						lng->setCP = FSF.atoi (value);
 					else if (!FSF.LStricmp (name, L"IgnoreCase"))
@@ -83,15 +104,15 @@ static void InitMacro ()
 						parseExec (&(lng->defExec), name, value);
 				}
 
-				if (lng->mask[0])
+				if (!lng->mask.empty())
 					langColl.insert (lng);
 				else
 				{
 					delete lng;
-					lng = NULL;
+					lng = nullptr;
 				}
 			}
-			else if (lng != NULL)
+			else if (lng != nullptr)
 			{
 				if (!group && !FSF.LStricmp (name, L"Define"))
 				{
@@ -99,12 +120,12 @@ static void InitMacro ()
 					while (parseItem (&(lng->defineColl), item, name, value))
 					{
 						if (!FSF.LStricmp (name, L"Name"))
-							wcscpy (tmpd->name, value);
+							tmpd->name = value;
 						else if (!FSF.LStricmp (name, L"Value"))
-							wcscpy (tmpd->value, value);
+							tmpd->value = value;
 					}
 
-					if (tmpd->name[0])
+					if (!tmpd->name.empty())
 						lng->defineColl.insert (tmpd);
 					else
 						delete tmpd;
@@ -115,13 +136,13 @@ static void InitMacro ()
 					while (parseItem (&(lng->defineColl), item, name, value))
 					{
 						if (!FSF.LStricmp (name, L"Mask"))
-							wcscpy (tmpn->mask, value);
+							tmpn->mask = value;
 						else if (!FSF.LStricmp (name, L"Pos"))
 							tmpn->pos = FSF.atoi (value);
 						else if (!FSF.LStricmp (name, L"Path"))
-							ExpandEnvironmentStrings (value, tmpn->path, MAX_STR_LEN);
+							tmpn->path = ExpandEnv (value);
 						else if (!FSF.LStricmp (name, L"Suffixes"))
-							ExpandEnvironmentStrings (value, tmpn->suffixes, MAX_STR_LEN);
+							tmpn->suffixes = ExpandEnv (value);
 						else if (!FSF.LStricmp (name, L"Rect"))
 							FSF.sscanf
 								(
@@ -136,7 +157,7 @@ static void InitMacro ()
 							tmpn->viewer = FSF.atoi (value) ? true : false;
 					}
 
-					if (tmpn->mask[0])
+					if (!tmpn->mask.empty())
 						lng->navyColl.insert (tmpn);
 					else
 						delete tmpn;
@@ -147,14 +168,14 @@ static void InitMacro ()
 					while (parseItem (&(lng->defineColl), item, name, value))
 					{
 						if (!FSF.LStricmp (name, L"Name"))
-							wcscpy (tmpf->name, value);
+							tmpf->name = value;
 						else if (!FSF.LStricmp (name, L"Command"))
-							ExpandEnvironmentStrings (value, tmpf->comm, MAX_STR_LEN);
+							tmpf->comm = ExpandEnv (value);
 						else if (!FSF.LStricmp (name, L"Echo"))
 							tmpf->echo = FSF.atoi (value) ? true : false;
 					}
 
-					if (tmpf->name[0] && tmpf->comm[0])
+					if (!tmpf->name.empty() && !tmpf->comm.empty())
 						lng->formatColl.insert (tmpf);
 					else
 						delete tmpf;
@@ -162,10 +183,14 @@ static void InitMacro ()
 				else if (!group && !FSF.LStricmp (name, L"Expand"))
 				{
 					TMacro	*tmpm = new TMacro;
-					wcscpy (tmpm->At, expOnBlank);
+					tmpm->At = expOnBlank;
 					tmpm->immChar = 0;
-					tmpm->Name[0] = tmpm->Word[0] = tmpm->before[0] = tmpm->after[0] = tmpm->MacroText[0] = 0;
-					wcscpy (tmpm->FARKey, L"");
+					tmpm->Name.clear();
+					tmpm->before.clear();
+					tmpm->after.clear();
+					tmpm->MacroText.clear();
+					tmpm->Word.clear();
+					tmpm->FARKey.clear();
 					tmpm->atStartup = false;
 					tmpm->submenu = false;
 
@@ -174,34 +199,35 @@ static void InitMacro ()
 					{
 						if (!FSF.LStricmp (name, L"Pattern"))
 						{
-							wcscpy (tmpm->Word, value);
-							if (tmpm->Word[0])
+							tmpm->Word = value;
+							if (!tmpm->Word.empty())
 							{
 								validTag = true;
 
-								wchar_t	*opDelimiter = wcschr (tmpm->Word, L'|');
+								const wchar_t	*opDelimiter = wcschr (tmpm->Word, L'|');
 								if (opDelimiter)
 								{
-									wchar_t	rest[MAX_STR_LEN], cc[3] = L"(.";
-									*opDelimiter = 0;
-									wcscpy (rest, opDelimiter + 1);
-									for (wchar_t *p = rest; *p; p++)
+									String rest(opDelimiter + 1);
+									tmpm->Word = String(tmpm->Word, opDelimiter);
+									for (const wchar_t *p = rest; *p; p++)
 									{
-										cc[1] = *p;
-										wcscat (tmpm->Word, cc);
+										tmpm->Word += L'(';
+										tmpm->Word += *p;
 									}
+									for (const wchar_t *p = rest; *p; p++)
 									{
-										for (wchar_t *p = rest; *p; p++) wcscat (tmpm->Word, L")?");
+										tmpm->Word += L')';
+										tmpm->Word += L'?';
 									}
 								}
 							}
 						}
 						else if (!FSF.LStricmp (name, L"To"))
-							wcscpy (tmpm->MacroText, value);
+							tmpm->MacroText = value;
 						else if (!FSF.LStricmp (name, L"Key"))
 						{
 							validTag = true;
-							wcscpy (tmpm->FARKey, value);
+							tmpm->FARKey = value;
 						}
 						else if (!FSF.LStricmp (name, L"Imm"))
 							tmpm->immChar = *value;
@@ -213,22 +239,22 @@ static void InitMacro ()
 						else if (!FSF.LStricmp (name, L"At"))
 						{
 							if (!FSF.LStricmp (value, L"AnyWhere"))
-								wcscpy (tmpm->At, expAnyWhere);
+								tmpm->At = expAnyWhere;
 							else if (!FSF.LStricmp (value, L"Start"))
-								wcscpy (tmpm->At, expAtStart);
+								tmpm->At = expAtStart;
 							else if (!FSF.LStricmp (value, L"Middle"))
-								wcscpy (tmpm->At, expAtMiddle);
+								tmpm->At = expAtMiddle;
 							else if (!FSF.LStricmp (value, L"End"))
-								wcscpy (tmpm->At, expAtEnd);
+								tmpm->At = expAtEnd;
 							else if (!FSF.LStricmp (value, L"Blank"))
-								wcscpy (tmpm->At, expOnBlank);
+								tmpm->At = expOnBlank;
 							else
-								wcscpy (tmpm->At, value);
+								tmpm->At = value;
 						}
 						else if (!FSF.LStricmp (name, L"Name"))
 						{
 							validTag = true;
-							wcscpy (tmpm->Name, value);
+							tmpm->Name = value;
 						}
 						else if (!FSF.LStricmp (name, L"SubMenu"))
 						{
@@ -238,14 +264,13 @@ static void InitMacro ()
 
 					if (validTag)
 					{
-						if (tmpm->At[0])
+						if (!tmpm->At.empty())
 						{
-							wchar_t	*opDelimiter = wcsstr (tmpm->At, L"\\p");
+							const wchar_t	*opDelimiter = wcsstr (tmpm->At, L"\\p");
 							if (opDelimiter)
 							{
-								*opDelimiter = 0;
-								wcscpy (tmpm->before, tmpm->At);
-								wcscpy (tmpm->after, opDelimiter + 2);
+								tmpm->before = String(tmpm->At, opDelimiter);
+								tmpm->after = opDelimiter + 2;
 							}
 						}
 
@@ -253,9 +278,7 @@ static void InitMacro ()
 						{
 							if (!wcschr (lng->immExp, tmpm->immChar))
 							{
-								size_t len = wcslen (lng->immExp);
-								lng->immExp[len++] = tmpm->immChar;
-								lng->immExp[len] = 0;
+								lng->immExp += tmpm->immChar;
 							}
 						}
 
@@ -267,10 +290,10 @@ static void InitMacro ()
 				else if (!group && !FSF.LStricmp (name, L"Comment"))
 				{
 					TComment	*tmpc = new TComment;
-					tmpc->mask[0] = 0;
+					tmpc->mask.clear();
 					while (parseItem (&(lng->defineColl), item, name, value))
-						if (!FSF.LStricmp (name, L"Pattern")) wcscpy (tmpc->mask, value);
-					if (tmpc->mask[0])
+						if (!FSF.LStricmp (name, L"Pattern")) tmpc->mask = value;
+					if (!tmpc->mask.empty())
 						lng->commentColl.insert (tmpc);
 					else
 						delete tmpc;
@@ -280,11 +303,11 @@ static void InitMacro ()
 					TExec *tmpe = new TExec (lng->defExec);
 					while (parseItem (&(lng->defineColl), item, name, value))
 						if (!FSF.LStricmp (name, L"Command"))
-							wcscpy (tmpe->cmd, value);
+							tmpe->cmd = value;
 						else
 							parseExec (tmpe, name, value);
-					if (!tmpe->title[0]) wcscpy (tmpe->title, tmpe->cmd);
-					if (!tmpe->title[0]) tmpe->cmd[0] = 0;
+					if (tmpe->title.empty()) tmpe->title = tmpe->cmd;
+					if (tmpe->title.empty()) tmpe->cmd.clear();
 					lng->execColl.insert (tmpe);
 				}
 				else if (!group && !FSF.LStricmp (name, L"Compiler"))
@@ -292,10 +315,10 @@ static void InitMacro ()
 					TCompiler *tmpc = new TCompiler ();
 					while (parseItem (&(lng->defineColl), item, name, value))
 						if (!FSF.LStricmp (name, L"Name"))
-							wcscpy (tmpc->title, value);
+							tmpc->title = value;
 						else
 							parseCompiler (tmpc, name, value);
-					if (tmpc->title[0])
+					if (!tmpc->title.empty())
 						lng->compilerColl.insert (tmpc);
 					else
 						delete tmpc;
@@ -303,7 +326,8 @@ static void InitMacro ()
 				else if (!group && !FSF.LStricmp (name, L"Indent"))
 				{
 					TIndent *tmpi = new TIndent;
-					tmpi->mask[0] = tmpi->relative[0] = 0;
+					tmpi->mask.clear();
+					tmpi->relative.clear();
 					tmpi->BracketsMode = 0;
 					tmpi->start = 0;
 					tmpi->immChar = L'\0';
@@ -311,7 +335,7 @@ static void InitMacro ()
 					while (parseItem (&(lng->defineColl), item, name, value))
 					{
 						if (!FSF.LStricmp (name, L"Pattern"))
-							wcscpy (tmpi->mask, value);
+							tmpi->mask = value;
 						else if (!FSF.LStricmp (name, L"Line"))
 							tmpi->indent[0] = FSF.atoi (value);
 						else if (!FSF.LStricmp (name, L"Next"))
@@ -321,18 +345,16 @@ static void InitMacro ()
 						else if (!FSF.LStricmp (name, L"Start"))
 							tmpi->start = FSF.atoi (value);
 						else if (!FSF.LStricmp (name, L"Relative"))
-							wcscpy (tmpi->relative, value);
+							tmpi->relative = value;
 					}
 
-					if (tmpi->mask[0])
+					if (!tmpi->mask.empty())
 					{
 						if (tmpi->immChar)
 						{
 							if (!wcsrchr (lng->imm, tmpi->immChar))
 							{
-								size_t len = wcslen (lng->imm);
-								lng->imm[len++] = tmpi->immChar;
-								lng->imm[len] = 0;
+								lng->imm += tmpi->immChar;
 							}
 						}
 
@@ -346,11 +368,12 @@ static void InitMacro ()
 					TBracket	*tmpb = new TBracket;
 					TIndent		*tmp0 = new TIndent;
 					TIndent		*tmp1 = new TIndent;
-					tmpb->open[0] = tmpb->close[0] = 0;
-					tmp0->relative[0] = 0;
+					tmpb->open.clear();
+					tmpb->close.clear();
+					tmp0->relative.clear();
 					tmp0->start = tmp0->immChar = 0;
 					tmp0->BracketsMode = 0;
-					tmp1->relative[0] = 0;
+					tmp1->relative.clear();
 					tmp1->start = tmp1->immChar = 0;
 					tmp1->BracketsMode = 1;
 					tmp1->bracketLink = lng->bracketColl.getCount ();
@@ -361,9 +384,9 @@ static void InitMacro ()
 					while (parseItem (&(lng->defineColl), item, name, value))
 					{
 						if (!FSF.LStricmp (name, L"Pattern"))
-							wcscpy (tmp0->mask, wcscpy (tmpb->open, value));
+							tmp0->mask = tmpb->open = value;
 						else if (!FSF.LStricmp (name, L"Match"))
-							wcscpy (tmp1->mask, wcscpy (tmpb->close, value));
+							tmp1->mask = tmpb->close = value;
 						else if (!FSF.LStricmp (name, L"Line"))
 							tmp0->indent[0] = FSF.atoi (value);
 						else if (!FSF.LStricmp (name, L"Shift"))
@@ -378,15 +401,13 @@ static void InitMacro ()
 							tmp0->start = FSF.atoi (value);
 					}
 
-					if (tmpb->open[0] && tmpb->close[0])
+					if (!tmpb->open.empty() && !tmpb->close.empty())
 					{
 						if (tmp0->immChar)
 						{
 							if (!wcschr (lng->imm, tmp0->immChar))
 							{
-								size_t len = wcslen (lng->imm);
-								lng->imm[len++] = tmp0->immChar;
-								lng->imm[len] = 0;
+								lng->imm += tmp0->immChar;
 							}
 						}
 
@@ -394,9 +415,7 @@ static void InitMacro ()
 						{
 							if (!wcschr (lng->imm, tmp1->immChar))
 							{
-								size_t len = wcslen (lng->imm);
-								lng->imm[len++] = tmp1->immChar;
-								lng->imm[len] = 0;
+								lng->imm += tmp1->immChar;
 							}
 						}
 
@@ -446,14 +465,14 @@ static TMacro *FindMacro
 		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
 		if (expChar && (expChar != mm->immChar)) continue;
 		if (!frommenu && !expChar && mm->immChar) continue;
-		if (frommenu && mm->Name[0] && (wcscmp (mm->Name, before) == 0)) return (mm);
+		if (frommenu && !mm->Name.empty() && (wcscmp (mm->Name, before) == 0)) return (mm);
 	}
 
 	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
 		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
 		if (expChar && (expChar != mm->immChar)) continue;
-		if (mm->Word[0] && strMatch (after, mm->after, L"/^\\s*", regEnd, 0))
+		if (!mm->Word.empty() && strMatch (after, mm->after, L"/^\\s*", regEnd, 0))
 		{
 			wchar_t	realBefore[MAX_REG_LEN];
 			wcscat (wcscpy (realBefore, mm->before), mm->Word);
@@ -475,7 +494,7 @@ static TMacro *FindMacro
 		}
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static TMacro *FindMacroKey (TLang *lng, const INPUT_RECORD *Rec)
@@ -488,13 +507,13 @@ static TMacro *FindMacroKey (TLang *lng, const INPUT_RECORD *Rec)
 		if (wcscmp(mm->FARKey, rKeyp) == 0) return (mm);
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
-static TMacro *CheckMacroPos (TLang *lng, TMacro *mm, wchar_t *before, wchar_t *after)
+static TMacro *CheckMacroPos (TLang *lng, TMacro *mm, const wchar_t *before, const wchar_t *after)
 {
 	wchar_t	*regEnd = lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/";
 	if (strMatch (after, mm->after, L"/^\\s*", regEnd, 0))
 		if (strMatch (before, mm->before, L"/^\\s*", regEnd, 0)) return (mm);
-	return (NULL);
+	return (nullptr);
 }

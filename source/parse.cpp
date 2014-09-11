@@ -32,27 +32,27 @@ static void parseExec (TExec *tmpe, const wchar_t *name, const wchar_t *value)
 	else if (!FSF.LStricmp (name, L"Echo"))
 		tmpe->echo = FSF.atoi (value) ? true : false;
 	else if (!FSF.LStricmp (name, L"Title"))
-		wcscpy (tmpe->title, value);
+		tmpe->title = value;
 	else if (!FSF.LStricmp (name, L"Enable"))
 	{
 		if (value[0] == L'*' && value[1] == L'\\')
 		{
-			wcscpy (tmpe->enable, value);
+			tmpe->enable = value;
 			tmpe->searchBase = true;
 		}
 		else
-			wcscpy (tmpe->enable, value + 2);
+			tmpe->enable = value + 2;
 	}
 	else if (!FSF.LStricmp (name, L"Disable"))
-		wcscpy (tmpe->disable, value);
+		tmpe->disable = value;
 	else if (!FSF.LStricmp (name, L"Compiler"))
-		wcscpy (tmpe->compiler, value);
+		tmpe->compiler = value;
 }
 
 static void parseCompiler (TCompiler *tmpc, const wchar_t *name, const wchar_t *value)
 {
 	if (!FSF.LStricmp (name, L"Error"))
-		wcscpy (tmpc->err, value);
+		tmpc->err = value;
 	else if (!FSF.LStricmp (name, L"Line"))
 		tmpc->line = FSF.atoi (value);
 	else if (!FSF.LStricmp (name, L"File"))
@@ -126,7 +126,7 @@ static wchar_t *parseItem (TCollection *dc, wchar_t * &line, wchar_t *kwd, wchar
 		return (line);
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static wchar_t *getItem (wchar_t * &line, wchar_t *kwd, bool &group)
@@ -220,21 +220,21 @@ static wchar_t *getItem (wchar_t * &line, wchar_t *kwd, bool &group)
 		return (k);
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static void findSectionInXML (wchar_t * &p)
 {
 	bool	group;
 	wchar_t	name[MAX_STR_LEN];
-	while ((getItem (p, name, group)) != NULL)
+	while ((getItem (p, name, group)) != nullptr)
 		if (group && !FSF.LStricmp (name, L"TrueTpl")) break;
 }
 
-static wchar_t *GetXmlParam (wchar_t **szParam)
+static wchar_t *GetXmlParam (const wchar_t **szParam)
 {
 	static wchar_t szString[_MAX_PATH + 1];
-	wchar_t				*p = *szParam;
+	const wchar_t	*p = *szParam;
 	if (*(++p) == L'\'')
 	{
 		wchar_t	*o = szString;
@@ -252,5 +252,5 @@ static wchar_t *GetXmlParam (wchar_t **szParam)
 		return (szString);
 	}
 	else
-		return (NULL);
+		return (nullptr);
 }

@@ -194,9 +194,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="clocale.cpp" />
     <ClCompile Include="console.cpp" />
-    <ClCompile Include="cregexp.cpp" />
     <ClCompile Include="eicoll.cpp" />
     <ClCompile Include="farintf.cpp" />
     <ClCompile Include="process.cpp" />
@@ -208,12 +206,11 @@
     <None Include="true-tpl.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="clocale.h" />
     <ClInclude Include="console.h" />
-    <ClInclude Include="cregexp.h" />
     <ClInclude Include="eicoll.h" />
     <ClInclude Include="farintf.h" />
     <ClInclude Include="guid.h" />
+    <ClInclude Include="mystring.h" />
     <ClInclude Include="process.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="syslog.h" />

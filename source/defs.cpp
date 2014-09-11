@@ -1,32 +1,30 @@
-struct TIndent
+struct TIndent : TCollectionItem
 {
-	wchar_t		mask[MAX_REG_LEN], relative[MAX_REG_LEN], immChar;
+	String		mask, relative;
+	wchar_t		immChar;
 	intptr_t	indent[2], start;
 	size_t		bracketLink;
 	int				BracketsMode;
 };
 
-struct TBracket
+struct TBracket : TCollectionItem
 {
-	wchar_t	open[MAX_REG_LEN], close[MAX_REG_LEN];
+	String	open, close;
 };
 
-struct TComment
+struct TComment : TCollectionItem
 {
-	wchar_t	mask[MAX_REG_LEN];
+	String	mask;
 };
 
-struct TDefine
+struct TDefine : TCollectionItem
 {
-	TDefine (const wchar_t *, const wchar_t *);
-	wchar_t	name[MAX_REG_LEN], value[MAX_STR_LEN];
+	String	name, value;
+	TDefine(const wchar_t *aName, const wchar_t *aValue)
+		: name(aName), value(aValue)
+	{
+	}
 };
-
-TDefine::TDefine (const wchar_t *aName, const wchar_t *aValue)
-{
-	wcscpy (name, aName);
-	wcscpy (value, aValue);
-}
 
 enum TJumpType
 {

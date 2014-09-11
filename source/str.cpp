@@ -6,13 +6,13 @@ static inline wchar_t *StrLower (wchar_t *str)
 
 static bool strMatch
 (
-	wchar_t	*s,
-	wchar_t	*pattern,
-	wchar_t	*prefix,
-	wchar_t	*suffix,
-	int		nb,
-	intptr_t		bounds[][2] = NULL,
-	intptr_t		regn[] = NULL
+	const wchar_t	*s,
+	const wchar_t	*pattern,
+	const wchar_t	*prefix,
+	const wchar_t	*suffix,
+	size_t	nb,
+	intptr_t		bounds[][2] = nullptr,
+	intptr_t		regn[] = nullptr
 )
 {
 	bool    ret = false;
@@ -21,25 +21,29 @@ static bool strMatch
 
 	if (slashPattern)
 	{
-		static CRegExp	reg;
-		SMatches				m;
-
 		wcscat (lstrcat (lstrcpy (slashPattern, prefix), pattern), suffix);
 
-		if (reg.SetExpr (slashPattern))
+		RegExpSearch rs;
+		rs.Text = s;
+		rs.Position = 0;
+		rs.Length = wcslen(s);
+		rs.Match = new RegExpMatch[nb + 1];
+		rs.Count = nb + 1;
+		rs.Reserved = nullptr;
+		ret = ::Info.RegExpControl(RegExpHandle, RECTL_COMPILE, 0, slashPattern) &&
+			::Info.RegExpControl(RegExpHandle, RECTL_MATCHEX, 0, &rs);
+		if (ret)
 		{
-			reg.SetNoMoves (slashPattern[1] == L'^' ? true : false);
-			ret = reg.Parse (s, &m);
-			if (ret)
+			if (bounds && regn)
 			{
-				if (bounds && regn)
-					for (int i = 0; i < nb; i++)
-					{
-						bounds[i][0] = m.s[regn[i]];
-						bounds[i][1] = m.e[regn[i]];
-					}
+				for (size_t i = 0; i < nb; i++)
+				{
+					bounds[i][0] = rs.Match[regn[i]].start;
+					bounds[i][1] = rs.Match[regn[i]].end;
+				}
 			}
 		}
+		delete[] rs.Match;
 
 		free (slashPattern);
 	}
@@ -60,7 +64,7 @@ bool wcscmpi2 (wchar_t *szStr1, wchar_t *szStr2)
 
 static inline int isCharSpace (wchar_t c)
 {
-	return (wcschr (L" \t\r\n", c) != NULL);
+	return (wcschr (L" \t\r\n", c) != nullptr);
 }
 
 static wchar_t *skipSpaces (wchar_t * &line)
@@ -99,7 +103,7 @@ static wchar_t *getWord (wchar_t * &line, wchar_t *kwd)
 
 wchar_t *makeSubstr(size_t n, const wchar_t *origStr, intptr_t bounds[][2], size_t nBounds)
 {
-	wchar_t	*s = NULL;
+	wchar_t	*s = nullptr;
 
 	if (origStr && bounds && n < nBounds)
 	{
@@ -126,5 +130,5 @@ static wchar_t *FirstNonSpace (const wchar_t *s)
 		i++;
 	}
 
-	return (NULL);
+	return (nullptr);
 }

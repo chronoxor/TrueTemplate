@@ -21,12 +21,12 @@ bool Config (void)
 		{ /* 5 */ DI_CHECKBOX, 5, 6, 0, 0, ignoreposn, 0, (wchar_t *) MIgnorePos },
 		{ /* 6 */ DI_CHECKBOX, 5, 7, 0, 0, outputmenu, 0, (wchar_t *) MOutputMenu },
 		{ /* 7 */ DI_CHECKBOX, 5, 8, 0, 0, filterring, 0, (wchar_t *) MFiltering },
-		{ /* 8 */ DI_TEXT, 5, 9, 0, 255, 0, 0, NULL },
+		{ /* 8 */ DI_TEXT, 5, 9, 0, 255, 0, 0, nullptr },
 		{ /* 9 */ DI_TEXT, 5, 10, 0, 0, 0, 0, (wchar_t *) MKey },
 		{ /* 10 */ DI_EDIT, 25, 10, 63, 0, 0, 0, defExpandFKey },
-		{ /* 11 */ DI_TEXT, 5, 11, 0, 255, 0, 0, NULL },
+		{ /* 11 */ DI_TEXT, 5, 11, 0, 255, 0, 0, nullptr },
 		{ /* 12 */ DI_BUTTON, 5, 12, 63, 0, 0, DIF_CENTERGROUP, (wchar_t *) MNavConfig },
-		{ /* 13 */ DI_TEXT, 5, 13, 0, 255, 0, 0, NULL },
+		{ /* 13 */ DI_TEXT, 5, 13, 0, 255, 0, 0, nullptr },
 		{ /* 14 - OK */ DI_BUTTON, 0, 14, 0, 0, 0, DIF_CENTERGROUP, (wchar_t *) MOK },
 		{ /* 15 */ DI_BUTTON, 0, 14, 0, 0, 0, DIF_CENTERGROUP, (wchar_t *) MCancel }
 	};
@@ -37,7 +37,7 @@ bool Config (void)
 	const intptr_t		OK = 14;
 	while (true)
 	{
-		HANDLE hDlg1 = Info.DialogInit(&MainGuid, &ConfigGuid, -1, -1, 69, OK + 3, NULL, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
+		HANDLE hDlg1 = Info.DialogInit(&MainGuid, &ConfigGuid, -1, -1, 69, OK + 3, nullptr, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
 		if (hDlg1 != INVALID_HANDLE_VALUE)
 		{
 			intptr_t n = Info.DialogRun(hDlg1);
@@ -45,23 +45,23 @@ bool Config (void)
 			{
 				struct InitDialogItemEx InitItems[] =
 				{ //Type X1 Y1 X2 Y2 Fo Se Fl DB Data
-					{ /* 00 */ DI_DOUBLEBOX, 3, 1, 55, 12, 0, 0, DIF_BOXCOLOR, 0, GetMsg (MNavConfig), NULL },
-					{ /* 01 */ DI_TEXT, 5, 2, 0, 0, 0, 0, 0, 0, GetMsg (MNavRectLeft), NULL },
-					{ /* 02 */ DI_FIXEDIT, 5, 3, 7, 0, 0, 0, 0, 0, navRectLeft, NULL },
-					{ /* 03 */ DI_TEXT, 5, 4, 0, 0, 0, 0, 0, 0, GetMsg (MNavRectTop), NULL },
-					{ /* 04 */ DI_FIXEDIT, 5, 5, 7, 0, 0, 0, 0, 0, navRectTop, NULL },
-					{ /* 05 */ DI_TEXT, 5, 6, 0, 0, 0, 0, 0, 0, GetMsg (MNavRectRight), NULL },
-					{ /* 06 */ DI_FIXEDIT, 5, 7, 7, 0, 0, 0, 0, 0, navRectRight, NULL },
-					{ /* 07 */ DI_TEXT, 5, 8, 0, 0, 0, 0, 0, 0, GetMsg (MNavRectBottom), NULL },
-					{ /* 08 */ DI_FIXEDIT, 5, 9, 7, 0, 0, 0, 0, 0, navRectBottom, NULL },
-					{ /* 09 */ DI_TEXT, 0, 10, 0, 0, 0, 0, DIF_BOXCOLOR | DIF_SEPARATOR, 0, L"", NULL },
-					{ /* 10 */ DI_BUTTON, 0, 11, 0, 0, 0, 0, DIF_CENTERGROUP, 1, GetMsg (MOK), NULL },
-					{ /* 11 */ DI_BUTTON, 0, 11, 0, 0, 0, 0, DIF_CENTERGROUP, 0, GetMsg (MCancel), NULL }
+					{ /* 00 */ DI_DOUBLEBOX, 3, 1, 55, 12, 0, 0, DIF_BOXCOLOR, 0, GetMsg (MNavConfig), nullptr },
+					{ /* 01 */ DI_TEXT, 5, 2, 0, 0, 0, 0, 0, 0, GetMsg (MNavRectLeft), nullptr },
+					{ /* 02 */ DI_FIXEDIT, 5, 3, 7, 0, 0, 0, 0, 0, navRectLeft, nullptr },
+					{ /* 03 */ DI_TEXT, 5, 4, 0, 0, 0, 0, 0, 0, GetMsg (MNavRectTop), nullptr },
+					{ /* 04 */ DI_FIXEDIT, 5, 5, 7, 0, 0, 0, 0, 0, navRectTop, nullptr },
+					{ /* 05 */ DI_TEXT, 5, 6, 0, 0, 0, 0, 0, 0, GetMsg (MNavRectRight), nullptr },
+					{ /* 06 */ DI_FIXEDIT, 5, 7, 7, 0, 0, 0, 0, 0, navRectRight, nullptr },
+					{ /* 07 */ DI_TEXT, 5, 8, 0, 0, 0, 0, 0, 0, GetMsg (MNavRectBottom), nullptr },
+					{ /* 08 */ DI_FIXEDIT, 5, 9, 7, 0, 0, 0, 0, 0, navRectBottom, nullptr },
+					{ /* 09 */ DI_TEXT, 0, 10, 0, 0, 0, 0, DIF_BOXCOLOR | DIF_SEPARATOR, 0, L"", nullptr },
+					{ /* 10 */ DI_BUTTON, 0, 11, 0, 0, 0, 0, DIF_CENTERGROUP, 1, GetMsg (MOK), nullptr },
+					{ /* 11 */ DI_BUTTON, 0, 11, 0, 0, 0, 0, DIF_CENTERGROUP, 0, GetMsg (MCancel), nullptr }
 				};
 				struct FarDialogItem		DialogItems[(sizeof (InitItems) / sizeof (InitItems[0]))];
 				InitDialogItemsEx (InitItems, DialogItems, (sizeof (InitItems) / sizeof (InitItems[0])));
 
-				HANDLE hDlg2 = Info.DialogInit(&MainGuid, &ConfigGuidEx, -1, -1, 59, 14, NULL, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
+				HANDLE hDlg2 = Info.DialogInit(&MainGuid, &ConfigGuidEx, -1, -1, 59, 14, nullptr, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
 				if (hDlg2 != INVALID_HANDLE_VALUE)
 				{
 					intptr_t n = Info.DialogRun(hDlg2);
@@ -89,13 +89,13 @@ bool Config (void)
 			}
 			if (n == OK)
 			{
-				settings.Set(0,L"AutoCompile", (autocompile = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,1,NULL) == BSTATE_CHECKED) ? 1 : 0));
-				settings.Set(0,L"AutoFormat", (autoformat = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,2,NULL) == BSTATE_CHECKED) ? 1 : 0));
-				settings.Set(0,L"Disable", (pluginStop = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,3,NULL) == BSTATE_CHECKED) ? 1 : 0));
-				settings.Set(0,L"UseScrollLock", (scrollStop = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,4,NULL) == BSTATE_CHECKED) ? 1 : 0));
-				settings.Set(0,L"IgnorePosition", (ignoreposn = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,5,NULL) == BSTATE_CHECKED) ? 1 : 0));
-				settings.Set(0,L"OutputMenu", (outputmenu = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,6,NULL) == BSTATE_CHECKED) ? 1 : 0));
-				settings.Set(0,L"OutputFilter", (filterring = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,7,NULL) == BSTATE_CHECKED) ? 1 : 0));
+				settings.Set(0,L"AutoCompile", (autocompile = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,1,nullptr) == BSTATE_CHECKED) ? 1 : 0));
+				settings.Set(0,L"AutoFormat", (autoformat = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,2,nullptr) == BSTATE_CHECKED) ? 1 : 0));
+				settings.Set(0,L"Disable", (pluginStop = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,3,nullptr) == BSTATE_CHECKED) ? 1 : 0));
+				settings.Set(0,L"UseScrollLock", (scrollStop = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,4,nullptr) == BSTATE_CHECKED) ? 1 : 0));
+				settings.Set(0,L"IgnorePosition", (ignoreposn = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,5,nullptr) == BSTATE_CHECKED) ? 1 : 0));
+				settings.Set(0,L"OutputMenu", (outputmenu = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,6,nullptr) == BSTATE_CHECKED) ? 1 : 0));
+				settings.Set(0,L"OutputFilter", (filterring = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,7,nullptr) == BSTATE_CHECKED) ? 1 : 0));
 				FarDialogItemDataEx item;
 				item.PtrLength = 256;
 				item.PtrData = defExpandFKey;

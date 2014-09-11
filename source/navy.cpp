@@ -1,16 +1,13 @@
-struct TNavy
+struct TNavy : TCollectionItem
 {
 	TNavy();
-	wchar_t	mask[MAX_REG_LEN], path[MAX_STR_LEN], suffixes[MAX_STR_LEN];
+	String	mask, path, suffixes;
 	intptr_t	pos, rect[4];
 	bool	viewer;
 };
 
 TNavy::TNavy ()
 {
-	wcscpy (this->mask, L"");
-	wcscpy (this->path, L"");
-	wcscpy (this->suffixes, L"");
 	this->pos = 0;
 	this->rect[0] = -1;
 	this->rect[1] = -1;
@@ -19,37 +16,39 @@ TNavy::TNavy ()
 	this->viewer = false;
 }
 
+struct TFoundNav : TCollectionItem
+{
+	String file;
+	intptr_t	rect[4];
+	bool	viewer;
+
+	TFoundNav (const wchar_t *aFile, const intptr_t aRect[4], bool aViewer)
+		: file(aFile), viewer(aViewer)
+	{
+		rect[0] = aRect[0];
+		rect[1] = aRect[1];
+		rect[2] = aRect[2];
+		rect[3] = aRect[3];
+	}
+};
+
 static void NavyInsert(const wchar_t *file, const wchar_t *suffixes, const intptr_t rect[4], bool viewer, TCollection &coll)
 {
-	struct nav
-	{
-		wchar_t	*file;
-		intptr_t	rect[4];
-		bool	viewer;
-	};
-
 	const wchar_t	*cursuffixes = suffixes;
 	wchar_t				tmp[2] = L"x";
 	wchar_t				filename[2 * _MAX_PATH + 1];
 	wchar_t				filenamex[2 * _MAX_PATH + 1];
 	wcscpy (filename, file);
-	GetFullPathName (filename, 2 * _MAX_PATH + 1, filenamex, NULL);
+	GetFullPathName (filename, 2 * _MAX_PATH + 1, filenamex, nullptr);
 	wcscpy (filename, filenamex);
 	do
 	{
 		if (IsFile (filename))
 		{
 			for (size_t i = 0; i < coll.getCount (); i++)
-				if (_wcsicmp (((nav *) (coll[i]))->file, filename) == 0) return ;
+				if (_wcsicmp( static_cast<TFoundNav *>(coll[i])->file, filename ) == 0) return;
 
-			nav *tmp = new nav;
-			tmp->rect[0] = rect[0];
-			tmp->rect[1] = rect[1];
-			tmp->rect[2] = rect[2];
-			tmp->rect[3] = rect[3];
-			tmp->viewer = viewer;
-			tmp->file = new wchar_t[wcslen (filename) + 1];
-			wcscpy (tmp->file, filename);
+			TFoundNav *tmp = new TFoundNav(filename, rect, viewer);
 			coll.insert (tmp);
 		}
 
@@ -65,7 +64,7 @@ static void NavyInsert(const wchar_t *file, const wchar_t *suffixes, const intpt
 			{
 				tmp[0] = *cursuffixes;
 				wcscat (filename, tmp);
-				GetFullPathName (filename, 2 * _MAX_PATH + 1, filenamex, NULL);
+				GetFullPathName (filename, 2 * _MAX_PATH + 1, filenamex, nullptr);
 				wcscpy (filename, filenamex);
 				cursuffixes++;
 			}
@@ -80,7 +79,7 @@ static void NavyFind(const wchar_t	*path, const wchar_t *file, const wchar_t *su
 	wcscat(testFile, file);
 	NavyInsert (testFile, suffixes, rect, viewer, coll);
 
-	intptr_t n = Info.AdvControl(&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
+	intptr_t n = Info.AdvControl(&MainGuid, ACTL_GETWINDOWCOUNT, 0, nullptr);
 	for (intptr_t i = 0; i < n; i++)
 	{
 		wchar_t	witypename[NM];
@@ -182,18 +181,11 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 		}
 	}
 
-	struct nav
-	{
-		wchar_t	*file;
-		int		rect[4];
-		bool	viewer;
-	};
-
-	FarMenuItemEx *mMenu = NULL;
+	FarMenuItemEx *mMenu = nullptr;
 	if (found.getCount () > 1) mMenu = new FarMenuItemEx[found.getCount ()];
 	for (size_t i = 0; ((i < found.getCount()) && (found.getCount() > 1)); i++)
 	{
-		mMenu[i].Text = ((nav *) (found[i]))->file;
+		mMenu[i].Text = static_cast<TFoundNav *>(found[i])->file;
 	}
 
 	FarKey BreakKeys[2];
@@ -216,7 +208,7 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 				FMENU_WRAPMODE,
 				GetMsg (MNavyMenu),
 				GetMsg (MNavyMenuBottom),
-				NULL,
+				nullptr,
 				BreakKeys,
 				&BreakCode,
 				(const FarMenuItemEx *) mMenu,
@@ -229,10 +221,10 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 				const wchar_t	*Msg[5];
 				Msg[0] = GetMsg (MNavigation);
 				Msg[1] = L"\1";
-				Msg[2] = ((nav *) (found[ExitCode]))->file;
+				Msg[2] = static_cast<TFoundNav *>(found[ExitCode])->file;
 				Msg[3] = L"\1";
 				Msg[4] = GetMsg (MOK);
-				Info.Message (&MainGuid, &NavigateMessageGuid, FMSG_LEFTALIGN, NULL, Msg, sizeof (Msg) / sizeof (Msg[0]), 1);
+				Info.Message (&MainGuid, &NavigateMessageGuid, FMSG_LEFTALIGN, nullptr, Msg, _countof (Msg), 1);
 				continue;
 			}
 			else
@@ -260,21 +252,22 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 		settings.Get(0,L"NavigationRectRight", navRectRight, 32, L"100");
 		settings.Get(0,L"NavigationRectBottom", navRectBottom, 32, L"100");
 
-		WORD	x1, y1, x2, y2;
-		x1 = ((((nav *) (found[ExitCode]))->rect[0] >= 0) && (((nav *) (found[ExitCode]))->rect[0] <= 100)) ? ((nav *) (found[ExitCode]))->rect[0] : FSF.atoi (navRectLeft);
-		y1 = ((((nav *) (found[ExitCode]))->rect[1] >= 0) && (((nav *) (found[ExitCode]))->rect[1] <= 100)) ? ((nav *) (found[ExitCode]))->rect[1] : FSF.atoi (navRectTop);
-		x2 = ((((nav *) (found[ExitCode]))->rect[2] >= 0) && (((nav *) (found[ExitCode]))->rect[2] <= 100)) ? ((nav *) (found[ExitCode]))->rect[2] : FSF.atoi (navRectRight);
-		y2 = ((((nav *) (found[ExitCode]))->rect[3] >= 0) && (((nav *) (found[ExitCode]))->rect[3] <= 100)) ? ((nav *) (found[ExitCode]))->rect[3] : FSF.atoi (navRectBottom);
+		const TFoundNav *exitFound = static_cast<TFoundNav *>(found[ExitCode]);
+		intptr_t	x1, y1, x2, y2;
+		x1 = ((exitFound->rect[0] >= 0) && (exitFound->rect[0] <= 100)) ? exitFound->rect[0] : FSF.atoi(navRectLeft);
+		y1 = ((exitFound->rect[1] >= 0) && (exitFound->rect[1] <= 100)) ? exitFound->rect[1] : FSF.atoi(navRectTop);
+		x2 = ((exitFound->rect[2] >= 0) && (exitFound->rect[2] <= 100)) ? exitFound->rect[2] : FSF.atoi(navRectRight);
+		y2 = ((exitFound->rect[3] >= 0) && (exitFound->rect[3] <= 100)) ? exitFound->rect[3] : FSF.atoi(navRectBottom);
 		x1 = ConBuffInfo.dwSize.X * x1 / 100;
 		y1 = ConBuffInfo.dwSize.Y * y1 / 100;
 		x2 = ConBuffInfo.dwSize.X * x2 / 100;
 		y2 = ConBuffInfo.dwSize.Y * y2 / 100;
-		if (((nav *) (found[ExitCode]))->viewer)
+		if (exitFound->viewer)
 		{
 			Info.Viewer
 				(
-					((nav *) (found[ExitCode]))->file,
-					NULL,
+					exitFound->file,
+					nullptr,
 					x1,
 					y1,
 					x2,
@@ -287,8 +280,8 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 		{
 			Info.Editor
 				(
-					((nav *) (found[ExitCode]))->file,
-					NULL,
+					exitFound->file,
+					nullptr,
 					x1,
 					y1,
 					x2,
@@ -301,7 +294,6 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 		}
 	}
 
-	for (size_t i = 0; i < found.getCount(); i++) delete[]((nav *)(found[i]))->file;
 	found.removeAll ();
 }
 
@@ -356,18 +348,11 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 				}
 			}
 
-			struct nav
-			{
-				wchar_t	*file;
-				int		rect[4];
-				bool	viewer;
-			};
-
-			FarMenuItemEx *mMenu = NULL;
+			FarMenuItemEx *mMenu = nullptr;
 			if (found.getCount () > 0) mMenu = new FarMenuItemEx[found.getCount ()];
 			for (size_t i = 0; ((i < found.getCount()) && (found.getCount() > 1)); i++)
 			{
-				mMenu[i].Text = ((nav *) (found[i]))->file;
+				mMenu[i].Text = static_cast<TFoundNav *>(found[i])->file;
 			}
 
 			FarKey BreakKeys[2];
@@ -390,7 +375,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 						FMENU_WRAPMODE,
 						GetMsg (MNavyMenu),
 						GetMsg (MNavyMenuBottom),
-						NULL,
+						nullptr,
 						BreakKeys,
 						&BreakCode,
 						(const FarMenuItemEx *) mMenu,
@@ -403,10 +388,10 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 						const wchar_t	*Msg[5];
 						Msg[0] = GetMsg (MNavigation);
 						Msg[1] = L"\1";
-						Msg[2] = ((nav *) (found[ExitCode]))->file;
+						Msg[2] = static_cast<TFoundNav *>(found[ExitCode])->file;
 						Msg[3] = L"\1";
 						Msg[4] = GetMsg (MOK);
-						Info.Message (&MainGuid, &SelNavigateMessageGuid, FMSG_LEFTALIGN, NULL, Msg, sizeof (Msg) / sizeof (Msg[0]), 1);
+						Info.Message (&MainGuid, &SelNavigateMessageGuid, FMSG_LEFTALIGN, nullptr, Msg, sizeof (Msg) / sizeof (Msg[0]), 1);
 						continue;
 					}
 					else
@@ -434,21 +419,22 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 				settings.Get(0,L"NavigationRectRight", navRectRight, 32, L"100");
 				settings.Get(0,L"NavigationRectBottom", navRectBottom, 32, L"100");
 
-				WORD	x1, y1, x2, y2;
-				x1 = ((((nav *) (found[ExitCode]))->rect[0] >= 0) && (((nav *) (found[ExitCode]))->rect[0] <= 100)) ? ((nav *) (found[ExitCode]))->rect[0] : FSF.atoi (navRectLeft);
-				y1 = ((((nav *) (found[ExitCode]))->rect[1] >= 0) && (((nav *) (found[ExitCode]))->rect[1] <= 100)) ? ((nav *) (found[ExitCode]))->rect[1] : FSF.atoi (navRectTop);
-				x2 = ((((nav *) (found[ExitCode]))->rect[2] >= 0) && (((nav *) (found[ExitCode]))->rect[2] <= 100)) ? ((nav *) (found[ExitCode]))->rect[2] : FSF.atoi (navRectRight);
-				y2 = ((((nav *) (found[ExitCode]))->rect[3] >= 0) && (((nav *) (found[ExitCode]))->rect[3] <= 100)) ? ((nav *) (found[ExitCode]))->rect[3] : FSF.atoi (navRectBottom);
+				const TFoundNav *exitFound = static_cast<TFoundNav *>(found[ExitCode]);
+				intptr_t	x1, y1, x2, y2;
+				x1 = ((exitFound->rect[0] >= 0) && (exitFound->rect[0] <= 100)) ? exitFound->rect[0] : FSF.atoi(navRectLeft);
+				y1 = ((exitFound->rect[1] >= 0) && (exitFound->rect[1] <= 100)) ? exitFound->rect[1] : FSF.atoi(navRectTop);
+				x2 = ((exitFound->rect[2] >= 0) && (exitFound->rect[2] <= 100)) ? exitFound->rect[2] : FSF.atoi(navRectRight);
+				y2 = ((exitFound->rect[3] >= 0) && (exitFound->rect[3] <= 100)) ? exitFound->rect[3] : FSF.atoi(navRectBottom);
 				x1 = ConBuffInfo.dwSize.X * x1 / 100;
 				y1 = ConBuffInfo.dwSize.Y * y1 / 100;
 				x2 = ConBuffInfo.dwSize.X * x2 / 100;
 				y2 = ConBuffInfo.dwSize.Y * y2 / 100;
-				if (((nav *) (found[ExitCode]))->viewer)
+				if (exitFound->viewer)
 				{
 					Info.Viewer
 						(
-							((nav *) (found[ExitCode]))->file,
-							NULL,
+							exitFound->file,
+							nullptr,
 							x1,
 							y1,
 							x2,
@@ -461,8 +447,8 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 				{
 					Info.Editor
 						(
-							((nav *) (found[ExitCode]))->file,
-							NULL,
+							exitFound->file,
+							nullptr,
 							x1,
 							y1,
 							x2,
@@ -475,7 +461,6 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 				}
 			}
 
-			for (size_t i = 0; i < found.getCount(); i++) delete[]((nav *)(found[i]))->file;
 			found.removeAll ();
 		}
 	}

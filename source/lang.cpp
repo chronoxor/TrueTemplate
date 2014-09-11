@@ -1,7 +1,7 @@
-struct TLang
+struct TLang : TCollectionItem
 {
 	TLang();
-	wchar_t				mask[MAX_REG_LEN], desc[MAX_REG_LEN], imm[MAX_REG_LEN], immExp[MAX_REG_LEN], blockcomment[MAX_REG_LEN];
+	String			mask, desc, imm, immExp, blockcomment;
 	bool				ignoreCase;
 	int					setCP;
 	TExec				defExec;
@@ -11,7 +11,6 @@ struct TLang
 
 TLang::TLang ()
 {
-	wcscpy (blockcomment, L"");
 	defineColl.insert (new TDefine (L"lt", L"<"));
 	defineColl.insert (new TDefine (L"gt", L">"));
 	defineColl.insert (new TDefine (L"quot", L"\""));
@@ -19,45 +18,12 @@ TLang::TLang ()
 	defineColl.insert (new TDefine (L"nbsp", L" "));
 }
 
-static void delLang (void *it)
-{
-	TLang *lng = (TLang *) it;
-	lng->macroColl.removeAll ();
-	lng->indentColl.removeAll ();
-	lng->bracketColl.removeAll ();
-	lng->commentColl.removeAll ();
-	lng->execColl.removeAll ();
-	lng->compilerColl.removeAll ();
-	lng->defineColl.removeAll ();
-	lng->navyColl.removeAll ();
-	lng->formatColl.removeAll ();
-}
-
 class TLangCollection : public TCollection
 {
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	public:
-
 		TLangCollection () :
-		TCollection(5, 5, delLang)
+			TCollection(5, 5)
 		{
-		}
-
-		TLangCollection(const TLangCollection &coll)
-		{
-			*this = coll;
-		}
-
-		TLangCollection(const TCollection &coll)
-		{
-			TCollection::operator=(coll);
-		}
-
-		TLangCollection& operator=(const TLangCollection &coll)
-		{
-			TCollection::operator=(coll);
-			return *this;
 		}
 };
 

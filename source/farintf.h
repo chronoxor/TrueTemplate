@@ -103,6 +103,7 @@ struct EditorSelectEx : EditorSelect
 
 extern struct PluginStartupInfo Info;
 extern struct FarStandardFunctions FSF;
+extern HANDLE RegExpHandle;
 extern wchar_t PluginRootKey[80];
 
 struct InitDialogItem

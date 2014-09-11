@@ -8,6 +8,7 @@
 
 struct PluginStartupInfo Info;
 struct FarStandardFunctions FSF;
+HANDLE RegExpHandle;
 wchar_t PluginRootKey[80];
 
 void InitDialogItems(InitDialogItem *Init, FarDialogItem *Item, size_t ItemsNumber)
@@ -36,11 +37,11 @@ void InitDialogItems(InitDialogItem *Init, FarDialogItem *Item, size_t ItemsNumb
         Item[I].Data = Init[I].Data;
     }
 	Item[I].MaxLength = 0;
-	Item[I].History = NULL;
-	Item[I].Mask = NULL;
-	Item[I].UserData = NULL;
-	Item[I].Reserved[0] = NULL;
-	Item[I].Reserved[1] = NULL;
+	Item[I].History = nullptr;
+	Item[I].Mask = nullptr;
+	Item[I].UserData = 0;
+	Item[I].Reserved[0] = 0;
+	Item[I].Reserved[1] = 0;
   }
 }
 
@@ -58,8 +59,8 @@ void InitDialogItemsEx(const struct InitDialogItemEx *Init, struct FarDialogItem
   PItem->Flags=PInit->Flags;
   PItem->Flags |= PInit->Focus ? DIF_FOCUS : 0;
   PItem->Selected=PInit->Selected;
-  PItem->History=NULL;
-  if (PInit->History!=NULL)
+  PItem->History=nullptr;
+  if (PInit->History!=nullptr)
    PItem->History=PInit->History;
   PItem->Flags |= PInit->DefaultButton ? DIF_DEFAULTBUTTON : 0;
   if ((unsigned int)PInit->Data<2000)
@@ -67,10 +68,10 @@ void InitDialogItemsEx(const struct InitDialogItemEx *Init, struct FarDialogItem
   else
    PItem->Data = PInit->Data;
   PItem->MaxLength = 0;
-  PItem->Mask = NULL;
-  PItem->UserData = NULL;
-  PItem->Reserved[0] = NULL;
-  PItem->Reserved[1] = NULL;
+  PItem->Mask = nullptr;
+  PItem->UserData = 0;
+  PItem->Reserved[0] = 0;
+  PItem->Reserved[1] = 0;
  }
 }
 
