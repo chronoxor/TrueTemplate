@@ -1,6 +1,5 @@
-class TLang : public TCollectionItem
+struct TLang : TCollectionItem
 {
-public:
 	TLang();
 	String			mask, desc, imm, immExp, blockcomment;
 	bool				ignoreCase;

@@ -1,6 +1,5 @@
-class TMacro : public TCollectionItem
+struct TMacro : TCollectionItem
 {
-public:
 	String	FARKey;
 	bool		atStartup;
 	bool		submenu;

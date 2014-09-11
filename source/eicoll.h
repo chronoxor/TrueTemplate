@@ -4,9 +4,8 @@
 #include "mystring.h"
 #include "tcoll.h"
 
-class TEInfo : public TCollectionItem
+struct TEInfo : TCollectionItem
 {
-public:
 	intptr_t ID, lang;
 	bool newFile;
 	String fn;

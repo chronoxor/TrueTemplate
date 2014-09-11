@@ -1,6 +1,5 @@
-class TNavy : public TCollectionItem
+struct TNavy : TCollectionItem
 {
-public:
 	TNavy();
 	String	mask, path, suffixes;
 	intptr_t	pos, rect[4];
@@ -17,12 +16,12 @@ TNavy::TNavy ()
 	this->viewer = false;
 }
 
-class TFoundNav : public TCollectionItem
+struct TFoundNav : TCollectionItem
 {
-public:
 	String file;
 	intptr_t	rect[4];
 	bool	viewer;
+
 	TFoundNav (const wchar_t *aFile, const intptr_t aRect[4], bool aViewer)
 		: file(aFile), viewer(aViewer)
 	{

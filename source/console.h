@@ -4,9 +4,8 @@
 #include "mystring.h"
 #include "tcoll.h"
 
-class TOutputLine : public TCollectionItem
+struct TOutputLine : TCollectionItem
 {
-public:
 	String line;
 	TOutputLine(const wchar_t *aLine)
 		: line(aLine)

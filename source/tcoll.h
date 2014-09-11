@@ -1,9 +1,8 @@
 #ifndef __TCOLL_H
 #define __TCOLL_H
 
-class TCollectionItem
+struct TCollectionItem
 {
-public:
 	virtual ~TCollectionItem()
 	{
 	}

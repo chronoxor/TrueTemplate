@@ -1,6 +1,5 @@
-class TIndent : public TCollectionItem
+struct TIndent : TCollectionItem
 {
-public:
 	String		mask, relative;
 	wchar_t		immChar;
 	intptr_t	indent[2], start;
@@ -8,21 +7,18 @@ public:
 	int				BracketsMode;
 };
 
-class TBracket : public TCollectionItem
+struct TBracket : TCollectionItem
 {
-public:
 	String	open, close;
 };
 
-class TComment : public TCollectionItem
+struct TComment : TCollectionItem
 {
-public:
 	String	mask;
 };
 
-class TDefine : public TCollectionItem
+struct TDefine : TCollectionItem
 {
-public:
 	String	name, value;
 	TDefine(const wchar_t *aName, const wchar_t *aValue)
 		: name(aName), value(aValue)

@@ -1,6 +1,5 @@
-class TExec : public TCollectionItem
+struct TExec : TCollectionItem
 {
-public:
 	TExec();
 	String		title, cmd, compiler;
 	String		enable, disable;

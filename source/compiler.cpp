@@ -1,6 +1,5 @@
-class TCompiler : public TCollectionItem
+struct TCompiler : TCollectionItem
 {
-public:
 	TCompiler();
 	String		title, err;
 	intptr_t	line, col, fileMatch;
@@ -49,9 +48,8 @@ static TCollection		*errColl = NULL;
 static intptr_t 			compilerOutN = 0;
 static intptr_t				compilerOutP = -1;
 
-class TErrData : public TCollectionItem
+struct TErrData : TCollectionItem
 {
-public:
 	wchar_t	fn[NM];
 	intptr_t	line, col, msgCount;
 	wchar_t	message[64][64];

@@ -1,6 +1,5 @@
-class TFormat : public TCollectionItem
+struct TFormat : TCollectionItem
 {
-public:
 	String	name;
 	String	comm;
 	bool	echo;
