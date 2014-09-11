@@ -39,7 +39,7 @@ static void NavyInsert(const wchar_t *file, const wchar_t *suffixes, const intpt
 	wchar_t				filename[2 * _MAX_PATH + 1];
 	wchar_t				filenamex[2 * _MAX_PATH + 1];
 	wcscpy (filename, file);
-	GetFullPathName (filename, 2 * _MAX_PATH + 1, filenamex, NULL);
+	GetFullPathName (filename, 2 * _MAX_PATH + 1, filenamex, nullptr);
 	wcscpy (filename, filenamex);
 	do
 	{
@@ -64,7 +64,7 @@ static void NavyInsert(const wchar_t *file, const wchar_t *suffixes, const intpt
 			{
 				tmp[0] = *cursuffixes;
 				wcscat (filename, tmp);
-				GetFullPathName (filename, 2 * _MAX_PATH + 1, filenamex, NULL);
+				GetFullPathName (filename, 2 * _MAX_PATH + 1, filenamex, nullptr);
 				wcscpy (filename, filenamex);
 				cursuffixes++;
 			}
@@ -79,7 +79,7 @@ static void NavyFind(const wchar_t	*path, const wchar_t *file, const wchar_t *su
 	wcscat(testFile, file);
 	NavyInsert (testFile, suffixes, rect, viewer, coll);
 
-	intptr_t n = Info.AdvControl(&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
+	intptr_t n = Info.AdvControl(&MainGuid, ACTL_GETWINDOWCOUNT, 0, nullptr);
 	for (intptr_t i = 0; i < n; i++)
 	{
 		wchar_t	witypename[NM];
@@ -181,7 +181,7 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 		}
 	}
 
-	FarMenuItemEx *mMenu = NULL;
+	FarMenuItemEx *mMenu = nullptr;
 	if (found.getCount () > 1) mMenu = new FarMenuItemEx[found.getCount ()];
 	for (size_t i = 0; ((i < found.getCount()) && (found.getCount() > 1)); i++)
 	{
@@ -208,7 +208,7 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 				FMENU_WRAPMODE,
 				GetMsg (MNavyMenu),
 				GetMsg (MNavyMenuBottom),
-				NULL,
+				nullptr,
 				BreakKeys,
 				&BreakCode,
 				(const FarMenuItemEx *) mMenu,
@@ -224,7 +224,7 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 				Msg[2] = static_cast<TFoundNav *>(found[ExitCode])->file;
 				Msg[3] = L"\1";
 				Msg[4] = GetMsg (MOK);
-				Info.Message (&MainGuid, &NavigateMessageGuid, FMSG_LEFTALIGN, NULL, Msg, _countof (Msg), 1);
+				Info.Message (&MainGuid, &NavigateMessageGuid, FMSG_LEFTALIGN, nullptr, Msg, _countof (Msg), 1);
 				continue;
 			}
 			else
@@ -267,7 +267,7 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 			Info.Viewer
 				(
 					exitFound->file,
-					NULL,
+					nullptr,
 					x1,
 					y1,
 					x2,
@@ -281,7 +281,7 @@ static void Navigate(TLang *lng, const wchar_t *path, wchar_t *realLine, intptr_
 			Info.Editor
 				(
 					exitFound->file,
-					NULL,
+					nullptr,
 					x1,
 					y1,
 					x2,
@@ -348,7 +348,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 				}
 			}
 
-			FarMenuItemEx *mMenu = NULL;
+			FarMenuItemEx *mMenu = nullptr;
 			if (found.getCount () > 0) mMenu = new FarMenuItemEx[found.getCount ()];
 			for (size_t i = 0; ((i < found.getCount()) && (found.getCount() > 1)); i++)
 			{
@@ -375,7 +375,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 						FMENU_WRAPMODE,
 						GetMsg (MNavyMenu),
 						GetMsg (MNavyMenuBottom),
-						NULL,
+						nullptr,
 						BreakKeys,
 						&BreakCode,
 						(const FarMenuItemEx *) mMenu,
@@ -391,7 +391,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 						Msg[2] = static_cast<TFoundNav *>(found[ExitCode])->file;
 						Msg[3] = L"\1";
 						Msg[4] = GetMsg (MOK);
-						Info.Message (&MainGuid, &SelNavigateMessageGuid, FMSG_LEFTALIGN, NULL, Msg, sizeof (Msg) / sizeof (Msg[0]), 1);
+						Info.Message (&MainGuid, &SelNavigateMessageGuid, FMSG_LEFTALIGN, nullptr, Msg, sizeof (Msg) / sizeof (Msg[0]), 1);
 						continue;
 					}
 					else
@@ -434,7 +434,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 					Info.Viewer
 						(
 							exitFound->file,
-							NULL,
+							nullptr,
 							x1,
 							y1,
 							x2,
@@ -448,7 +448,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 					Info.Editor
 						(
 							exitFound->file,
-							NULL,
+							nullptr,
 							x1,
 							y1,
 							x2,

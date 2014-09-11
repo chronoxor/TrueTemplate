@@ -7,13 +7,13 @@ static void SysLog(wchar_t *fmt,...)
   va_start(argptr, fmt);
   wvsprintf(temp, fmt, argptr);
   va_end(argptr);
-  HANDLE f = CreateFile(Log, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  HANDLE f = CreateFile(Log, GENERIC_WRITE, 0, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
   if ( f != INVALID_HANDLE_VALUE )
   {
 	  DWORD dwBytesRead = wcslen(temp), dwBytesWritten = 0;
-    DWORD dwPos = SetFilePointer(f, 0, NULL, FILE_END);
+    DWORD dwPos = SetFilePointer(f, 0, nullptr, FILE_END);
     LockFile(f, dwPos, 0, dwPos+dwBytesRead, 0);
-    WriteFile(f, temp, dwBytesRead, &dwBytesWritten, NULL);
+    WriteFile(f, temp, dwBytesRead, &dwBytesWritten, nullptr);
     UnlockFile(f, dwPos, 0, dwPos+dwBytesRead, 0);
   }
   CloseHandle(f);

@@ -66,7 +66,7 @@ static void BlockComments (TEInfo *te)
 		wchar_t		*pc;
 		while (true)
 		{
-			pc = NULL;
+			pc = nullptr;
 			switch (action)
 			{
 			case eComment:

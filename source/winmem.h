@@ -21,7 +21,7 @@ inline void *myAlloc(size_t size)
 
 inline void myFree(void *block)
 {
-  if ( block != NULL ) HeapFree(GetProcessHeap(), 0, block);
+  if ( block != nullptr ) HeapFree(GetProcessHeap(), 0, block);
 }
 
 #define malloc(var) myAlloc(var)

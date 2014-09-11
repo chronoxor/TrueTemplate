@@ -6,7 +6,7 @@ struct TCompiler : TCollectionItem
 	bool		searchCol;
 	void defaults (void)
 	{
-		title.clear(); 
+		title.clear();
 		err.clear();
 		line = col = fileMatch = -1;
 		searchCol = false;
@@ -18,11 +18,11 @@ TCompiler::TCompiler ()
 	defaults ();
 }
 
-TEICollection *eList = NULL;
+TEICollection *eList = nullptr;
 
 static void initEList (void)
 {
-	if (eList == NULL) eList = new TEICollection;
+	if (eList == nullptr) eList = new TEICollection;
 }
 
 static ptrdiff_t findLngID(const wchar_t *fn)
@@ -42,9 +42,9 @@ static size_t eListInsert(intptr_t EditorID, wchar_t* filename)
 	return (eList->insert (EditorID, findLngID (filename), filename, newFile));
 }
 
-static TCollection 		*compilerColl = NULL;
-static FarMenuItemEx	*compilerOut = NULL;
-static TCollection		*errColl = NULL;
+static TCollection 		*compilerColl = nullptr;
+static FarMenuItemEx	*compilerOut = nullptr;
+static TCollection		*errColl = nullptr;
 static intptr_t 			compilerOutN = 0;
 static intptr_t				compilerOutP = -1;
 
@@ -70,7 +70,7 @@ static bool showErrorMsgBox(intptr_t res)
 			err->message[17], err->message[18], err->message[19]
 		};
 		redraw ();
-		Info.Message (&MainGuid, &ErrorMsgGuid, FMSG_MB_OK | FMSG_LEFTALIGN, NULL, MsgItems, err->msgCount + 3, 0);
+		Info.Message (&MainGuid, &ErrorMsgGuid, FMSG_MB_OK | FMSG_LEFTALIGN, nullptr, MsgItems, err->msgCount + 3, 0);
 		return (true);
 	}
 
@@ -100,7 +100,7 @@ static void jumpToError( EditorInfoEx *ei, const wchar_t* path, intptr_t aj, boo
 			wi.Name = winame;
 			wi.NameSize = NM;
 			bool			found = false;
-			intptr_t	wcnt = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
+			intptr_t	wcnt = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, 0, nullptr);
 			for (intptr_t i = -1; i < wcnt; i++)
 			{
 				wi.Pos = i;
@@ -112,7 +112,7 @@ static void jumpToError( EditorInfoEx *ei, const wchar_t* path, intptr_t aj, boo
 						if (i != -1)
 						{
 							Info.AdvControl (&MainGuid, ACTL_SETCURRENTWINDOW, i, 0);
-							Info.AdvControl (&MainGuid, ACTL_COMMIT, NULL, NULL);
+							Info.AdvControl (&MainGuid, ACTL_COMMIT, 0, nullptr);
 						}
 
 						sLine = nLine;
@@ -123,7 +123,7 @@ static void jumpToError( EditorInfoEx *ei, const wchar_t* path, intptr_t aj, boo
 			}
 
 			if (!found)
-				Info.Editor (err->fn, NULL, 0, 0, -1, -1, EF_NONMODAL | EF_ENABLE_F6 | EF_IMMEDIATERETURN, err->line, nCol, CP_DEFAULT);
+				Info.Editor (err->fn, nullptr, 0, 0, -1, -1, EF_NONMODAL | EF_ENABLE_F6 | EF_IMMEDIATERETURN, err->line, nCol, CP_DEFAULT);
 			EditorSetPosEx (ei, sLine, nCol, err->colSearch);
 			if (showMsgBox) showErrorMsgBox (aj);
 		}
@@ -134,7 +134,7 @@ static void showCompileOut (EditorInfoEx *ei, const wchar_t* path)
 {
 	if (compilerOut)
 	{
-		FarMenuItemEx *errOut = NULL;
+		FarMenuItemEx *errOut = nullptr;
 		bool					ErrOnly = (filterring != 0);
 		intptr_t			ErrCount = 0;
 		intptr_t			Code;
@@ -183,7 +183,7 @@ static void showCompileOut (EditorInfoEx *ei, const wchar_t* path)
 					FMENU_WRAPMODE | FMENU_SHOWAMPERSAND,
 					cmd,
 					GetMsg (MMenuBottom),
-					NULL,
+					nullptr,
 					BreakKeys,
 					&Code,
 					(ErrOnly) ? (const FarMenuItemEx *) errOut : (const FarMenuItemEx *) compilerOut,
@@ -243,7 +243,7 @@ static bool SaveAll ()
 	Info.AdvControl (&MainGuid, ACTL_GETWINDOWINFO, 0, (void *) &wi);
 
 	intptr_t home = wi.Pos;
-	intptr_t n = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
+	intptr_t n = Info.AdvControl (&MainGuid, ACTL_GETWINDOWCOUNT, 0, nullptr);
 	for (intptr_t i = 0; i < n; i++)
 	{
 		wi.Pos = i;
@@ -252,8 +252,8 @@ static bool SaveAll ()
 		{
 			if (Info.AdvControl (&MainGuid, ACTL_SETCURRENTWINDOW, i, 0))
 			{
-				Info.AdvControl (&MainGuid, ACTL_COMMIT, NULL, NULL);
-				if (!Info.EditorControl (-1, ECTL_SAVEFILE, NULL, NULL)) res = false;
+				Info.AdvControl (&MainGuid, ACTL_COMMIT, 0, nullptr);
+				if (!Info.EditorControl (-1, ECTL_SAVEFILE, 0, nullptr)) res = false;
 			}
 			else
 				res = false;
@@ -261,7 +261,7 @@ static bool SaveAll ()
 	}
 
 	Info.AdvControl (&MainGuid, ACTL_SETCURRENTWINDOW, home, 0);
-	Info.AdvControl (&MainGuid, ACTL_COMMIT, NULL, NULL);
+	Info.AdvControl (&MainGuid, ACTL_COMMIT, 0, nullptr);
 	return (res);
 }
 
@@ -269,7 +269,7 @@ static bool findBaseFile (const wchar_t *path, const wchar_t *file, wchar_t *bas
 {
 	bool			found = false;
 	wchar_t		testFile[NM];
-	intptr_t	n = Info.AdvControl(&MainGuid, ACTL_GETWINDOWCOUNT, NULL, NULL);
+	intptr_t	n = Info.AdvControl(&MainGuid, ACTL_GETWINDOWCOUNT, 0, nullptr);
 	wcscpy(testFile, path);
 	FSF.AddEndSlash (testFile);
 	wcscat (testFile, FSF.PointToName (file));
@@ -320,10 +320,10 @@ static bool validMenuItem (const wchar_t *path, const wchar_t *fn, TExec *e)
 	{
 		makeCmdLine (false, baseFile, e->enable, path, fn);
 		enable = isFile (baseFile);
-		if (!enable && e->searchBase) enable = findBaseFile (path, baseFile, NULL);
+		if (!enable && e->searchBase) enable = findBaseFile (path, baseFile, nullptr);
 	}
 
-	if (enable && !e->disable.empty()) 
+	if (enable && !e->disable.empty())
 		enable = !isFile (makeCmdLine (false, baseFile, e->disable, path, fn));
 	return (enable);
 }
@@ -335,11 +335,11 @@ static String makeTitle (const wchar_t *line, size_t size, const wchar_t *path, 
 	return String(FSF.TruncStr(temp, size));
 }
 
-static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path, const wchar_t *fn, 
+static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path, const wchar_t *fn,
 	const wchar_t *line, uintptr_t ci, intptr_t &aj)
 {
 	intptr_t	lineBounds[2], colBounds[2], fileBounds[2];
-	TCompiler *e = NULL;
+	TCompiler *e = nullptr;
 	bool			found = false, res = false;
 	for (size_t i = 0; i < lng->compilerColl.getCount (); i++)
 	{
@@ -493,14 +493,14 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 			wi.Pos = -1;
 			Info.AdvControl (&MainGuid, ACTL_GETWINDOWINFO, 0, (void *) &wi);
 			if (wi.Type == WTYPE_EDITOR && (wi.Flags & WIF_MODIFIED))
-				if (!Info.EditorControl (-1, ECTL_SAVEFILE, NULL, NULL)) return (false);
+				if (!Info.EditorControl (-1, ECTL_SAVEFILE, 0, nullptr)) return (false);
 		}
 		else
 		{
 			if (!SaveAll ())
 			{
 				const wchar_t *MsgItems[] = { GetMsg (MTitle), GetMsg (MSaveError), GetMsg (MContinue) };
-				if (Info.Message (&MainGuid, &RunCompilerGuid, FMSG_MB_YESNO, NULL, MsgItems, _countof (MsgItems), 0)) return (false);
+				if (Info.Message (&MainGuid, &RunCompilerGuid, FMSG_MB_YESNO, nullptr, MsgItems, _countof (MsgItems), 0)) return (false);
 			}
 		}
 	}
@@ -551,7 +551,7 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 
 			wchar_t	*pp, *p = compiler;
 			bool	found = false;
-			while ((pp = wcschr (p, L',')) != NULL)
+			while ((pp = wcschr (p, L',')) != nullptr)
 			{
 				*pp = 0;
 				if (parseError (lng, p, path, fn, line, i, aj))
@@ -590,9 +590,9 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 	else if (compilerOut)
 	{
 		delete compilerColl;
-		compilerColl = NULL;
+		compilerColl = nullptr;
 		delete[] compilerOut;
-		compilerOut = NULL;
+		compilerOut = nullptr;
 	}
 
 	if (*cwd) SetCurrentDirectory (cwd);
@@ -699,10 +699,10 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *Name, const wchar_t *
 				0,
 				FMENU_WRAPMODE | FMENU_AUTOHIGHLIGHT,
 				top,
-				NULL,
-				NULL,
-				NULL,
-				NULL,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
 				(const FarMenuItemEx *) amenu,
 				(outputmenu) ? i : i - 2
 			);

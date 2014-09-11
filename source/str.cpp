@@ -11,8 +11,8 @@ static bool strMatch
 	const wchar_t	*prefix,
 	const wchar_t	*suffix,
 	size_t	nb,
-	intptr_t		bounds[][2] = NULL,
-	intptr_t		regn[] = NULL
+	intptr_t		bounds[][2] = nullptr,
+	intptr_t		regn[] = nullptr
 )
 {
 	bool    ret = false;
@@ -64,7 +64,7 @@ bool wcscmpi2 (wchar_t *szStr1, wchar_t *szStr2)
 
 static inline int isCharSpace (wchar_t c)
 {
-	return (wcschr (L" \t\r\n", c) != NULL);
+	return (wcschr (L" \t\r\n", c) != nullptr);
 }
 
 static wchar_t *skipSpaces (wchar_t * &line)
@@ -103,7 +103,7 @@ static wchar_t *getWord (wchar_t * &line, wchar_t *kwd)
 
 wchar_t *makeSubstr(size_t n, const wchar_t *origStr, intptr_t bounds[][2], size_t nBounds)
 {
-	wchar_t	*s = NULL;
+	wchar_t	*s = nullptr;
 
 	if (origStr && bounds && n < nBounds)
 	{
@@ -130,5 +130,5 @@ static wchar_t *FirstNonSpace (const wchar_t *s)
 		i++;
 	}
 
-	return (NULL);
+	return (nullptr);
 }

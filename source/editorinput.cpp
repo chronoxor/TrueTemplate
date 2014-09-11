@@ -95,13 +95,13 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 
 		if (gs.StringLength)
 		{
-			if ((c = FirstNonSpace (gs.StringText)) != NULL)
+			if ((c = FirstNonSpace (gs.StringText)) != nullptr)
 			{
 				FSF.Trim (wcscpy (buff, c));
 				if (lng->ignoreCase) StrLower (buff);
 				for (size_t i = 0; i < nOpenBr; i++)
 				{
-					if (strMatch (buff, openBr[i], L"/^", closeReg, NULL, 0))
+					if (strMatch (buff, openBr[i], L"/^", closeReg, 0, 0))
 					{
 						ret = (ptrdiff_t)(c - gs.StringText);
 						break;
@@ -115,15 +115,15 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 					for (size_t i = 0; i < n; i++)
 					{
 						TBracket	*br = (TBracket *) (lng->bracketColl[i]);
-						if (strMatch (buff, br->close, L"/^", closeReg, NULL, 0))
+						if (strMatch (buff, br->close, L"/^", closeReg, 0, 0))
 						{
-							wchar_t	*result = NULL;
+							wchar_t	*result = nullptr;
 							const wchar_t **br4look = new const wchar_t *[n];
 							size_t nbr4look = FindBrackets (lng, buff, br4look);
 							if (nbr4look) result = LookForOpenBracket (ei, p, lng, br4look, nbr4look);
 							delete[] br4look;
 							if (result) break;
-							return (NULL);
+							return (nullptr);
 						}
 					}
 				}
@@ -138,7 +138,7 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 		return (buff);
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static wchar_t *FindOpenBracket (EditorInfoEx *ei, TLang *lng, const wchar_t **openBr, size_t n)
@@ -222,12 +222,12 @@ static int TryIndent
 	if (iCurr != 0xFFFF)
 	{
 		bool				processIndent = true;
-		wchar_t				*opencol = NULL;
+		wchar_t				*opencol = nullptr;
 		TEditorPos	pos = EditorGetPos ();
 		if (!tmpi->relative.empty())
 		{
 			const wchar_t	*rel = tmpi->relative;
-			if ((opencol = FindOpenBracket (ei, lng, &rel, 1)) == NULL) processIndent = false;
+			if ((opencol = FindOpenBracket (ei, lng, &rel, 1)) == nullptr) processIndent = false;
 		}
 		else if (tmpi->BracketsMode)
 		{
@@ -242,7 +242,7 @@ static int TryIndent
 
 		if (processIndent)
 		{
-			if (opencol == NULL) opencol = prevStringIndent ();
+			if (opencol == nullptr) opencol = prevStringIndent ();
 
 			intptr_t	olen = wcslen(opencol);
 			wchar_t		*ptr = new wchar_t[olen + wcslen (str) + 1];
@@ -360,7 +360,7 @@ static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wcha
 					}
 
 					*p1 = L'\0';
-					tm = FindMacro (lng, tmpBefore, after, 0, NULL, bounds, true);
+					tm = FindMacro (lng, tmpBefore, after, 0, nullptr, bounds, true);
 					amenu[i].Text = new wchar_t[wcslen(tmpTitle) + 1];
 					wcscpy(const_cast<wchar_t*>(amenu[i].Text), tmpTitle);
 					if (tm)
@@ -380,10 +380,10 @@ static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wcha
 						0,
 						FMENU_WRAPMODE,
 						GetMsg (MSelectMacro),
-						NULL,
-						NULL,
-						NULL,
-						NULL,
+						nullptr,
+						nullptr,
+						nullptr,
+						nullptr,
 						amenu,
 						i
 					);
@@ -506,9 +506,9 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 					if (n == 1)
 					{
 						TMacro	*mm = (TMacro *) (lng->macroColl[l]);
-						if (checkMultipleChoice (lng, mm, L"", L"", 0, NULL))
+						if (checkMultipleChoice (lng, mm, L"", L"", 0, nullptr))
 						{
-							RunMacro (mm, NULL, NULL);
+							RunMacro (mm, nullptr, nullptr);
 							redraw ();
 						}
 					}
@@ -539,10 +539,10 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 								0,
 								FMENU_WRAPMODE,
 								GetMsg (MSelectMacro),
-								NULL,
-								NULL,
-								NULL,
-								NULL,
+								nullptr,
+								nullptr,
+								nullptr,
+								nullptr,
 								pMenu,
 								n
 							);
@@ -562,9 +562,9 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 								}
 
 							TMacro	*mm = (TMacro *) (lng->macroColl[l]);
-							if (checkMultipleChoice (lng, mm, L"", L"", 0, NULL))
+							if (checkMultipleChoice (lng, mm, L"", L"", 0, nullptr))
 							{
-								RunMacro (mm, NULL, NULL);
+								RunMacro (mm, nullptr, nullptr);
 								redraw ();
 							}
 						}
@@ -588,7 +588,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 			TMacro			*fm;
 
 			//! MACRO EXISTS - START
-			if ((fm = FindMacroKey (lng, &Info->Rec)) != NULL)
+			if ((fm = FindMacroKey (lng, &Info->Rec)) != nullptr)
 			{
 				EditorGetStringEx gs;
 				EditorGetStr (&gs);
@@ -608,9 +608,9 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 					before[epos.Col] = 0;
 					if (CheckMacroPos (lng, fm, before, after))
 					{
-						if (checkMultipleChoice (lng, fm, before, after, 0, NULL))
+						if (checkMultipleChoice (lng, fm, before, after, 0, nullptr))
 						{
-							RunMacro (fm, NULL, NULL);
+							RunMacro (fm, nullptr, nullptr);
 							redraw ();
 							return (IGNORE_EVENT);
 						}
@@ -634,13 +634,13 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 				if (lng->ignoreCase)
 				{
 					wchar_t	lwrStr[MAX_REG_LEN], c = (wchar_t) (FSF.LLower (vChar));
-					inImm = wcschr (StrLower (wcscpy (lwrStr, lng->imm)), c) != NULL;
-					inImmExp = wcschr (StrLower (wcscpy (lwrStr, lng->immExp)), c) != NULL;
+					inImm = wcschr (StrLower (wcscpy (lwrStr, lng->imm)), c) != nullptr;
+					inImmExp = wcschr (StrLower (wcscpy (lwrStr, lng->immExp)), c) != nullptr;
 				}
 				else
 				{
-					inImm = wcschr (lng->imm, vChar) != NULL;
-					inImmExp = wcschr (lng->immExp, vChar) != NULL;
+					inImm = wcschr (lng->imm, vChar) != nullptr;
+					inImmExp = wcschr (lng->immExp, vChar) != nullptr;
 				}
 			}
 
@@ -683,7 +683,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 					}
 
 					wchar_t	*pstrText = FirstNonSpace (gs.StringText);
-					if (pstrText == NULL) return (ret);
+					if (pstrText == nullptr) return (ret);
 
 					size_t	lstr = wcslen (pstrText);
 					wchar_t	*str = (wchar_t *) malloc ((lstr + 1) * sizeof(wchar_t));

@@ -9,7 +9,7 @@ struct TExec : TCollectionItem
 	bool			searchBase, echo;
 	void defaults (void)
 	{
-		title.clear(); cmd.clear(); compiler.clear(); 
+		title.clear(); cmd.clear(); compiler.clear();
 		enable.clear(); disable.clear();
 		saveType = saCurrent;
 		jumpType = jtSmart;
@@ -34,14 +34,14 @@ static wchar_t *makeCmdLine
 	const wchar_t	*mask,
 	const wchar_t	*dir,
 	const wchar_t	*fn,
-	const wchar_t	*title = NULL,
+	const wchar_t	*title = nullptr,
 	const wchar_t	macro = L'='
 )
 {
 	static wchar_t tmp[NM];
 	static wchar_t n1[NM], drv1[NM], dir1[NM], fil1[NM], ext1[NM];
 	static wchar_t n2[NM], drv2[NM], dir2[NM], fil2[NM], ext2[NM];
-	wchar_t				*i, *j, *e1 = ext1, *e2 = ext2, *smartQuote = NULL;
+	wchar_t				*i, *j, *e1 = ext1, *e2 = ext2, *smartQuote = nullptr;
 	fExpand (wcscpy (tmp, fn), dir);
 	GetFullPathName (tmp, sizeof n1, n1, &j);
 	fnSplit (n1, drv1, dir1, fil1, ext1);
@@ -55,7 +55,7 @@ static wchar_t *makeCmdLine
 	if (ask)
 	{
 		nullUserStrings ();
-		if (!scanUserInput (false, L'=', mask, title)) return (NULL);
+		if (!scanUserInput (false, L'=', mask, title)) return (nullptr);
 	}
 
 	*tmp = 0;
@@ -195,7 +195,7 @@ static wchar_t *makeCmdLine
 						for (wchar_t *p = smartQuote; *p; p++)
 							if (*p == L'\"') *p = L'\'';
 						quote (1, smartQuote);
-						smartQuote = NULL;
+						smartQuote = nullptr;
 					}
 					else
 						smartQuote = wcschr (j, 0);
@@ -220,11 +220,11 @@ static void execute (TCollection *coll, const wchar_t *title, bool showExec)
 	if (!showExec)
 	{
 		const wchar_t	*MsgItems[] = { GetMsg (MTitle), title };
-		Info.Message (&MainGuid, &ExecGuid, 0, NULL, MsgItems, _countof (MsgItems), 0);
+		Info.Message (&MainGuid, &ExecGuid, 0, nullptr, MsgItems, _countof (MsgItems), 0);
 	}
 
 	ExecConsoleApp (cmd, cmdpath, coll, true, showExec);
-	if (showExec) Info.PanelControl (0, FCTL_SETUSERSCREEN, 0, NULL);
+	if (showExec) Info.PanelControl (0, FCTL_SETUSERSCREEN, 0, nullptr);
 	Info.RestoreScreen (hScreen);
 	redraw ();
 }

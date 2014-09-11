@@ -29,7 +29,7 @@ static wchar_t *GetOsName ()
 	ovi.dwOSVersionInfoSize = sizeof (ovi);
 	if (GetVersionEx ((LPOSVERSIONINFO)&ovi))
 	{
-		szName = (ovi.dwPlatformId == VER_PLATFORM_WIN32_NT) ? szWinNT : NULL;
+		szName = (ovi.dwPlatformId == VER_PLATFORM_WIN32_NT) ? szWinNT : nullptr;
 		switch (ovi.dwMajorVersion)
 		{
 		case 6:
@@ -86,7 +86,7 @@ static wchar_t *GetOsName ()
 		return (szWindows);
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 //====================================================================================================================
@@ -112,17 +112,17 @@ static wchar_t *GetOsType ()
 		}
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static size_t	curlength = 0;
 static size_t	fullength = 0;
-static wchar_t		*output = NULL;
+static wchar_t		*output = nullptr;
 
 static bool		RunFlag = false;
-static void		*StdOutput = NULL;
-static HANDLE PipeStdOutputDup = NULL;
-static HANDLE StdOutputThread = NULL;
+static void		*StdOutput = nullptr;
+static HANDLE PipeStdOutputDup = nullptr;
+static HANDLE StdOutputThread = nullptr;
 static DWORD WINAPI StdOutputThreadFunction (LPVOID lpParameter)
 {
 	BOOL	OkFlag;
@@ -131,7 +131,7 @@ static DWORD WINAPI StdOutputThreadFunction (LPVOID lpParameter)
 	while (!RunFlag) Sleep (1);
 	while (true)
 	{
-		OkFlag = ReadFile (PipeStdOutputDup, Buffer, 4096, &ReadCount, NULL);
+		OkFlag = ReadFile (PipeStdOutputDup, Buffer, 4096, &ReadCount, nullptr);
 		if ((OkFlag) && (ReadCount > 0))
 		{
 			if (curlength + ReadCount + 1 > fullength)
@@ -167,7 +167,7 @@ static void ParseExec (wchar_t *pf, const wchar_t *path)
 	SECURITY_ATTRIBUTES saAttrStdOutput;
 	saAttrStdOutput.nLength = sizeof (SECURITY_ATTRIBUTES);
 	saAttrStdOutput.bInheritHandle = true;
-	saAttrStdOutput.lpSecurityDescriptor = NULL;
+	saAttrStdOutput.lpSecurityDescriptor = nullptr;
 	CreateStdOutput = CreatePipe (&PipeStdOutputRead, &PipeStdOutputWrite, &saAttrStdOutput, 0);
 	CreateStdOutput = SetStdHandle (STD_OUTPUT_HANDLE, PipeStdOutputWrite);
 	CreateStdOutput = DuplicateHandle
@@ -185,10 +185,10 @@ static void ParseExec (wchar_t *pf, const wchar_t *path)
 	DWORD StdOutputThreadID;
 	StdOutputThread = CreateThread
 		(
-			NULL,
+			nullptr,
 			0,
 			(LPTHREAD_START_ROUTINE) StdOutputThreadFunction,
-			NULL,
+			nullptr,
 			0,
 			&StdOutputThreadID
 		);
@@ -202,7 +202,7 @@ static void ParseExec (wchar_t *pf, const wchar_t *path)
 	si.hStdOutput = GetStdHandle (STD_OUTPUT_HANDLE);
 	si.hStdInput = GetStdHandle (STD_INPUT_HANDLE);
 	si.hStdError = GetStdHandle (STD_ERROR_HANDLE);
-	if (CreateProcess (NULL, pf, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, path, &si, &pi))
+	if (CreateProcess (nullptr, pf, nullptr, nullptr, TRUE, NORMAL_PRIORITY_CLASS, nullptr, path, &si, &pi))
 	{
 		RunFlag = true;
 		WaitForSingleObject (pi.hProcess, INFINITE);
@@ -256,7 +256,7 @@ static wchar_t *GetParamParam (wchar_t *szParam)
 		*o = 0;
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static wchar_t *DoCounter (wchar_t *szName, wchar_t *szParam, wchar_t *szValue)
@@ -298,7 +298,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	const wchar_t	fmtDateTime[] = L"HH:mm:ss dd.MM.yyyy";
 	wchar_t				szDate[128];
 	wchar_t				szString[10240] = L"";
-	wchar_t				*clip = NULL, *psz = NULL, *szParam1, *szParam2, *szParam3;
+	wchar_t				*clip = nullptr, *psz = nullptr, *szParam1, *szParam2, *szParam3;
 	bool					toup = false;
 	unsigned long	l;
 	szParam1 = szParam;
@@ -333,7 +333,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 		break;
 	case CMD_ClipBoard:
 		{
-			size_t count = FSF.PasteFromClipboard (FCT_ANY, NULL, 0);
+			size_t count = FSF.PasteFromClipboard (FCT_ANY, nullptr, 0);
 			if (count > 0)
 			{
 				clip = (wchar_t *) malloc ((count + 1) * sizeof(wchar_t));
@@ -376,9 +376,9 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_Decrement:
 		{
 			szParam3 = GetParamParam (szParam2);
-			DoCounter (szParam1, NULL, szString);
+			DoCounter (szParam1, nullptr, szString);
 			FSF.itoa (FSF.atoi (szString) - ((szParam2) ? FSF.atoi (szParam2) : 1), szString, 10);
-			psz = DoCounter (szParam1, szString, NULL);
+			psz = DoCounter (szParam1, szString, nullptr);
 		}
 		break;
 	case CMD_Exec:
@@ -440,7 +440,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 		{
 			GUID	Guid;
 			wchar_t	*pw = psz = szString;
-			CoInitialize (NULL);
+			CoInitialize (nullptr);
 			CoCreateGuid (&Guid);
 			StringFromGUID2 (Guid, (LPOLESTR) szString, sizeof (szString));
 			while (true)
@@ -457,9 +457,9 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_Increment:
 		{
 			szParam3 = GetParamParam (szParam2);
-			DoCounter (szParam1, NULL, szString);
+			DoCounter (szParam1, nullptr, szString);
 			FSF.itoa (FSF.atoi (szString) + ((szParam2) ? FSF.atoi (szParam2) : 1), szString, 10);
-			psz = DoCounter (szParam1, szString, NULL);
+			psz = DoCounter (szParam1, szString, nullptr);
 		}
 		break;
 	case CMD_Input:
@@ -476,7 +476,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 					szParam4 = GetParamParam (szParam3);
 				else
 					break;
-				DoString (szParam1, NULL, szString, sizeof (szString));
+				DoString (szParam1, nullptr, szString, sizeof (szString));
 			}
 
 			wchar_t	*p1 = (eCmd != CMD_InputString) ? szParam1 : szParam2;
@@ -485,27 +485,27 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 			{															//Type X1 Y1 X2 Y2 Fo Se Fl DB Data
 																		///;
 																		///00
-				{ DI_DOUBLEBOX, 3, 1, 55, 6, 0, 0, DIF_BOXCOLOR, 0, GetMsg (MInput), NULL },
+				{ DI_DOUBLEBOX, 3, 1, 55, 6, 0, 0, DIF_BOXCOLOR, 0, GetMsg (MInput), nullptr },
 
 				//01
-				{ DI_TEXT, 5, 2, 0, 0, 0, 0, 0, 0, p1, NULL },
+				{ DI_TEXT, 5, 2, 0, 0, 0, 0, 0, 0, p1, nullptr },
 
 				//02
 				{ DI_EDIT, 5, 3, 53, 0, 1, 0, DIF_HISTORY, 0, p2, L"True-Tpl.History.UserInput" },
 
 				//03
-				{ DI_TEXT, 0, 4, 0, 0, 0, 0, DIF_BOXCOLOR | DIF_SEPARATOR, 0, L"", NULL },
+				{ DI_TEXT, 0, 4, 0, 0, 0, 0, DIF_BOXCOLOR | DIF_SEPARATOR, 0, L"", nullptr },
 
 				//04
-				{ DI_BUTTON, 0, 5, 0, 0, 0, 0, DIF_CENTERGROUP, 1, GetMsg (MOK), NULL },
+				{ DI_BUTTON, 0, 5, 0, 0, 0, 0, DIF_CENTERGROUP, 1, GetMsg (MOK), nullptr },
 
 				//05
-				{ DI_BUTTON, 0, 5, 0, 0, 0, 0, DIF_CENTERGROUP, 0, GetMsg (MCancel), NULL }
+				{ DI_BUTTON, 0, 5, 0, 0, 0, 0, DIF_CENTERGROUP, 0, GetMsg (MCancel), nullptr }
 			};
 			struct FarDialogItem		DialogItems[(sizeof (InitItems) / sizeof (InitItems[0]))];
 			InitDialogItemsEx (InitItems, DialogItems, (sizeof (InitItems) / sizeof (InitItems[0])));
 
-			HANDLE hDlg = Info.DialogInit(&MainGuid, &DoCommandGuid, -1, -1, 59, 8, NULL, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
+			HANDLE hDlg = Info.DialogInit(&MainGuid, &DoCommandGuid, -1, -1, 59, 8, nullptr, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
 			if (hDlg != INVALID_HANDLE_VALUE)
 			{
 				intptr_t n = Info.DialogRun(hDlg);
@@ -525,11 +525,11 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 						if (szParam2 && *szParam2)
 						{
 							szParam4 = GetParamParam (szParam3);
-							if (szParam3) DoString (szParam3, temp, NULL, 0);
+							if (szParam3) DoString (szParam3, temp, nullptr, 0);
 						}
 					}
 					else
-						DoString (szParam1, temp, NULL, 0);
+						DoString (szParam1, temp, nullptr, 0);
 				}
 				Info.DialogFree(hDlg);
 			}
@@ -679,8 +679,8 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 							{
 								wchar_t	_d;
 								next = f;
-								macro = NULL;
-								param = NULL;
+								macro = nullptr;
+								param = nullptr;
 								while (*next)
 								{
 									if (*next == L'\\')
@@ -869,7 +869,7 @@ static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 		EditorInfoEx	ei;
 		Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 		if (ei.BlockType != BTYPE_NONE) EditorSaveSelected ();
-		Info.EditorControl (ei.EditorID, ECTL_DELETEBLOCK, NULL, NULL);
+		Info.EditorControl (ei.EditorID, ECTL_DELETEBLOCK, 0, nullptr);
 	}
 
 	if (scanUserInput (true, L'\\', m->MacroText))
@@ -998,7 +998,7 @@ static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 					}
 					break;
 				case L'{':
-					if ((cb = wcschr (p + 1, L'}')) == NULL)
+					if ((cb = wcschr (p + 1, L'}')) == nullptr)
 						EditorProcessKey (*p);
 					else
 					{
@@ -1013,7 +1013,7 @@ static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 					makeTime = true;
 				case L'd':
 					{
-						wchar_t	format[80] = L"", *fmt = NULL;
+						wchar_t	format[80] = L"", *fmt = nullptr;
 						if (p[1] == L'\'')
 						{
 							wchar_t	*t = format;
@@ -1032,13 +1032,13 @@ static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 
 				case L'c':
 					{
-						DoCommand (CMD_ClipBoard, NULL);
+						DoCommand (CMD_ClipBoard, nullptr);
 						break;
 					}
 
 				case L'l':
 					{
-						DoCommand (CMD_Selected, NULL);
+						DoCommand (CMD_Selected, nullptr);
 						break;
 					}
 
@@ -1046,15 +1046,15 @@ static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 					{
 						p++;
 						if (*p == L'f')
-							DoCommand (CMD_File, NULL);
+							DoCommand (CMD_File, nullptr);
 						else if (*p == L'p')
-							DoCommand (CMD_FilePath, NULL);
+							DoCommand (CMD_FilePath, nullptr);
 						else if (*p == L'n')
-							DoCommand (CMD_FileName, NULL);
+							DoCommand (CMD_FileName, nullptr);
 						else if (*p == L'e')
-							DoCommand (CMD_FileExt, NULL);
+							DoCommand (CMD_FileExt, nullptr);
 						else if (*p == L'x')
-							DoCommand (CMD_FileNameExt, NULL);
+							DoCommand (CMD_FileNameExt, nullptr);
 						break;
 					}
 
@@ -1062,15 +1062,15 @@ static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 					{
 						p++;
 						if (*p == L'F')
-							DoCommand (CMD_FileUp, NULL);
+							DoCommand (CMD_FileUp, nullptr);
 						else if (*p == L'P')
-							DoCommand (CMD_FilePathUp, NULL);
+							DoCommand (CMD_FilePathUp, nullptr);
 						else if (*p == L'N')
-							DoCommand (CMD_FileNameUp, NULL);
+							DoCommand (CMD_FileNameUp, nullptr);
 						else if (*p == L'E')
-							DoCommand (CMD_FileExtUp, NULL);
+							DoCommand (CMD_FileExtUp, nullptr);
 						else if (*p == L'X')
-							DoCommand (CMD_FileNameExtUp, NULL);
+							DoCommand (CMD_FileNameExtUp, nullptr);
 						break;
 					}
 
@@ -1078,17 +1078,17 @@ static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 					{
 						p++;
 						if (*p == L's')
-							DoCommand (CMD_EditorString, NULL);
+							DoCommand (CMD_EditorString, nullptr);
 						else if (*p == L'p')
-							DoCommand (CMD_EditorPos, NULL);
+							DoCommand (CMD_EditorPos, nullptr);
 						else if (*p == L'c')
-							DoCommand (CMD_EditorCol, NULL);
+							DoCommand (CMD_EditorCol, nullptr);
 						break;
 					}
 
 				case L'u':
 					{
-						DoCommand (CMD_UserName, NULL);
+						DoCommand (CMD_UserName, nullptr);
 						break;
 					}
 

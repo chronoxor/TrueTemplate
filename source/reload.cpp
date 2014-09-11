@@ -24,8 +24,8 @@ DWORD WINAPI reloadCheck (LPVOID)
 static void initThread (void)
 {
 	DWORD id;
-	if (!hEvent) hEvent = CreateEvent (NULL, false, false, NULL);
-	hReloadCheck = CreateThread (NULL, 0, reloadCheck, 0, 0, &id);
+	if (!hEvent) hEvent = CreateEvent (nullptr, false, false, nullptr);
+	hReloadCheck = CreateThread (nullptr, 0, reloadCheck, 0, 0, &id);
 }
 
 static void doneThread (void)

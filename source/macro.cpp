@@ -32,7 +32,7 @@ static void InitMacro ()
 
 	HANDLE			hScreen = Info.SaveScreen (0, 0, -1, -1);
 	const wchar_t	*MsgItems[] = { GetMsg (MTitle), GetMsg (MLoading) };
-	Info.Message (&MainGuid, &InitMacroGuid, 0, NULL, MsgItems, _countof (MsgItems), 0);
+	Info.Message (&MainGuid, &InitMacroGuid, 0, nullptr, MsgItems, _countof (MsgItems), 0);
 
 	wchar_t	path[NM];
 	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
@@ -42,11 +42,11 @@ static void InitMacro ()
 	{
 		wchar_t				*item, *p = fileBuff;
 		wchar_t				name[MAX_STR_LEN], value[MAX_STR_LEN];
-		TLang				*lng = NULL;
+		TLang				*lng = nullptr;
 		bool				group;
 
 		findSectionInXML (p);
-		while ((item = getItem (p, name, group)) != NULL)
+		while ((item = getItem (p, name, group)) != nullptr)
 		{
 			if (group && !FSF.LStricmp (name, L"/True-Tpl"))
 				findSectionInXML (p);
@@ -55,7 +55,7 @@ static void InitMacro ()
 				wchar_t	incFile[NM];
 				*incFile = 0;
 
-				TCollection *dc = (lng == NULL) ? NULL : &(lng->defineColl);
+				TCollection *dc = (lng == nullptr) ? nullptr : &(lng->defineColl);
 				while (parseItem (dc, item, name, value))
 					if (!FSF.LStricmp (name, L"File")) wcscpy (incFile, value);
 				if (*incFile)
@@ -77,15 +77,15 @@ static void InitMacro ()
 				}
 			}
 			else if (group && !FSF.LStricmp (name, L"/Language"))
-				lng = NULL;
+				lng = nullptr;
 			else if (group && !FSF.LStricmp (name, L"Language"))
 			{
 				lng = new TLang;
 				lng->ignoreCase = false;
-				lng->setCP = 0; 
+				lng->setCP = 0;
 				lng->mask.clear();
-				lng->desc.clear(); 
-				lng->imm.clear(); 
+				lng->desc.clear();
+				lng->imm.clear();
 				lng->immExp.clear();
 				lng->defExec.defaults ();
 				while (parseItem (&(lng->defineColl), item, name, value))
@@ -109,10 +109,10 @@ static void InitMacro ()
 				else
 				{
 					delete lng;
-					lng = NULL;
+					lng = nullptr;
 				}
 			}
-			else if (lng != NULL)
+			else if (lng != nullptr)
 			{
 				if (!group && !FSF.LStricmp (name, L"Define"))
 				{
@@ -186,7 +186,7 @@ static void InitMacro ()
 					tmpm->At = expOnBlank;
 					tmpm->immChar = 0;
 					tmpm->Name.clear();
-					tmpm->before.clear(); 
+					tmpm->before.clear();
 					tmpm->after.clear();
 					tmpm->MacroText.clear();
 					tmpm->Word.clear();
@@ -326,7 +326,7 @@ static void InitMacro ()
 				else if (!group && !FSF.LStricmp (name, L"Indent"))
 				{
 					TIndent *tmpi = new TIndent;
-					tmpi->mask.clear(); 
+					tmpi->mask.clear();
 					tmpi->relative.clear();
 					tmpi->BracketsMode = 0;
 					tmpi->start = 0;
@@ -368,7 +368,7 @@ static void InitMacro ()
 					TBracket	*tmpb = new TBracket;
 					TIndent		*tmp0 = new TIndent;
 					TIndent		*tmp1 = new TIndent;
-					tmpb->open.clear(); 
+					tmpb->open.clear();
 					tmpb->close.clear();
 					tmp0->relative.clear();
 					tmp0->start = tmp0->immChar = 0;
@@ -494,7 +494,7 @@ static TMacro *FindMacro
 		}
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static TMacro *FindMacroKey (TLang *lng, const INPUT_RECORD *Rec)
@@ -507,7 +507,7 @@ static TMacro *FindMacroKey (TLang *lng, const INPUT_RECORD *Rec)
 		if (wcscmp(mm->FARKey, rKeyp) == 0) return (mm);
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static TMacro *CheckMacroPos (TLang *lng, TMacro *mm, const wchar_t *before, const wchar_t *after)
@@ -515,5 +515,5 @@ static TMacro *CheckMacroPos (TLang *lng, TMacro *mm, const wchar_t *before, con
 	wchar_t	*regEnd = lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/";
 	if (strMatch (after, mm->after, L"/^\\s*", regEnd, 0))
 		if (strMatch (before, mm->before, L"/^\\s*", regEnd, 0)) return (mm);
-	return (NULL);
+	return (nullptr);
 }
