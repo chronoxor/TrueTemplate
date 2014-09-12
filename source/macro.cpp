@@ -45,6 +45,7 @@ static void InitMacro ()
 		TLang				*lng = nullptr;
 		bool				group;
 
+		if (*p == cBOM) p++;
 		findSectionInXML (p);
 		while ((item = getItem (p, name, group)) != nullptr)
 		{
@@ -63,10 +64,12 @@ static void InitMacro ()
 					wchar_t	*incBuff = getFile (path, incFile);
 					if (incBuff)
 					{
-						wchar_t	*newBuff = new wchar_t[wcslen (incBuff) + wcslen (p) + 16];
+						wchar_t	*inc = incBuff;
+						if (*inc == cBOM) inc++;
+						wchar_t	*newBuff = new wchar_t[wcslen (inc) + wcslen (p) + 16];
 						if (newBuff)
 						{
-							wcscat (wcscat (wcscpy (newBuff, incBuff), L"\r\n<TrueTpl>\r\n"), p);
+							wcscat (wcscat (wcscpy (newBuff, inc), L"\r\n<TrueTpl>\r\n"), p);
 							delete[] fileBuff;
 							fileBuff = p = newBuff;
 							findSectionInXML (p);
