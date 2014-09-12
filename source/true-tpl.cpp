@@ -23,6 +23,7 @@ static HINSTANCE	hInst;
 bool							IsOldFar = true;
 wchar_t							szIni[_MAX_PATH]; //Plugin INI filename
 const wchar_t				cMD = L'@';				//Macro delimiter
+const wchar_t				cBOM = 0xFEFF;		//Byte-order mark
 
 #define expAnyWhere			L".*\\b\\p.*"
 #define expAtStart			L"\\p.*"
@@ -200,10 +201,10 @@ static void SelectTemplate (TEInfo *te)
 							0,
 							FMENU_WRAPMODE,
 							GetMsg (MSelectMacro),
-							NULL,
-							NULL,
-							NULL,
-							NULL,
+							nullptr,
+							nullptr,
+							nullptr,
+							nullptr,
 							amenu,
 							count
 						);
@@ -233,16 +234,16 @@ static void SelectTemplate (TEInfo *te)
 										before[epos.Col] = 0;
 										if (ignoreposn)
 										{
-											if (checkMultipleChoice (lng, fm, L"", L"", 0, NULL))
+											if (checkMultipleChoice (lng, fm, L"", L"", 0, nullptr))
 											{
-												RunMacro (fm, NULL, NULL);
+												RunMacro (fm, nullptr, nullptr);
 												redraw ();
 											}
 										}
 										else if (CheckMacroPos (lng, fm, before, after))
-											if (checkMultipleChoice (lng, fm, before, after, 0, NULL))
+											if (checkMultipleChoice (lng, fm, before, after, 0, nullptr))
 											{
-												RunMacro (fm, NULL, NULL);
+												RunMacro (fm, nullptr, nullptr);
 												redraw ();
 											}
 									}
@@ -290,10 +291,10 @@ static void SelectTemplateSet (TEInfo *te)
 				0,
 				FMENU_WRAPMODE | FMENU_AUTOHIGHLIGHT,
 				GetMsg (MSelectLang),
-				NULL,
-				NULL,
-				NULL,
-				NULL,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
 				amenu,
 				lc + 2
 			);
@@ -324,7 +325,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 				wcscpy(filepath, filename);
 				*Point2FileName (filepath) = 0;
 				n = findLngID (filename);
-				if (n != -1) CompilerMenu (NULL, filename, filepath, n);
+				if (n != -1) CompilerMenu (nullptr, filename, filepath, n);
 				break;
 			}
 		case OPEN_COMMANDLINE:
@@ -338,7 +339,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 				wchar_t path[NM];
 				wcscpy(path, filename);
 				wchar_t* ch = wcsrchr(path, L'\\');
-				if (ch == NULL)
+				if (ch == nullptr)
 				{
 					FarPanelDirectory* dirInfo = (FarPanelDirectory*)malloc(sizeof(FarPanelDirectory) + NM);
 					if (dirInfo)
@@ -363,7 +364,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 				if (tmp[2] == L'l')
 				{
 					n = findLngID (file);
-					if (n != -1) CompilerMenu (NULL, file, path, n);
+					if (n != -1) CompilerMenu (nullptr, file, path, n);
 				}
 
 				if (tmp[2] == L'f')
@@ -409,10 +410,10 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 							0,
 							FMENU_WRAPMODE,
 							GetMsg (MTitle),
-							NULL,
-							NULL,
-							NULL,
-							NULL,
+							nullptr,
+							nullptr,
+							nullptr,
+							nullptr,
 							(const FarMenuItemEx *) mMenu,
 							count
 						);
@@ -464,10 +465,10 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 					0,
 					FMENU_WRAPMODE,
 					GetMsg (MTitle),
-					NULL,
-					NULL,
-					NULL,
-					NULL,
+					nullptr,
+					nullptr,
+					nullptr,
+					nullptr,
 					(const FarMenuItemEx *) mMenu,
 					count
 				);
@@ -510,7 +511,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 								}
 
 								n = findLngID (buf);
-								if (n != -1) CompilerMenu (NULL, buf, path, n);
+								if (n != -1) CompilerMenu (nullptr, buf, path, n);
 							}
 							else if (mode == 2)
 							{
@@ -525,7 +526,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 		}
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 void WINAPI ExitFARW(const struct ExitInfo *Info)
@@ -539,7 +540,7 @@ void WINAPI ExitFARW(const struct ExitInfo *Info)
 	if (compilerOut)
 	{
 		delete[] compilerOut;
-		compilerOut = NULL;
+		compilerOut = nullptr;
 	}
 
 	if (errColl)

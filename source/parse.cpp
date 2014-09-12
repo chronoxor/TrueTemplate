@@ -126,7 +126,7 @@ static wchar_t *parseItem (TCollection *dc, wchar_t * &line, wchar_t *kwd, wchar
 		return (line);
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static wchar_t *getItem (wchar_t * &line, wchar_t *kwd, bool &group)
@@ -220,14 +220,14 @@ static wchar_t *getItem (wchar_t * &line, wchar_t *kwd, bool &group)
 		return (k);
 	}
 
-	return (NULL);
+	return (nullptr);
 }
 
 static void findSectionInXML (wchar_t * &p)
 {
 	bool	group;
 	wchar_t	name[MAX_STR_LEN];
-	while ((getItem (p, name, group)) != NULL)
+	while ((getItem (p, name, group)) != nullptr)
 		if (group && !FSF.LStricmp (name, L"TrueTpl")) break;
 }
 
@@ -252,5 +252,5 @@ static wchar_t *GetXmlParam (const wchar_t **szParam)
 		return (szString);
 	}
 	else
-		return (NULL);
+		return (nullptr);
 }

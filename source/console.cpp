@@ -41,8 +41,8 @@ static void OutputLine(HANDLE& h, TCollection *AppOutput, bool showExec)
 	DWORD dummy;
 	if (showExec)
 	{
-		WriteConsole(h, static_cast<const wchar_t*>(outLine->line), (DWORD)outLine->line.length(), &dummy, NULL);
-		WriteConsole(h, crlf, (DWORD)wcslen(crlf), &dummy, NULL);
+		WriteConsole(h, static_cast<const wchar_t*>(outLine->line), (DWORD)outLine->line.length(), &dummy, nullptr);
+		WriteConsole(h, crlf, (DWORD)wcslen(crlf), &dummy, nullptr);
 	}
 }
 
@@ -60,7 +60,7 @@ void showPartOfCompilerOut(TShowOutputData *sd)
     UCHAR ReadBuf[BUFF_SIZE];
     DWORD BytesRead;
     memset(&BytesRead, 0, sizeof(BytesRead));
-    while ( ReadFile(sd->hInput, ReadBuf, sizeof(ReadBuf), &BytesRead, NULL) )
+    while ( ReadFile(sd->hInput, ReadBuf, sizeof(ReadBuf), &BytesRead, nullptr) )
     {
       for ( int i = 0 ; i < (int)BytesRead ; i++ )
       {
@@ -120,7 +120,7 @@ static bool ExeExist(const wchar_t *FilePath, const wchar_t *FileName, const wch
 	wcscpy(fullpath, FilePath);
 	wcscat(fullpath, L"\\");
 	wcscat(fullpath, FileName);
-    if ( SearchPath(NULL, FileName, testExt, (DWORD)sizeofFullName, FullName, &FilePart) || SearchPath(NULL, fullpath, testExt, (DWORD)sizeofFullName, FullName, &FilePart))
+    if ( SearchPath(nullptr, FileName, testExt, (DWORD)sizeofFullName, FullName, &FilePart) || SearchPath(nullptr, fullpath, testExt, (DWORD)sizeofFullName, FullName, &FilePart))
       return true;
   }
   return false;
@@ -132,13 +132,13 @@ static CmdType CommandType(bool NT, const wchar_t *Command, const wchar_t *Path)
   if ( *Command == L'\"' )
   {
 	  wcscpy(FileName, Command+1);
-	if ( ( EndName = wcschr(FileName,L'\"') ) != NULL )
+	if ( ( EndName = wcschr(FileName,L'\"') ) != nullptr )
       *EndName = 0;
   }
   else
   {
     wcscpy(FileName, Command);
-	if ( ( EndName = wcspbrk(FileName, L" \t/")) != NULL)
+	if ( ( EndName = wcspbrk(FileName, L" \t/")) != nullptr)
       *EndName = 0;
   }
   const wchar_t *ext = getExt(FileName);
@@ -221,10 +221,10 @@ DWORD ExecConsoleApp(const wchar_t *CmdStr, const wchar_t *path, TCollection *Ou
       sd->hInput = ReadHandle;
       sd->hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
       sd->AppOutput = OutputColl;
-      ExitCode = CreateProcess(NULL, ExecLine, NULL, NULL, true, CREATE_NO_WINDOW, NULL, path, &si, &pi);
+      ExitCode = CreateProcess(nullptr, ExecLine, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, path, &si, &pi);
       if ( ExitCode )
       {
-        HANDLE hThread = CreateThread(NULL, 0xf000, ThreadWhatUpdateScreen, sd, 0, &dummy);
+        HANDLE hThread = CreateThread(nullptr, 0xf000, ThreadWhatUpdateScreen, sd, 0, &dummy);
         WaitForSingleObject(pi.hProcess, INFINITE);
         GetExitCodeProcess(pi.hProcess, &ExitCode);
         CloseHandle(WriteHandle);

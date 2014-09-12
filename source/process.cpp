@@ -9,20 +9,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "process.h"
 /*============================================================================*/
-HANDLE OldStdOutput=NULL;
-HANDLE OldStdInput=NULL;
-HANDLE OldStdError=NULL;
+HANDLE OldStdOutput=nullptr;
+HANDLE OldStdInput=nullptr;
+HANDLE OldStdError=nullptr;
 bool IsInstalled=false;
 bool ShowFlag=false;
 bool ClearFlag=false;
 unsigned OutStringsIndex;
 /*============================================================================*/
-static HANDLE PipeStdOutputDup=NULL;
-static HANDLE PipeStdInputDup=NULL;
-static HANDLE PipeStdErrorDup=NULL;
-static HANDLE StdOutputThread=NULL;
-static HANDLE StdInputThread=NULL;
-static HANDLE StdErrorThread=NULL;
+static HANDLE PipeStdOutputDup=nullptr;
+static HANDLE PipeStdInputDup=nullptr;
+static HANDLE PipeStdErrorDup=nullptr;
+static HANDLE StdOutputThread=nullptr;
+static HANDLE StdInputThread=nullptr;
+static HANDLE StdErrorThread=nullptr;
 static DWORD WINAPI StdOutputThreadFunction(LPVOID lpParameter);
 static DWORD WINAPI StdInputThreadFunction(LPVOID lpParameter);
 static DWORD WINAPI StdErrorThreadFunction(LPVOID lpParameter);
@@ -38,11 +38,11 @@ static DWORD WINAPI StdOutputThreadFunction(LPVOID lpParameter)
   ClearScreen();
  while (true)
  {
-  OkFlag=ReadFile(PipeStdOutputDup,Buffer,4096,&ReadCount,NULL);
+  OkFlag=ReadFile(PipeStdOutputDup,Buffer,4096,&ReadCount,nullptr);
   if ((OkFlag)&&(ReadCount>0))
   {
    if (ShowFlag)
-    WriteFile(OldStdOutput,Buffer,ReadCount,&Temp,NULL);
+    WriteFile(OldStdOutput,Buffer,ReadCount,&Temp,nullptr);
   }
   SwitchToThread();
  }
@@ -58,9 +58,9 @@ static DWORD WINAPI StdInputThreadFunction(LPVOID lpParameter)
   SwitchToThread();
  while (true)
  {
-  OkFlag=ReadFile(OldStdInput,Buffer,4096,&ReadCount,NULL);
+  OkFlag=ReadFile(OldStdInput,Buffer,4096,&ReadCount,nullptr);
   if (ReadCount>0)
-   WriteFile(PipeStdInputDup,Buffer,ReadCount,&WriteCount,NULL);
+   WriteFile(PipeStdInputDup,Buffer,ReadCount,&WriteCount,nullptr);
   SwitchToThread();
  }
  return 0;
@@ -75,11 +75,11 @@ static DWORD WINAPI StdErrorThreadFunction(LPVOID lpParameter)
   SwitchToThread();
  while (true)
  {
-  OkFlag=ReadFile(PipeStdErrorDup,Buffer,4096,&ReadCount,NULL);
+  OkFlag=ReadFile(PipeStdErrorDup,Buffer,4096,&ReadCount,nullptr);
   if ((OkFlag)&&(ReadCount>0))
   {
    if (ShowFlag)
-    WriteFile(OldStdError,Buffer,ReadCount,&Temp,NULL);
+    WriteFile(OldStdError,Buffer,ReadCount,&Temp,nullptr);
   }
   SwitchToThread();
  }
@@ -122,15 +122,15 @@ bool ProcessInstall(void)
   SECURITY_ATTRIBUTES saAttrStdOutput,saAttrStdInput,saAttrStdError;
   saAttrStdOutput.nLength=sizeof(SECURITY_ATTRIBUTES);
   saAttrStdOutput.bInheritHandle=true;
-  saAttrStdOutput.lpSecurityDescriptor=NULL;
+  saAttrStdOutput.lpSecurityDescriptor=nullptr;
   CreateStdOutput=CreatePipe(&PipeStdOutputRead,&PipeStdOutputWrite,&saAttrStdOutput,0);
   saAttrStdInput.nLength=sizeof(SECURITY_ATTRIBUTES);
   saAttrStdInput.bInheritHandle=true;
-  saAttrStdInput.lpSecurityDescriptor=NULL;
+  saAttrStdInput.lpSecurityDescriptor=nullptr;
   CreateStdInput=CreatePipe(&PipeStdInputRead,&PipeStdInputWrite,&saAttrStdInput,0);
   saAttrStdError.nLength=sizeof(SECURITY_ATTRIBUTES);
   saAttrStdError.bInheritHandle=true;
-  saAttrStdError.lpSecurityDescriptor=NULL;
+  saAttrStdError.lpSecurityDescriptor=nullptr;
   CreateStdError=CreatePipe(&PipeStdErrorRead,&PipeStdErrorWrite,&saAttrStdError,0);
   if ((!CreateStdOutput)||(!CreateStdInput)||(!CreateStdError))
   {
@@ -164,10 +164,10 @@ bool ProcessInstall(void)
   DWORD StdOutputThreadID;
   DWORD StdInputThreadID;
   DWORD StdErrorThreadID;
-  StdOutputThread=CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)StdOutputThreadFunction,NULL,0,&StdOutputThreadID);
-  StdInputThread=CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)StdInputThreadFunction,NULL,0,&StdInputThreadID);
-  StdErrorThread=CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)StdErrorThreadFunction,NULL,0,&StdErrorThreadID);
-  if ((StdOutputThread==NULL)||(StdInputThread==NULL)||(StdErrorThread==NULL))
+  StdOutputThread=CreateThread(nullptr,0,(LPTHREAD_START_ROUTINE)StdOutputThreadFunction,nullptr,0,&StdOutputThreadID);
+  StdInputThread=CreateThread(nullptr,0,(LPTHREAD_START_ROUTINE)StdInputThreadFunction,nullptr,0,&StdInputThreadID);
+  StdErrorThread=CreateThread(nullptr,0,(LPTHREAD_START_ROUTINE)StdErrorThreadFunction,nullptr,0,&StdErrorThreadID);
+  if ((StdOutputThread==nullptr)||(StdInputThread==nullptr)||(StdErrorThread==nullptr))
   {
    ProcessUninstall();
    return false;
@@ -187,30 +187,30 @@ bool ProcessUninstall(void)
 {
  if (IsInstalled)
  {
-  if (StdOutputThread!=NULL)
+  if (StdOutputThread!=nullptr)
    TerminateThread(StdOutputThread,0);
-  if (StdInputThread!=NULL)
+  if (StdInputThread!=nullptr)
    TerminateThread(StdInputThread,0);
-  if (StdErrorThread!=NULL)
+  if (StdErrorThread!=nullptr)
    TerminateThread(StdErrorThread,0);
   HANDLE CloseStdOutput,CloseStdInput,CloseStdError;
   CloseStdOutput=GetStdHandle(STD_OUTPUT_HANDLE);
   CloseStdInput=GetStdHandle(STD_INPUT_HANDLE);
   CloseStdError=GetStdHandle(STD_ERROR_HANDLE);
-  if (CloseStdOutput!=NULL)
+  if (CloseStdOutput!=nullptr)
    CloseHandle(CloseStdOutput);
-  if (CloseStdInput!=NULL)
+  if (CloseStdInput!=nullptr)
    CloseHandle(CloseStdInput);
-  if (CloseStdError!=NULL)
+  if (CloseStdError!=nullptr)
    CloseHandle(CloseStdError);
   SetStdHandle(STD_OUTPUT_HANDLE,OldStdOutput);
   SetStdHandle(STD_INPUT_HANDLE,OldStdInput);
   SetStdHandle(STD_ERROR_HANDLE,OldStdError);
-  if (PipeStdOutputDup!=NULL)
+  if (PipeStdOutputDup!=nullptr)
    CloseHandle(PipeStdOutputDup);
-  if (PipeStdInputDup!=NULL)
+  if (PipeStdInputDup!=nullptr)
    CloseHandle(PipeStdInputDup);
-  if (PipeStdErrorDup!=NULL)
+  if (PipeStdErrorDup!=nullptr)
    CloseHandle(PipeStdErrorDup);
   IsInstalled=false;
   return true;

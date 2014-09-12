@@ -171,33 +171,33 @@ static wchar_t *fExpand (wchar_t *rpath, const wchar_t *defPath)
 	return (wcscpy (rpath, path));
 }
 
-static wchar_t *getFile (wchar_t *path, wchar_t *fn)
+static wchar_t *getFile(const wchar_t *path, const wchar_t *fn)
 {
-	wchar_t		file[NM], *fileBuff = NULL;
+	wchar_t		file[NM], *fileBuff = nullptr;
 	HANDLE	s = CreateFile
 		(
 			fExpand (wcscpy (file, fn), path),
 			GENERIC_READ,
 			FILE_SHARE_READ,
-			NULL,
+			nullptr,
 			OPEN_EXISTING,
 			FILE_ATTRIBUTE_NORMAL,
-			NULL
+			nullptr
 		);
 	if (s != INVALID_HANDLE_VALUE)
 	{
-		unsigned	fileSize = GetFileSize (s, NULL);
+		unsigned	fileSize = GetFileSize (s, nullptr);
 		if (fileSize)
 		{
-			if ((fileBuff = new wchar_t[(fileSize  / sizeof(wchar_t)) + 1]) != NULL)
+			if ((fileBuff = new wchar_t[(fileSize  / sizeof(wchar_t)) + 1]) != nullptr)
 			{
 				DWORD rb = 0;
-				if (ReadFile (s, fileBuff, fileSize, &rb, NULL) && rb)
+				if (ReadFile (s, fileBuff, fileSize, &rb, nullptr) && rb)
 					fileBuff[fileSize  / sizeof(wchar_t)] = 0;
 				else
 				{
 					delete[] fileBuff;
-					fileBuff = NULL;
+					fileBuff = nullptr;
 				}
 			}
 		}
