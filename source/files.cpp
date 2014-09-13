@@ -171,7 +171,7 @@ static wchar_t *fExpand (wchar_t *rpath, const wchar_t *defPath)
 	return (wcscpy (rpath, path));
 }
 
-static wchar_t *getFile (wchar_t *path, wchar_t *fn)
+static wchar_t *getFile(const wchar_t *path, const wchar_t *fn)
 {
 	wchar_t		file[NM], *fileBuff = nullptr;
 	HANDLE	s = CreateFile
