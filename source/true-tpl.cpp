@@ -23,6 +23,7 @@ static HINSTANCE	hInst;
 bool							IsOldFar = true;
 wchar_t							szIni[_MAX_PATH]; //Plugin INI filename
 const wchar_t				cMD = L'@';				//Macro delimiter
+const wchar_t				cBOM = 0xFEFF;		//Byte-order mark
 
 #define expAnyWhere			L".*\\b\\p.*"
 #define expAtStart			L"\\p.*"
