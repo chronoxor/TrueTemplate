@@ -473,109 +473,11 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 	if (edId == -1) edId = eListInsert (ei.EditorID, filename);
 
 	TEInfo	  *te = (*eList)[edId];
-	intptr_t	id = te->lang;
-	if (id != -1)
+	if (te->lang != -1)
 	{
-		TLang *lng = (TLang *) (langColl[id]);
+		TLang *lng = (TLang *) (langColl[te->lang]);
 		if (lng)
 		{
-			//! NEW FILE - START
-			if (te->newFile)
-			{
-				te->newFile = false;
-				if (!Info->Rec.Event.KeyEvent.wVirtualKeyCode)
-				{
-					if (lng->setCP)
-					{
-						EditorSetParameter	esp;
-						esp.Type = ESPT_CODEPAGE;
-						esp.iParam = lng->setCP;
-						::Info.EditorControl (ei.EditorID, ECTL_SETPARAM, 0, &esp);
-					}
-
-					//Execute init macros
-					size_t	l = 0;
-					size_t	n = 0;
-					for (size_t i = 0; i < lng->macroColl.getCount(); i++)
-						if ((((TMacro *) (lng->macroColl[i]))->atStartup))
-						{
-							l = i;
-							n++;
-						}
-
-					if (n == 1)
-					{
-						TMacro	*mm = (TMacro *) (lng->macroColl[l]);
-						if (checkMultipleChoice (lng, mm, L"", L"", 0, nullptr))
-						{
-							RunMacro (mm, nullptr, nullptr);
-							redraw ();
-						}
-					}
-
-					if (n > 1)
-					{
-						l = 0;
-
-						FarMenuItemEx *pMenu = new FarMenuItemEx[n];
-						for (size_t i = 0; i < lng->macroColl.getCount(); i++)
-						{
-							if ((((TMacro *) (lng->macroColl[i]))->atStartup))
-							{
-								if (((TMacro *) (lng->macroColl[i]))->Name.empty())
-									pMenu[l].Text = GetMsg (MUnnamed);
-								else
-									pMenu[l].Text = ((TMacro *) (lng->macroColl[i]))->Name;
-								l++;
-							}
-						}
-
-						intptr_t	res = ::Info.Menu
-							(
-								&MainGuid,
-								&EditorInputGuid,
-								-1,
-								-1,
-								0,
-								FMENU_WRAPMODE,
-								GetMsg (MSelectMacro),
-								nullptr,
-								nullptr,
-								nullptr,
-								nullptr,
-								pMenu,
-								n
-							);
-						if (res != -1)
-						{
-							n = 0;
-							for (size_t i = 0; i < lng->macroColl.getCount(); i++)
-								if ((((TMacro *) (lng->macroColl[i]))->atStartup))
-								{
-									if (n == res)
-									{
-										l = i;
-										break;
-									}
-
-									n++;
-								}
-
-							TMacro	*mm = (TMacro *) (lng->macroColl[l]);
-							if (checkMultipleChoice (lng, mm, L"", L"", 0, nullptr))
-							{
-								RunMacro (mm, nullptr, nullptr);
-								redraw ();
-							}
-						}
-
-						delete[] pMenu;
-					}
-
-					return (IGNORE_EVENT);
-				}
-			} //! NEW FILE - END
-
 			// Don't handle other editor events for disabled plugin.
 			if (pluginStop)
 				return (PROCESS_EVENT);
@@ -712,4 +614,96 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 	}
 
 	return (PROCESS_EVENT);
+}
+
+static void InsertTemplate(intptr_t EditorID, TLang *lng)
+{
+	if (lng->setCP)
+	{
+		EditorSetParameter	esp;
+		esp.Type = ESPT_CODEPAGE;
+		esp.iParam = lng->setCP;
+		::Info.EditorControl(EditorID, ECTL_SETPARAM, 0, &esp);
+	}
+
+	//Execute init macros
+	size_t	l = 0;
+	size_t	n = 0;
+	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
+		if ((((TMacro *)(lng->macroColl[i]))->atStartup))
+		{
+		l = i;
+		n++;
+		}
+
+	if (n == 1)
+	{
+		TMacro	*mm = (TMacro *)(lng->macroColl[l]);
+		if (checkMultipleChoice(lng, mm, L"", L"", 0, nullptr))
+		{
+			RunMacro(mm, nullptr, nullptr);
+			redraw();
+		}
+	}
+
+	if (n > 1)
+	{
+		l = 0;
+
+		FarMenuItemEx *pMenu = new FarMenuItemEx[n];
+		for (size_t i = 0; i < lng->macroColl.getCount(); i++)
+		{
+			if ((((TMacro *)(lng->macroColl[i]))->atStartup))
+			{
+				if (((TMacro *)(lng->macroColl[i]))->Name.empty())
+					pMenu[l].Text = GetMsg(MUnnamed);
+				else
+					pMenu[l].Text = ((TMacro *)(lng->macroColl[i]))->Name;
+				l++;
+			}
+		}
+
+		intptr_t	res = ::Info.Menu
+			(
+			&MainGuid,
+			&EditorInputGuid,
+			-1,
+			-1,
+			0,
+			FMENU_WRAPMODE,
+			GetMsg(MSelectMacro),
+			nullptr,
+			nullptr,
+			nullptr,
+			nullptr,
+			pMenu,
+			n
+			);
+		if (res != -1)
+		{
+			n = 0;
+			for (size_t i = 0; i < lng->macroColl.getCount(); i++)
+				if ((((TMacro *)(lng->macroColl[i]))->atStartup))
+				{
+				if (n == res)
+				{
+					l = i;
+					break;
+				}
+
+				n++;
+				}
+
+			TMacro	*mm = (TMacro *)(lng->macroColl[l]);
+			if (checkMultipleChoice(lng, mm, L"", L"", 0, nullptr))
+			{
+				RunMacro(mm, nullptr, nullptr);
+				redraw();
+			}
+		}
+
+		delete[] pMenu;
+	}
+
+
 }
