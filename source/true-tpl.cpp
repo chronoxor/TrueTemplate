@@ -134,19 +134,34 @@ intptr_t WINAPI ConfigureW(const struct ConfigureInfo *Info)
 
 intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 {
-	wchar_t filename[NM];
-	EditorInfoEx					ei;
+	wchar_t				filename[NM];
+	EditorInfoEx	ei;
+	TEInfo				*te;
+
 	initEList ();
 	switch (Info->Event)
 	{
 	case EE_READ:
 		::Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 		::Info.EditorControl (ei.EditorID, ECTL_GETFILENAME, NM, filename);
-		eListInsert (ei.EditorID, filename);
+		te = (*eList) [eListInsert (ei.EditorID, filename)];
+		if (te->newFile)
+		{
+			te->newFile = false;
+			intptr_t	lngid = te->lang;
+			if (lngid != -1)
+			{
+				TLang		*lng = (TLang *)(langColl[lngid]);
+				if (lng)
+					InsertTemplate (ei.EditorID, lng);
+			}
+		}
 		return (0);
+
 	case EE_CLOSE:
 		eList->removeID (Info->EditorID);
 		return (0);
+
 	case EE_REDRAW:
 		if (reloadNeeded)
 		{
@@ -154,8 +169,8 @@ intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 			DoneMacro ();
 			InitMacro ();
 		}
-
 		return (0);
+
 	default:
 		return (0);
 	}

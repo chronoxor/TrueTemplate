@@ -20,7 +20,7 @@ public:
 	void removeAll(void);
 	size_t remove(size_t);
 	virtual void setLimit(size_t);
-	size_t getCount() { return count; }
+	size_t getCount() const { return count; }
 	TCollectionItem *find(bool(*)(TCollectionItem*, void*), void*);
 	ptrdiff_t findIndex(bool(*)(TCollectionItem*, void*), void*);
 protected:
