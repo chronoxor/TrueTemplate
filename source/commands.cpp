@@ -646,6 +646,8 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 		if (cBuffer)
 		{
 			wchar_t	*s = f = cBuffer;
+			if (*f == cBOM)
+				s = ++f;
 			wchar_t	*macro, *param, *next;
 			while (*f)
 			{

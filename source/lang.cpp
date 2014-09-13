@@ -18,13 +18,4 @@ TLang::TLang ()
 	defineColl.insert (new TDefine (L"nbsp", L" "));
 }
 
-class TLangCollection : public TCollection
-{
-	public:
-		TLangCollection () :
-			TCollection(5, 5)
-		{
-		}
-};
-
-static TLangCollection	langColl;
+static TCollection	langColl;
