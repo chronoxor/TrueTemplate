@@ -350,7 +350,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_CompName:
 		{
 			psz = szString;
-			l = sizeof (szString);
+			l = _countof (szString);
 			GetComputerName (szString, &l);
 		}
 		break;
@@ -391,7 +391,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_Enviroment:
 		{
 			psz = szString;
-			GetEnvironmentVariable (szParam1, szString, sizeof (szString));
+			GetEnvironmentVariable (szParam1, szString, _countof (szString));
 		}
 		break;
 	case CMD_File:
@@ -442,7 +442,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 			wchar_t	*pw = psz = szString;
 			CoInitialize (nullptr);
 			CoCreateGuid (&Guid);
-			StringFromGUID2 (Guid, (LPOLESTR) szString, sizeof (szString));
+			StringFromGUID2 (Guid, (LPOLESTR) szString, _countof (szString));
 			while (true)
 			{
 				*psz++ = *pw++;
@@ -476,7 +476,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 					szParam4 = GetParamParam (szParam3);
 				else
 					break;
-				DoString (szParam1, nullptr, szString, sizeof (szString));
+				DoString (szParam1, nullptr, szString, _countof (szString));
 			}
 
 			wchar_t	*p1 = (eCmd != CMD_InputString) ? szParam1 : szParam2;
@@ -502,10 +502,10 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 				//05
 				{ DI_BUTTON, 0, 5, 0, 0, 0, 0, DIF_CENTERGROUP, 0, GetMsg (MCancel), nullptr }
 			};
-			struct FarDialogItem		DialogItems[(sizeof (InitItems) / sizeof (InitItems[0]))];
-			InitDialogItemsEx (InitItems, DialogItems, (sizeof (InitItems) / sizeof (InitItems[0])));
+			struct FarDialogItem		DialogItems[_countof (InitItems)];
+			InitDialogItemsEx (InitItems, DialogItems, _countof (InitItems));
 
-			HANDLE hDlg = Info.DialogInit(&MainGuid, &DoCommandGuid, -1, -1, 59, 8, nullptr, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
+			HANDLE hDlg = Info.DialogInit(&MainGuid, &DoCommandGuid, -1, -1, 59, 8, nullptr, DialogItems, _countof (InitItems), 0, 0, Info.DefDlgProc, 0);
 			if (hDlg != INVALID_HANDLE_VALUE)
 			{
 				intptr_t n = Info.DialogRun(hDlg);
@@ -556,7 +556,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 			if (szParam1 && *szParam1)
 			{
 				szParam3 = GetParamParam (szParam2);
-				psz = DoString (szParam1, szParam2, szString, sizeof (szString));
+				psz = DoString (szParam1, szParam2, szString, _countof (szString));
 			}
 		}
 		break;
@@ -574,7 +574,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_UserName:
 		{
 			psz = szString;
-			l = sizeof (szString);
+			l = _countof (szString);
 			GetUserName (szString, &l);
 		}
 		break;
@@ -586,13 +586,13 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 		GetLocalTime (&SysDate);
 		if (eCmd != CMD_Date)
 		{
-			GetTimeFormat (LOCALE_SYSTEM_DEFAULT, 0, &SysDate, psz, szString, sizeof (szString));
+			GetTimeFormat (LOCALE_SYSTEM_DEFAULT, 0, &SysDate, psz, szString, _countof(szString));
 			psz = szString;
 		}
 
 		if (eCmd != CMD_Time)
 		{
-			GetDateFormat (LOCALE_SYSTEM_DEFAULT, 0, &SysDate, psz, szDate, sizeof (szDate));
+			GetDateFormat (LOCALE_SYSTEM_DEFAULT, 0, &SysDate, psz, szDate, _countof (szDate));
 			psz = szDate;
 		}
 	}
@@ -646,6 +646,8 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 		if (cBuffer)
 		{
 			wchar_t	*s = f = cBuffer;
+			if (*f == cBOM)
+				s = ++f;
 			wchar_t	*macro, *param, *next;
 			while (*f)
 			{

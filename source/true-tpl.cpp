@@ -23,6 +23,7 @@ static HINSTANCE	hInst;
 bool							IsOldFar = true;
 wchar_t							szIni[_MAX_PATH]; //Plugin INI filename
 const wchar_t				cMD = L'@';				//Macro delimiter
+const wchar_t				cBOM = 0xFEFF;		//Byte-order mark
 
 #define expAnyWhere			L".*\\b\\p.*"
 #define expAtStart			L"\\p.*"
@@ -71,7 +72,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
 	Info->StructSize = sizeof(struct PluginInfo);
 	Info->MinFarVersion=MAKEFARVERSION(3,0,0,3835,VS_RELEASE);
-	Info->Version=MAKEFARVERSION(3,0,1,3,VS_RC);
+	Info->Version=MAKEFARVERSION(3,0,1,5,VS_RC);
 	Info->Guid=MainGuid;
 	Info->Title=L"True Template";
 	Info->Description=L"True Template Editor Plugin";
@@ -98,6 +99,7 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		ignoreposn=settings.Get(0,L"IgnorePosition",1);
 		outputmenu=settings.Get(0,L"OutputMenu",1);
 		settings.Get(0,L"Key", defExpandFKey, 256, L"Space");
+
 		InitMacro ();
 	}
 }
@@ -133,19 +135,34 @@ intptr_t WINAPI ConfigureW(const struct ConfigureInfo *Info)
 
 intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 {
-	wchar_t filename[NM];
-	EditorInfoEx					ei;
+	wchar_t				filename[NM];
+	EditorInfoEx	ei;
+	TEInfo				*te;
+
 	initEList ();
 	switch (Info->Event)
 	{
 	case EE_READ:
 		::Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
 		::Info.EditorControl (ei.EditorID, ECTL_GETFILENAME, NM, filename);
-		eListInsert (ei.EditorID, filename);
+		te = (*eList) [eListInsert (ei.EditorID, filename)];
+		if (te->newFile)
+		{
+			te->newFile = false;
+			intptr_t	lngid = te->lang;
+			if (lngid != -1)
+			{
+				TLang		*lng = (TLang *)(langColl[lngid]);
+				if (lng)
+					InsertTemplate (ei.EditorID, lng);
+			}
+		}
 		return (0);
+
 	case EE_CLOSE:
 		eList->removeID (Info->EditorID);
 		return (0);
+
 	case EE_REDRAW:
 		if (reloadNeeded)
 		{
@@ -153,8 +170,8 @@ intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 			DoneMacro ();
 			InitMacro ();
 		}
-
 		return (0);
+
 	default:
 		return (0);
 	}
@@ -310,7 +327,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 {
 	if (!IsOldFar)
 	{
-    	ptrdiff_t 		n;
+		ptrdiff_t 		n;
 		EditorInfoEx	ei;
 		wchar_t filepath[NM];
 		wchar_t filename[NM];

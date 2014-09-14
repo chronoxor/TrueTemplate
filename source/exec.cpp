@@ -43,9 +43,9 @@ static wchar_t *makeCmdLine
 	static wchar_t n2[NM], drv2[NM], dir2[NM], fil2[NM], ext2[NM];
 	wchar_t				*i, *j, *e1 = ext1, *e2 = ext2, *smartQuote = nullptr;
 	fExpand (wcscpy (tmp, fn), dir);
-	GetFullPathName (tmp, sizeof n1, n1, &j);
+	GetFullPathName (tmp, _countof(n1), n1, &j);
 	fnSplit (n1, drv1, dir1, fil1, ext1);
-	GetShortPathName (tmp, n2, sizeof n2);
+	GetShortPathName (tmp, n2, _countof(n2));
 	fnSplit (n2, drv2, dir2, fil2, ext2);
 	wcscat (wcscat (wcscat (wcscpy (n1, drv1), dir1), fil1), ext1);
 	wcscat (wcscat (wcscat (wcscpy (n2, drv2), dir2), fil2), ext2);

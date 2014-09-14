@@ -1,39 +1,39 @@
 static void parseExec (TExec *tmpe, const wchar_t *name, const wchar_t *value)
 {
-	if (!FSF.LStricmp (name, L"Save"))
+	if (!_wcsicmp (name, L"Save"))
 	{
-		if (!FSF.LStricmp (value, L"Current"))
+		if (!_wcsicmp (value, L"Current"))
 			tmpe->saveType = saCurrent;
-		else if (!FSF.LStricmp (value, L"All"))
+		else if (!_wcsicmp (value, L"All"))
 			tmpe->saveType = saAll;
 		else
 			tmpe->saveType = saNone;
 	}
-	else if (!FSF.LStricmp (name, L"CD"))
+	else if (!_wcsicmp (name, L"CD"))
 	{
-		if (!FSF.LStricmp (value, L"File"))
+		if (!_wcsicmp (value, L"File"))
 			tmpe->cd = cdFile;
-		else if (!FSF.LStricmp (value, L"Base"))
+		else if (!_wcsicmp (value, L"Base"))
 			tmpe->cd = cdBase;
 		else
 			tmpe->cd = cdNone;
 	}
-	else if (!FSF.LStricmp (name, L"Jump"))
+	else if (!_wcsicmp (name, L"Jump"))
 	{
-		if (!FSF.LStricmp (value, L"Smart"))
+		if (!_wcsicmp (value, L"Smart"))
 			tmpe->jumpType = jtSmart;
-		else if (!FSF.LStricmp (value, L"Menu"))
+		else if (!_wcsicmp (value, L"Menu"))
 			tmpe->jumpType = jtMenu;
-		else if (!FSF.LStricmp (value, L"First"))
+		else if (!_wcsicmp (value, L"First"))
 			tmpe->jumpType = jtFirst;
 		else
 			tmpe->jumpType = jtNone;
 	}
-	else if (!FSF.LStricmp (name, L"Echo"))
+	else if (!_wcsicmp (name, L"Echo"))
 		tmpe->echo = FSF.atoi (value) ? true : false;
-	else if (!FSF.LStricmp (name, L"Title"))
+	else if (!_wcsicmp (name, L"Title"))
 		tmpe->title = value;
-	else if (!FSF.LStricmp (name, L"Enable"))
+	else if (!_wcsicmp (name, L"Enable"))
 	{
 		if (value[0] == L'*' && value[1] == L'\\')
 		{
@@ -43,21 +43,21 @@ static void parseExec (TExec *tmpe, const wchar_t *name, const wchar_t *value)
 		else
 			tmpe->enable = value + 2;
 	}
-	else if (!FSF.LStricmp (name, L"Disable"))
+	else if (!_wcsicmp (name, L"Disable"))
 		tmpe->disable = value;
-	else if (!FSF.LStricmp (name, L"Compiler"))
+	else if (!_wcsicmp (name, L"Compiler"))
 		tmpe->compiler = value;
 }
 
 static void parseCompiler (TCompiler *tmpc, const wchar_t *name, const wchar_t *value)
 {
-	if (!FSF.LStricmp (name, L"Error"))
+	if (!_wcsicmp (name, L"Error"))
 		tmpc->err = value;
-	else if (!FSF.LStricmp (name, L"Line"))
+	else if (!_wcsicmp (name, L"Line"))
 		tmpc->line = FSF.atoi (value);
-	else if (!FSF.LStricmp (name, L"File"))
+	else if (!_wcsicmp (name, L"File"))
 		tmpc->fileMatch = FSF.atoi (value);
-	else if (!FSF.LStricmp (name, L"Col"))
+	else if (!_wcsicmp (name, L"Col"))
 	{
 		wchar_t	*v = (wchar_t *) value;
 		if (*value == L'?')
@@ -228,7 +228,7 @@ static void findSectionInXML (wchar_t * &p)
 	bool	group;
 	wchar_t	name[MAX_STR_LEN];
 	while ((getItem (p, name, group)) != nullptr)
-		if (group && !FSF.LStricmp (name, L"TrueTpl")) break;
+		if (group && !_wcsicmp (name, L"TrueTpl")) break;
 }
 
 static wchar_t *GetXmlParam (const wchar_t **szParam)

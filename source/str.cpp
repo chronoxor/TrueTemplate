@@ -62,9 +62,12 @@ bool wcscmpi2 (wchar_t *szStr1, wchar_t *szStr2)
 	return (0);
 }
 
-static inline int isCharSpace (wchar_t c)
+static inline bool isCharSpace (wchar_t c)
 {
-	return (wcschr (L" \t\r\n", c) != nullptr);
+	return c == L' ' ||
+	       c == L'\t' ||
+	       c == L'\r' ||
+	       c == L'\n';
 }
 
 static wchar_t *skipSpaces (wchar_t * &line)
