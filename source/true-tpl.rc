@@ -8,7 +8,7 @@
 //
 
 1 VERSIONINFO
- FILEVERSION 3,0,1,3
+ FILEVERSION 3,0,1,5
  PRODUCTVERSION 3,0,0,3835
  FILEFLAGSMASK 0x0L
 #ifdef _DEBUG
@@ -27,7 +27,7 @@ BEGIN
             VALUE "Comments", "Freeware"
             VALUE "CompanyName", "Far group"
             VALUE "FileDescription", "True Template Plugin for FAR Manager 3.0.x"
-            VALUE "FileVersion", "3.0.1.3"
+            VALUE "FileVersion", "3.0.1.5"
             VALUE "InternalName", "True Template"
             VALUE "LegalCopyright", "Copyright © 2013 Ivan Shynkarenka"
             VALUE "OriginalFilename", "true-tpl.dll"

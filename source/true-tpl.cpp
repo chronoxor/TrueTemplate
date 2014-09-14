@@ -72,7 +72,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
 	Info->StructSize = sizeof(struct PluginInfo);
 	Info->MinFarVersion=MAKEFARVERSION(3,0,0,3835,VS_RELEASE);
-	Info->Version=MAKEFARVERSION(3,0,1,3,VS_RC);
+	Info->Version=MAKEFARVERSION(3,0,1,5,VS_RC);
 	Info->Guid=MainGuid;
 	Info->Title=L"True Template";
 	Info->Description=L"True Template Editor Plugin";
@@ -99,7 +99,7 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		ignoreposn=settings.Get(0,L"IgnorePosition",1);
 		outputmenu=settings.Get(0,L"OutputMenu",1);
 		settings.Get(0,L"Key", defExpandFKey, 256, L"Space");
-		
+
 		InitMacro ();
 	}
 }
