@@ -107,7 +107,7 @@ static void jumpToError( EditorInfoEx *ei, const wchar_t* path, intptr_t aj, boo
 				Info.AdvControl (&MainGuid, ACTL_GETWINDOWINFO, 0, (void *) &wi);
 				if (wi.Type == WTYPE_EDITOR)
 				{
-					if (!FSF.LStricmp (errfn, wi.Name))
+					if (!_wcsicmp (errfn, wi.Name))
 					{
 						if (i != -1)
 						{
@@ -344,7 +344,7 @@ static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path,
 	for (size_t i = 0; i < lng->compilerColl.getCount (); i++)
 	{
 		e = (TCompiler *) (lng->compilerColl[i]);
-		if (e && !e->err.empty() && !FSF.LStricmp (compiler, e->title))
+		if (e && !e->err.empty() && !_wcsicmp (compiler, e->title))
 		{
 			intptr_t	bounds[3][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 } };
 			intptr_t	pos[3] = { e->line, e->col, e->fileMatch };

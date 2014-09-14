@@ -99,6 +99,7 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		ignoreposn=settings.Get(0,L"IgnorePosition",1);
 		outputmenu=settings.Get(0,L"OutputMenu",1);
 		settings.Get(0,L"Key", defExpandFKey, 256, L"Space");
+		
 		InitMacro ();
 	}
 }
@@ -326,7 +327,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *Info)
 {
 	if (!IsOldFar)
 	{
-    	ptrdiff_t 		n;
+		ptrdiff_t 		n;
 		EditorInfoEx	ei;
 		wchar_t filepath[NM];
 		wchar_t filename[NM];
