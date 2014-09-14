@@ -391,7 +391,7 @@ static void SelectNavigationList (TEInfo *te, const wchar_t* path)
 						Msg[2] = static_cast<TFoundNav *>(found[ExitCode])->file;
 						Msg[3] = L"\1";
 						Msg[4] = GetMsg (MOK);
-						Info.Message (&MainGuid, &SelNavigateMessageGuid, FMSG_LEFTALIGN, nullptr, Msg, sizeof (Msg) / sizeof (Msg[0]), 1);
+						Info.Message (&MainGuid, &SelNavigateMessageGuid, FMSG_LEFTALIGN, nullptr, Msg, _countof (Msg), 1);
 						continue;
 					}
 					else

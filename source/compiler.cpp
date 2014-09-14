@@ -515,7 +515,7 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 		if (p) *p = 0;
 		if (*newDir)
 		{
-			GetCurrentDirectory (sizeof (cwd), cwd);
+			GetCurrentDirectory (_countof (cwd), cwd);
 			SetCurrentDirectory (newDir);
 		}
 	}
@@ -624,13 +624,10 @@ static void addToCompilerMenu (const wchar_t *line, FarMenuItemEx *amenu, intptr
 	}
 }
 
-static void CompilerMenu (EditorInfoEx *ei, const wchar_t *Name, const wchar_t *Path, ptrdiff_t lang)
+static void CompilerMenu (EditorInfoEx *ei, const wchar_t *FileName, const wchar_t *Path, ptrdiff_t lang)
 {
-	wchar_t	top[NM], FileName[NM];
-	wcscpy (FileName, Name);
-	wcscpy (top, GetMsg (MTitle));
-
-	TLang			*lng = (TLang *) (langColl[lang]);
+	String	top(GetMsg (MTitle));
+	TLang		*lng = (TLang *) (langColl[lang]);
 	size_t	ec = (lng) ? lng->execColl.getCount () : 0;
 	if ((!ec) && (!outputmenu)) return ;
 	if (autocompile)
@@ -672,16 +669,13 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *Name, const wchar_t *
 			for (size_t j = 0; j < ec; j++)
 			{
 				TExec *ex = ((TExec *) lng->execColl[j]);
-				if (validMenuItem (Path, FileName, ex)) addToCompilerMenu (ex->title, amenu, i, j, Path, FileName, FarKey());
+				if (validMenuItem (Path, FileName, ex))
+					addToCompilerMenu (ex->title, amenu, i, j, Path, FileName, FarKey());
 			}
 
 			addToCompilerMenu (L"", amenu, i, 0, Path, FileName, FarKey());
 		}
-
-		FarKey Key;
-		Key.VirtualKeyCode = VK_MULTIPLY;
-		Key.ControlKeyState = 0;
-		addToCompilerMenu (GetMsg (MShowOutput), amenu, i, scId, Path, FileName, Key);
+		addToCompilerMenu (GetMsg (MShowOutput), amenu, i, scId, Path, FileName, {VK_MULTIPLY, 0});
 		if (!compilerOut) amenu[i - 1].Flags = MIF_DISABLE;
 		for (intptr_t k = 0; k < i; k++)
 			if (!(amenu[k].Flags & (MIF_DISABLE | MIF_SEPARATOR)))

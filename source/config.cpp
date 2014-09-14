@@ -30,14 +30,14 @@ bool Config (void)
 		{ /* 14 - OK */ DI_BUTTON, 0, 14, 0, 0, 0, DIF_CENTERGROUP, (wchar_t *) MOK },
 		{ /* 15 */ DI_BUTTON, 0, 14, 0, 0, 0, DIF_CENTERGROUP, (wchar_t *) MCancel }
 	};
-	struct FarDialogItem		DialogItems[(sizeof (InitItems) / sizeof (InitItems[0]))];
-	InitDialogItems (InitItems, DialogItems, (sizeof (InitItems) / sizeof (InitItems[0])));
+	struct FarDialogItem		DialogItems[_countof (InitItems)];
+	InitDialogItems (InitItems, DialogItems, _countof (InitItems));
 
 	const intptr_t		NV = 12;
 	const intptr_t		OK = 14;
 	while (true)
 	{
-		HANDLE hDlg1 = Info.DialogInit(&MainGuid, &ConfigGuid, -1, -1, 69, OK + 3, nullptr, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
+		HANDLE hDlg1 = Info.DialogInit(&MainGuid, &ConfigGuid, -1, -1, 69, OK + 3, nullptr, DialogItems, _countof (InitItems), 0, 0, Info.DefDlgProc, 0);
 		if (hDlg1 != INVALID_HANDLE_VALUE)
 		{
 			intptr_t n = Info.DialogRun(hDlg1);
@@ -58,10 +58,10 @@ bool Config (void)
 					{ /* 10 */ DI_BUTTON, 0, 11, 0, 0, 0, 0, DIF_CENTERGROUP, 1, GetMsg (MOK), nullptr },
 					{ /* 11 */ DI_BUTTON, 0, 11, 0, 0, 0, 0, DIF_CENTERGROUP, 0, GetMsg (MCancel), nullptr }
 				};
-				struct FarDialogItem		DialogItems[(sizeof (InitItems) / sizeof (InitItems[0]))];
-				InitDialogItemsEx (InitItems, DialogItems, (sizeof (InitItems) / sizeof (InitItems[0])));
+				struct FarDialogItem		DialogItems[_countof (InitItems)];
+				InitDialogItemsEx (InitItems, DialogItems, _countof (InitItems));
 
-				HANDLE hDlg2 = Info.DialogInit(&MainGuid, &ConfigGuidEx, -1, -1, 59, 14, nullptr, DialogItems, sizeof (InitItems) / sizeof (InitItems[0]), 0, 0, Info.DefDlgProc, 0);
+				HANDLE hDlg2 = Info.DialogInit(&MainGuid, &ConfigGuidEx, -1, -1, 59, 14, nullptr, DialogItems, _countof (InitItems), 0, 0, Info.DefDlgProc, 0);
 				if (hDlg2 != INVALID_HANDLE_VALUE)
 				{
 					intptr_t n = Info.DialogRun(hDlg2);

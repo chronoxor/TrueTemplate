@@ -58,8 +58,7 @@ void showPartOfCompilerOut(TShowOutputData *sd)
   if ( sd && ( sd->hInput != INVALID_HANDLE_VALUE ) )
   {
     UCHAR ReadBuf[BUFF_SIZE];
-    DWORD BytesRead;
-    memset(&BytesRead, 0, sizeof(BytesRead));
+    DWORD BytesRead = 0;
     while ( ReadFile(sd->hInput, ReadBuf, sizeof(ReadBuf), &BytesRead, nullptr) )
     {
       for ( int i = 0 ; i < (int)BytesRead ; i++ )
@@ -74,7 +73,7 @@ void showPartOfCompilerOut(TShowOutputData *sd)
         {
           LineBuf[LineBufPtr] = ReadBuf[i];
           LineBufPtr++;
-          if ( LineBufPtr >= sizeof(LineBuf)-1 )
+          if ( LineBufPtr >= _countof(LineBuf)-1 )
             OutputLine(sd->hOutput, sd->AppOutput, sd->showExec);
         }
       }

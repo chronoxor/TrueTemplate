@@ -708,3 +708,4 @@ static void InsertTemplate(intptr_t EditorID, TLang *lng)
 
 
 }
+
