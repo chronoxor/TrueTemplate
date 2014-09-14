@@ -315,7 +315,8 @@ static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wcha
 					TMacro	*tm;
 					wchar_t		tmpTitle[MAX_STR_LEN];
 					wchar_t		tmpBefore[MAX_STR_LEN];
-					wcscpy (tmpBefore, before);
+					tmpTitle[0] = 0;
+					wcscpy(tmpBefore, before);
 					tmpBefore[wcslen (tmpBefore) - len] = 0;
 
 					wchar_t	*p1 = tmpBefore + wcslen (tmpBefore);

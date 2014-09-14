@@ -350,7 +350,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_CompName:
 		{
 			psz = szString;
-			l = sizeof (szString);
+			l = _countof (szString);
 			GetComputerName (szString, &l);
 		}
 		break;
@@ -574,7 +574,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_UserName:
 		{
 			psz = szString;
-			l = sizeof (szString);
+			l = _countof (szString);
 			GetUserName (szString, &l);
 		}
 		break;
@@ -586,13 +586,13 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 		GetLocalTime (&SysDate);
 		if (eCmd != CMD_Date)
 		{
-			GetTimeFormat (LOCALE_SYSTEM_DEFAULT, 0, &SysDate, psz, szString, sizeof (szString));
+			GetTimeFormat (LOCALE_SYSTEM_DEFAULT, 0, &SysDate, psz, szString, _countof(szString));
 			psz = szString;
 		}
 
 		if (eCmd != CMD_Time)
 		{
-			GetDateFormat (LOCALE_SYSTEM_DEFAULT, 0, &SysDate, psz, szDate, sizeof (szDate));
+			GetDateFormat (LOCALE_SYSTEM_DEFAULT, 0, &SysDate, psz, szDate, _countof (szDate));
 			psz = szDate;
 		}
 	}
