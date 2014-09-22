@@ -71,8 +71,8 @@ static int				autoformat = 0;
 void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
 	Info->StructSize = sizeof(struct PluginInfo);
-	Info->MinFarVersion=MAKEFARVERSION(3,0,0,3835,VS_RELEASE);
-	Info->Version=MAKEFARVERSION(3,0,1,5,VS_RC);
+	Info->MinFarVersion=MAKEFARVERSION(3,0,0,4040,VS_RELEASE);
+	Info->Version=MAKEFARVERSION(3,0,1,6,VS_RC);
 	Info->Guid=MainGuid;
 	Info->Title=L"True Template";
 	Info->Description=L"True Template Editor Plugin";
