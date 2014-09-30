@@ -42,9 +42,9 @@ static size_t eListInsert(intptr_t EditorID, wchar_t* filename)
 	return (eList->insert (EditorID, findLngID (filename), filename, newFile));
 }
 
-static TCollection 		*compilerColl = nullptr;
-static FarMenuItemEx	*compilerOut = nullptr;
+static TCollection 		*compilerOutColl = nullptr;
 static TCollection		*errColl = nullptr;
+static FarMenuItemEx	*compilerOut = nullptr;
 static intptr_t 			compilerOutN = 0;
 static intptr_t				compilerOutP = -1;
 
@@ -520,10 +520,10 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 		}
 	}
 
-	if (compilerColl)
-		compilerColl->removeAll ();
+	if (compilerOutColl)
+		compilerOutColl->removeAll ();
 	else
-		compilerColl = new TCollection;
+		compilerOutColl = new TCollection;
 
 	if (errColl)
 		errColl->removeAll ();
@@ -531,16 +531,16 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 		errColl = new TCollection;
 
 	compilerOutP = -1;
-	execute (compilerColl, cmd, e->echo);
+	execute (compilerOutColl, cmd, e->echo);
 
-	size_t	n = compilerColl->getCount ();
+	size_t	n = compilerOutColl->getCount ();
 	if (n)
 	{
 		intptr_t nErr = 0, aj = -1;
 		compilerOut = new FarMenuItemEx[compilerOutN = n + 1];
 		for (size_t i = 0; i < n; i++)
 		{
-			const TOutputLine *outData = static_cast<TOutputLine *>((*compilerColl)[i]);
+			const TOutputLine *outData = static_cast<TOutputLine *>((*compilerOutColl)[i]);
 			const wchar_t	*line = outData->line;
 			compilerOut[i].Text = line;
 			compilerOut[i].Flags = MIF_DISABLE;
@@ -589,8 +589,8 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 	}
 	else if (compilerOut)
 	{
-		delete compilerColl;
-		compilerColl = nullptr;
+		delete compilerOutColl;
+		compilerOutColl = nullptr;
 		delete[] compilerOut;
 		compilerOut = nullptr;
 	}
