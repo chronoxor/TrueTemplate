@@ -92,13 +92,14 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		::Info.RegExpControl(nullptr, RECTL_CREATE, 0, &RegExpHandle);
 
 		PluginSettings settings(MainGuid, ::Info.SettingsControl);
-		autocompile=settings.Get(0,L"AutoCompile",1);
-		autoformat=settings.Get(0,L"AutoFormat",1);
-		pluginStop=settings.Get(0,L"Disable",0);
-		scrollStop=settings.Get(0,L"UseScrollLock",1);
-		ignoreposn=settings.Get(0,L"IgnorePosition",1);
-		outputmenu=settings.Get(0,L"OutputMenu",1);
-		settings.Get(0,L"Key", defExpandFKey, 256, L"Space");
+		autocompile = settings.Get(0, L"AutoCompile", true);
+		autoformat = settings.Get(0, L"AutoFormat", true);
+		pluginStop = settings.Get(0, L"Disable", false);
+		scrollStop = settings.Get(0, L"UseScrollLock", true);
+		ignoreposn = settings.Get(0, L"IgnorePosition", true);
+		outputmenu = settings.Get(0, L"OutputMenu", true);
+		filterring = settings.Get(0, L"OutputFilter", false);
+		settings.Get(0, L"Key", defExpandFKey, 256, L"Space");
 
 		InitMacro ();
 	}
