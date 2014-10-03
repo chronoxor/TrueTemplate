@@ -27,6 +27,7 @@
 "Ignore macros position in menu"
 "Show output in external command menu"
 "Enable default filtering in \"Show output\""
+"Template file:"
 "Activation key:"
 "Press desired key..."
 "Key unavaliable in plugin"
