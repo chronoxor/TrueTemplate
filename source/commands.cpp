@@ -485,22 +485,22 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 			{															//Type X1 Y1 X2 Y2 Fo Se Fl DB Data
 																		///;
 																		///00
-				{ DI_DOUBLEBOX, 3, 1, 55, 6, 0, 0, DIF_BOXCOLOR, 0, GetMsg (MInput), nullptr },
+				{ DI_DOUBLEBOX, 3, 1, 55, 6, 0, 0, 0, DIF_BOXCOLOR, GetMsg (MInput), nullptr },
 
 				//01
 				{ DI_TEXT, 5, 2, 0, 0, 0, 0, 0, 0, p1, nullptr },
 
 				//02
-				{ DI_EDIT, 5, 3, 53, 0, 1, 0, DIF_HISTORY, 0, p2, L"True-Tpl.History.UserInput" },
+				{ DI_EDIT, 5, 3, 53, 0, 1, 0, 0, DIF_HISTORY, p2, L"True-Tpl.History.UserInput" },
 
 				//03
-				{ DI_TEXT, 0, 4, 0, 0, 0, 0, DIF_BOXCOLOR | DIF_SEPARATOR, 0, L"", nullptr },
+				{ DI_TEXT, 0, 4, 0, 0, 0, 0, 0, DIF_BOXCOLOR | DIF_SEPARATOR, L"", nullptr },
 
 				//04
-				{ DI_BUTTON, 0, 5, 0, 0, 0, 0, DIF_CENTERGROUP, 1, GetMsg (MOK), nullptr },
+				{ DI_BUTTON, 0, 5, 0, 0, 0, 0, 1, DIF_CENTERGROUP, GetMsg (MOK), nullptr },
 
 				//05
-				{ DI_BUTTON, 0, 5, 0, 0, 0, 0, DIF_CENTERGROUP, 0, GetMsg (MCancel), nullptr }
+				{ DI_BUTTON, 0, 5, 0, 0, 0, 0, 0, DIF_CENTERGROUP, GetMsg (MCancel), nullptr }
 			};
 			struct FarDialogItem		DialogItems[_countof (InitItems)];
 			InitDialogItemsEx (InitItems, DialogItems, _countof (InitItems));
