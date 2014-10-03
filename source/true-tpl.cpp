@@ -47,6 +47,7 @@ static bool				outputmenu;
 static bool				filterring;
 static bool				autocompile;
 static bool				autoformat;
+static String			tplFilename;
 static String			defExpandFKey;
 
 #include "files.cpp"
@@ -98,6 +99,7 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		ignoreposn = settings.Get(0, L"IgnorePosition", true);
 		outputmenu = settings.Get(0, L"OutputMenu", true);
 		filterring = settings.Get(0, L"OutputFilter", false);
+		tplFilename = String(settings.Get(0, L"TemplateFilename", L"true-tpl.xml"));
 		defExpandFKey = String(settings.Get(0, L"Key", L"Space"));
 
 		InitMacro ();

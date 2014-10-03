@@ -37,7 +37,7 @@ static void InitMacro ()
 	wchar_t	path[NM];
 	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
 
-	wchar_t	*fileBuff = getFile (path, L"true-tpl.xml");
+	wchar_t	*fileBuff = getFile (path, tplFilename);
 	if (fileBuff)
 	{
 		wchar_t				*item, *p = fileBuff;
