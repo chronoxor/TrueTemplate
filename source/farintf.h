@@ -2,6 +2,7 @@
 #define __FARINTF_H
 #define _FAR_USE_FARFINDDATA
 #include <plugin.hpp>
+#include "mystring.h"
 
 struct WindowInfoEx : WindowInfo
 {
@@ -134,5 +135,7 @@ inline const wchar_t *GetMsg(intptr_t MsgId)
 
 extern void InitDialogItems(struct InitDialogItem*, struct FarDialogItem*, size_t);
 extern void InitDialogItemsEx(const struct InitDialogItemEx*, struct FarDialogItem*, size_t);
+extern String GetDialogItemText(HANDLE, intptr_t);
 
 #endif
+

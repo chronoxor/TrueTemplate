@@ -96,11 +96,7 @@ bool Config (void)
 				settings.Set(0,L"IgnorePosition", (ignoreposn = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,5,nullptr) == BSTATE_CHECKED) ? 1 : 0));
 				settings.Set(0,L"OutputMenu", (outputmenu = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,6,nullptr) == BSTATE_CHECKED) ? 1 : 0));
 				settings.Set(0,L"OutputFilter", (filterring = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,7,nullptr) == BSTATE_CHECKED) ? 1 : 0));
-				FarDialogItemDataEx item;
-				item.PtrLength = 256;
-				item.PtrData = defExpandFKey;
-				Info.SendDlgMessage(hDlg1,DM_GETTEXT,10,(void*)&item);
-				settings.Set(0,L"Key", item.PtrData);
+				settings.Set(0,L"Key", (defExpandFKey = GetDialogItemText(hDlg1,10)));
 				DoneMacro ();
 				InitMacro ();
 				Info.DialogFree(hDlg1);

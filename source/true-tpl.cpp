@@ -39,16 +39,15 @@ const wchar_t				cBOM = 0xFEFF;		//Byte-order mark
 #define MAX_REG_LEN			512
 #define MAX_STR_LEN			8192
 
-static wchar_t			defExpandFKey[256] = L"Space";
-
-static int				pluginBusy = 0;
-static int				pluginStop = 0;
-static int				scrollStop = 0;
-static int				ignoreposn = 0;
-static int				outputmenu = 0;
-static int				filterring = 0;
-static int				autocompile = 0;
-static int				autoformat = 0;
+static bool				pluginBusy;
+static bool				pluginStop;
+static bool				scrollStop;
+static bool				ignoreposn;
+static bool				outputmenu;
+static bool				filterring;
+static bool				autocompile;
+static bool				autoformat;
+static String			defExpandFKey;
 
 #include "files.cpp"
 #include "editor.cpp"
@@ -99,7 +98,7 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		ignoreposn = settings.Get(0, L"IgnorePosition", true);
 		outputmenu = settings.Get(0, L"OutputMenu", true);
 		filterring = settings.Get(0, L"OutputFilter", false);
-		settings.Get(0, L"Key", defExpandFKey, 256, L"Space");
+		defExpandFKey = String(settings.Get(0, L"Key", L"Space"));
 
 		InitMacro ();
 	}

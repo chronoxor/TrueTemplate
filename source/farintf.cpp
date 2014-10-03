@@ -75,12 +75,13 @@ void InitDialogItemsEx(const struct InitDialogItemEx *Init, struct FarDialogItem
  }
 }
 
-static void SaveDialogItems(FarDialogItem *Item, InitDialogItem *Init, int ItemsNumber)
+String GetDialogItemText(HANDLE hDlg, intptr_t index)
 {
-  for (int I = 0 ; I < ItemsNumber ; I++ )
-  {
-    Init[I].Selected = (unsigned int)Item[I].Selected;
-    if ( (unsigned int)Init[I].Data >= 2000 && Init[I].Y2 != 255 )
-      wcscpy(Init[I].Data, Item[I].Data);
-  }
+	FarDialogItemData data = { sizeof(FarDialogItemData) };
+	size_t nChars = ::Info.SendDlgMessage(hDlg, DM_GETTEXT, index, nullptr);
+	data.PtrData = new wchar_t[nChars + 1];
+	::Info.SendDlgMessage(hDlg, DM_GETTEXT, index, &data);
+	String result(data.PtrData, data.PtrData + data.PtrLength);
+	delete[] data.PtrData;
+	return result;
 }
