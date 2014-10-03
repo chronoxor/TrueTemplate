@@ -523,8 +523,8 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 				return (PROCESS_EVENT);
 			} //! MACRO EXISTS - END
 
-			wchar_t fKey[256];
-			FSF.FarInputRecordToName (&Info->Rec, fKey, 256);
+			String fKey(256);
+			FSF.FarInputRecordToName (&Info->Rec, fKey.getBuffer(), fKey.length());
 			vState &= (SHIFT_PRESSED | RIGHT_ALT_PRESSED | LEFT_ALT_PRESSED | RIGHT_CTRL_PRESSED | LEFT_CTRL_PRESSED);
 
 			bool spORret = ((wcscmp(fKey, L"Enter") == 0) || (wcscmp(fKey, defExpandFKey) == 0));
