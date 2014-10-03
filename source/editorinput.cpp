@@ -1,4 +1,4 @@
-static int inComment (TLang *lng, const wchar_t *text_line, intptr_t pos)
+static bool inComment (TLang *lng, const wchar_t *text_line, intptr_t pos)
 {
 	if (text_line)
 	{
@@ -19,13 +19,13 @@ static int inComment (TLang *lng, const wchar_t *text_line, intptr_t pos)
 
 				if (blMatched && pos >= bounds[0] && pos <= bounds[1])
 				{
-					return (1);
+					return true;
 				}
 			}
 		}
 	}
 
-	return (0);
+	return false;
 }
 
 static intptr_t FindIndent (wchar_t c, TLang *lng, wchar_t *str, intptr_t foundBounds[2])
@@ -207,7 +207,7 @@ static intptr_t shiftLine(intptr_t i)
 static int TryIndent
 (
 	EditorInfoEx	*ei,
-	int						ret,
+	bool					ret,
 	TLang					*lng,
 	intptr_t			j,
 	wchar_t				*str,
@@ -408,7 +408,7 @@ static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wcha
 	return (true);
 }
 
-static int TryMacro (EditorInfoEx *ei, TLang *lng, EditorGetStringEx &gs, TEditorPos &ep, wchar_t *line, wchar_t expChar)
+static bool TryMacro (EditorInfoEx *ei, TLang *lng, EditorGetStringEx &gs, TEditorPos &ep, wchar_t *line, wchar_t expChar)
 {
 	if (expChar || !isCharSpace (gs.StringText[ep.Col - 1]))
 	{
@@ -444,12 +444,12 @@ static int TryMacro (EditorInfoEx *ei, TLang *lng, EditorGetStringEx &gs, TEdito
 				pluginBusy = 0;
 				RunMacro (mc, before, bounds);
 				redraw ();
-				return (1);
+				return true;
 			}
 		}
 	}
 
-	return (0);
+	return false;
 }
 
 intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
@@ -527,10 +527,10 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 			FSF.FarInputRecordToName (&Info->Rec, fKey, 256);
 			vState &= (SHIFT_PRESSED | RIGHT_ALT_PRESSED | LEFT_ALT_PRESSED | RIGHT_CTRL_PRESSED | LEFT_CTRL_PRESSED);
 
-			int spORret = ((wcscmp(fKey, L"Enter") == 0) || (wcscmp(fKey, defExpandFKey) == 0));
+			bool spORret = ((wcscmp(fKey, L"Enter") == 0) || (wcscmp(fKey, defExpandFKey) == 0));
 			if (!spORret && (vState &~SHIFT_PRESSED)) return (PROCESS_EVENT);
 
-			int		inImm = 0, inImmExp = 0;
+			bool	inImm = false, inImmExp = false;
 			wchar_t	vChar = Info->Rec.Event.KeyEvent.uChar.UnicodeChar;
 			if (!spORret)
 			{
@@ -708,4 +708,3 @@ static void InsertTemplate(intptr_t EditorID, TLang *lng)
 
 
 }
-
