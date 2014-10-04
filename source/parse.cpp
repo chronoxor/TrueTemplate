@@ -70,7 +70,7 @@ static void parseCompiler (TCompiler *tmpc, const wchar_t *name, const wchar_t *
 	}
 }
 
-static wchar_t *parseItem (TCollection *dc, wchar_t * &line, wchar_t *kwd, wchar_t *value)
+static wchar_t *parseItem (const TCollection<TDefine> *dc, wchar_t * &line, wchar_t *kwd, wchar_t *value)
 {
 	if (IsCharAlpha (*skipSpaces (line)))
 	{
@@ -107,7 +107,7 @@ static wchar_t *parseItem (TCollection *dc, wchar_t * &line, wchar_t *kwd, wchar
 															///'
 						for (size_t i = 0; i < dc->getCount (); ++i)
 						{
-							TDefine *d = (TDefine *) ((*dc)[i]);
+							const TDefine *d = (*dc)[i];
 							if (0 == wcscmp (d->name, name))
 							{
 								for (const wchar_t *pdv = d->value; *pdv;) *pv++ = *pdv++;

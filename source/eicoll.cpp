@@ -7,12 +7,12 @@
 
 size_t TEICollection::insert(intptr_t aID, intptr_t aLang, const wchar_t *aFn, bool aNewFile)
 {
-	return TCollection::insert(new TEInfo(aID, aLang, aFn, aNewFile));
+	return TCollection<TEInfo>::insert(new TEInfo(aID, aLang, aFn, aNewFile));
 }
 
-static bool find_ID(TCollectionItem *it, void *data)
+static bool find_ID(const TEInfo *it, void *data)
 {
-	return static_cast<TEInfo*>(it)->ID == *((intptr_t*)data);
+	return it->ID == *((intptr_t*)data);
 }
 
 ptrdiff_t TEICollection::findID(intptr_t aID)
@@ -22,17 +22,17 @@ ptrdiff_t TEICollection::findID(intptr_t aID)
 
 ptrdiff_t TEICollection::findLang(intptr_t aID)
 {
-	TCollectionItem *i = find(find_ID, &aID);
+	TEInfo *i = find(find_ID, &aID);
 	if (i)
-		return static_cast<TEInfo*>(i)->lang;
+		return i->lang;
 	return -1;
 }
 
 const wchar_t *TEICollection::findFile(intptr_t aID)
 {
-	TCollectionItem *i = find(find_ID, &aID);
+	TEInfo *i = find(find_ID, &aID);
 	if (i)
-		return static_cast<TEInfo*>(i)->fn;
+		return i->fn;
 	return nullptr;
 }
 

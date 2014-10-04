@@ -12,7 +12,7 @@ static bool strMatch
 	const wchar_t	*suffix,
 	size_t	nb,
 	intptr_t		bounds[][2] = nullptr,
-	intptr_t		regn[] = nullptr
+	const intptr_t	regn[] = nullptr
 )
 {
 	bool    ret = false;

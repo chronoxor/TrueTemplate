@@ -214,7 +214,7 @@ static wchar_t *makeCmdLine
 	return (buffer);
 }
 
-static void execute (TCollection *coll, const wchar_t *title, bool showExec)
+static void execute(TCollection<TOutputLine> *coll, const wchar_t *title, bool showExec)
 {
 	HANDLE	hScreen = Info.SaveScreen (0, 0, -1, -1);
 	if (!showExec)

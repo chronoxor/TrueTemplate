@@ -38,7 +38,7 @@ static void BlockComments (TEInfo *te)
 		TEditorPos				epos = EditorGetPos ();
 		String						sComment;
 		intptr_t					iComment = 0;
-		TLang							*lng = (TLang *) (langColl[te->lang]);
+		const TLang				*lng = langColl[te->lang];
 		if (lng)
 		{
 			sComment = lng->blockcomment;

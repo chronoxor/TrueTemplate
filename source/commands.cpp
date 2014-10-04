@@ -850,7 +850,7 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 	}
 }
 
-static void RunMacro(TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
+static void RunMacro(const TMacro *m, const wchar_t *origStr, intptr_t bounds[][2])
 {
 	bool	firstsel = false;
 	for (const wchar_t *p = m->MacroText; *p; p++)

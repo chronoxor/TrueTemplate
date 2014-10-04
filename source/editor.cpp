@@ -209,7 +209,7 @@ static void EditorSaveRestore (void)
 		EditorSetStringEx ess;
 		ess.StringNumber = -1;
 		ess.StringText = buffer;
-		ess.StringEOL = /* FAR API defect workaround */ const_cast<wchar_t *>(egs.StringEOL);
+		ess.StringEOL = /* FAR API defect workaround */ egs.StringEOL;
 		ess.StringLength = egs.StringLength + len;
 		Info.EditorControl (-1, ECTL_SETSTRING, 0, &ess);
 
@@ -228,7 +228,7 @@ static void EditorSaveRemove (void)
 	_wunlink (filename);
 }
 
-static void EditorSetPosEx(EditorInfoEx *ei, intptr_t line, intptr_t initCol, const wchar_t *colSearch)
+static void EditorSetPosEx(const EditorInfoEx *ei, intptr_t line, intptr_t initCol, const wchar_t *colSearch)
 {
 	intptr_t col = (initCol < 0) ? -1 : initCol;
 	EditorSetPos (line, col);

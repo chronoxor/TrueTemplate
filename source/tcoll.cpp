@@ -7,17 +7,17 @@
 
 static const size_t MAXCOLLECTIONSIZE = 0x7FFFFFFF;
 
-TCollection::TCollection(size_t aLimit, size_t aDelta)
+TCommonCollection::TCommonCollection(size_t aLimit, size_t aDelta)
 {
 	init(aLimit, aDelta);
 }
 
-TCollection::TCollection()
+TCommonCollection::TCommonCollection()
 {
 	init(0, 5);
 }
 
-void TCollection::init(size_t aLimit, size_t aDelta)
+void TCommonCollection::init(size_t aLimit, size_t aDelta)
 {
 	count = limit = 0;
 	items = nullptr;
@@ -25,20 +25,27 @@ void TCollection::init(size_t aLimit, size_t aDelta)
 	setLimit(aLimit);
 }
 
-TCollection::~TCollection()
+TCommonCollection::~TCommonCollection()
 {
 	removeAll();
 	delete[] items;
 }
 
-TCollectionItem *TCollection::at(size_t index)
+TCollectionItem *TCommonCollection::at(size_t index)
 {
 	if (index >= count)
 		return nullptr;
 	return items[index];
 }
 
-TCollectionItem *TCollection::find(bool(*ff)(TCollectionItem*, void*), void *data)
+const TCollectionItem *TCommonCollection::at(size_t index) const
+{
+	if (index >= count)
+		return nullptr;
+	return items[index];
+}
+
+TCollectionItem *TCommonCollection::find(FindProc ff, void *data)
 {
 	if (items)
 	{
@@ -49,7 +56,7 @@ TCollectionItem *TCollection::find(bool(*ff)(TCollectionItem*, void*), void *dat
 	return nullptr;
 }
 
-ptrdiff_t TCollection::findIndex(bool(*ff)(TCollectionItem*, void*), void *data)
+ptrdiff_t TCommonCollection::findIndex(FindProc ff, void *data)
 {
 	if (items)
 	{
@@ -60,7 +67,7 @@ ptrdiff_t TCollection::findIndex(bool(*ff)(TCollectionItem*, void*), void *data)
 	return -1;
 }
 
-size_t TCollection::insert(TCollectionItem *item)
+size_t TCommonCollection::insert(TCollectionItem *item)
 {
 	if (count == limit)
 		setLimit(count + delta);
@@ -68,7 +75,7 @@ size_t TCollection::insert(TCollectionItem *item)
 	return count++;
 }
 
-size_t TCollection::remove(size_t index)
+size_t TCommonCollection::remove(size_t index)
 {
 	if (items && (index < limit) && count)
 	{
@@ -79,7 +86,7 @@ size_t TCollection::remove(size_t index)
 	return count;
 }
 
-void TCollection::removeAll(void)
+void TCommonCollection::removeAll(void)
 {
 	if (items)
 	{
@@ -95,7 +102,7 @@ void TCollection::removeAll(void)
 	setLimit(count = 0);
 }
 
-void TCollection::setLimit(size_t aLimit)
+void TCommonCollection::setLimit(size_t aLimit)
 {
 	if (aLimit < count)
 		aLimit = count;

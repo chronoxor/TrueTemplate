@@ -13,6 +13,6 @@ struct TOutputLine : TCollectionItem
 	}
 };
 
-extern DWORD ExecConsoleApp(const wchar_t*, const wchar_t*, TCollection*, bool, bool);
+extern DWORD ExecConsoleApp(const wchar_t*, const wchar_t*, TCollection<TOutputLine>*, bool, bool);
 
 #endif

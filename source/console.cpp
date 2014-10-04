@@ -28,7 +28,7 @@ static void cls(HANDLE& StdOutput)
   SetConsoleCursorPosition(StdOutput, C);
 }
 
-static void OutputLine(HANDLE& h, TCollection *AppOutput, bool showExec)
+static void OutputLine(HANDLE& h, TCollection<TOutputLine> *AppOutput, bool showExec)
 {
 	const wchar_t crlf[] = L"\r\n";
 	wchar_t *eos = wcspbrk(LineBuf, crlf);
@@ -41,7 +41,7 @@ static void OutputLine(HANDLE& h, TCollection *AppOutput, bool showExec)
 	DWORD dummy;
 	if (showExec)
 	{
-		WriteConsole(h, static_cast<const wchar_t*>(outLine->line), (DWORD)outLine->line.length(), &dummy, nullptr);
+		WriteConsole(h, outLine->line, (DWORD)outLine->line.length(), &dummy, nullptr);
 		WriteConsole(h, crlf, (DWORD)wcslen(crlf), &dummy, nullptr);
 	}
 }
@@ -50,7 +50,7 @@ struct TShowOutputData
 {
   bool compilerDone, cls, showExec;
   HANDLE hInput, hOutput;
-  TCollection *AppOutput;
+  TCollection<TOutputLine> *AppOutput;
 };
 
 void showPartOfCompilerOut(TShowOutputData *sd)
@@ -157,7 +157,7 @@ static CmdType CommandType(bool NT, const wchar_t *Command, const wchar_t *Path)
   return none;
 }
 
-DWORD ExecConsoleApp(const wchar_t *CmdStr, const wchar_t *path, TCollection *OutputColl, bool clear, bool showExec)
+DWORD ExecConsoleApp(const wchar_t *CmdStr, const wchar_t *path, TCollection<TOutputLine> *OutputColl, bool clear, bool showExec)
 {
   if ( !OutputColl )
     return -1;

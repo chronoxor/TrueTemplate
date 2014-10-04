@@ -56,7 +56,7 @@ static void InitMacro ()
 				wchar_t	incFile[NM];
 				*incFile = 0;
 
-				TCollection *dc = (lng == nullptr) ? nullptr : &(lng->defineColl);
+				const TCollection<TDefine> *dc = (lng == nullptr) ? nullptr : &(lng->defineColl);
 				while (parseItem (dc, item, name, value))
 					if (!_wcsicmp (name, L"File")) wcscpy (incFile, value);
 				if (*incFile)
@@ -146,16 +146,16 @@ static void InitMacro ()
 							tmpn->path = ExpandEnv (value);
 						else if (!_wcsicmp (name, L"Suffixes"))
 							tmpn->suffixes = ExpandEnv (value);
-						else if (!_wcsicmp (name, L"Rect"))
-							FSF.sscanf
-								(
-									value,
-									L"%d%%,%d%%,%d%%,%d%%",
-									&tmpn->rect[0],
-									&tmpn->rect[1],
-									&tmpn->rect[2],
-									&tmpn->rect[3]
-								);
+						else if (!_wcsicmp(name, L"Rect"))
+						{
+							int r0, r1, r2, r3;
+							FSF.sscanf (value, L"%d%%,%d%%,%d%%,%d%%",
+								&r0, &r1, &r2, &r3);
+							tmpn->rect[0] = r0;
+							tmpn->rect[1] = r1;
+							tmpn->rect[2] = r2;
+							tmpn->rect[3] = r3;
+						}
 						else if (!_wcsicmp (name, L"Viewer"))
 							tmpn->viewer = FSF.atoi (value) ? true : false;
 					}
@@ -451,21 +451,21 @@ static void DoneMacro ()
 	doneThread ();
 }
 
-static TMacro *FindMacro
+static const TMacro *FindMacro
 (
-	TLang *lng,
-	wchar_t	*before,
-	wchar_t	*after,
+	const TLang *lng,
+	const wchar_t	*before,
+	const wchar_t	*after,
 	wchar_t	expChar,
 	intptr_t	*delCount,
 	intptr_t	bounds[][2],
 	bool	frommenu = false
 )
 {
-	wchar_t			*regEnd = lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/";
+	const wchar_t	*regEnd = lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/";
 	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
-		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+		const TMacro	*mm = lng->macroColl[i];
 		if (expChar && (expChar != mm->immChar)) continue;
 		if (!frommenu && !expChar && mm->immChar) continue;
 		if (frommenu && !mm->Name.empty() && (wcscmp (mm->Name, before) == 0)) return (mm);
@@ -473,7 +473,7 @@ static TMacro *FindMacro
 
 	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
-		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+		const TMacro	*mm = lng->macroColl[i];
 		if (expChar && (expChar != mm->immChar)) continue;
 		if (!mm->Word.empty() && strMatch (after, mm->after, L"/^\\s*", regEnd, 0))
 		{
@@ -500,20 +500,20 @@ static TMacro *FindMacro
 	return (nullptr);
 }
 
-static TMacro *FindMacroKey (TLang *lng, const INPUT_RECORD *Rec)
+static const TMacro *FindMacroKey (const TLang *lng, const INPUT_RECORD *Rec)
 {
 	wchar_t rKeyp[MAX_STR_LEN];
 	FSF.FarInputRecordToName (Rec, rKeyp, MAX_STR_LEN);
 	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
-		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+		const TMacro	*mm = lng->macroColl[i];
 		if (wcscmp(mm->FARKey, rKeyp) == 0) return (mm);
 	}
 
 	return (nullptr);
 }
 
-static TMacro *CheckMacroPos (TLang *lng, TMacro *mm, const wchar_t *before, const wchar_t *after)
+static const TMacro *CheckMacroPos (const TLang *lng, const TMacro *mm, const wchar_t *before, const wchar_t *after)
 {
 	wchar_t	*regEnd = lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/";
 	if (strMatch (after, mm->after, L"/^\\s*", regEnd, 0))

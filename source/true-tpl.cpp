@@ -154,7 +154,7 @@ intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 			intptr_t	lngid = te->lang;
 			if (lngid != -1)
 			{
-				TLang		*lng = (TLang *)(langColl[lngid]);
+				const TLang	*lng = langColl[lngid];
 				if (lng)
 					InsertTemplate (ei.EditorID, lng);
 			}
@@ -183,13 +183,13 @@ static void SelectTemplate (TEInfo *te)
 {
 	if (te)
 	{
-		TLang *lng = (TLang *) (langColl[te->lang]);
+		const TLang *lng = langColl[te->lang];
 		if (lng)
 		{
 			size_t	count = 0;
 			for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 			{
-				TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+				const TMacro	*mm = lng->macroColl[i];
 				if (!mm->Name.empty() && !mm->submenu) count++;
 			}
 
@@ -201,7 +201,7 @@ static void SelectTemplate (TEInfo *te)
 					count = 0;
 					for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 					{
-						TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+						const TMacro	*mm = lng->macroColl[i];
 						if (!mm->Name.empty() && !mm->submenu)
 						{
 							amenu[count].Text = mm->Name;
@@ -231,12 +231,12 @@ static void SelectTemplate (TEInfo *te)
 						count = 0;
 						for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 						{
-							TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+							const TMacro	*mm = lng->macroColl[i];
 							if (!mm->Name.empty() && !mm->submenu)
 							{
 								if (count == res)
 								{
-									TMacro			*fm = (TMacro *) (lng->macroColl[i]);
+									const TMacro	*fm = lng->macroColl[i];
 									wchar_t				line[MAX_STR_LEN];
 									EditorInfoEx	ei;
 									Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
@@ -288,7 +288,7 @@ static void SelectTemplateSet (TEInfo *te)
 	{
 		for (size_t i = 0; i < lc; i++)
 		{
-			amenu[i].Text = ((TLang *) langColl[i])->desc;
+			amenu[i].Text = langColl[i]->desc;
 			amenu[i].Flags &= ~(MIF_CHECKED | MIF_SEPARATOR);
 			amenu[i].Flags |= ((size_t) (te->lang) == i) ? MIF_SELECTED : 0;
 		}
