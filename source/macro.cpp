@@ -13,16 +13,13 @@ struct TMacro : TCollectionItem
 static String ExpandEnv(const wchar_t *env)
 {
 	const size_t BufSize = 4096;
-	wchar_t *buf = new wchar_t[BufSize];
-	size_t nChars = ExpandEnvironmentStrings(env, buf, BufSize);
+	String result(BufSize);
+	size_t nChars = ExpandEnvironmentStrings(env, result.getBuffer(), BufSize);
 	if (nChars > BufSize)
 	{
-		delete[] buf;
-		buf = new wchar_t[nChars];
-		ExpandEnvironmentStrings(env, buf, (DWORD)nChars);
+		result.makeBuffer(nChars);
+		ExpandEnvironmentStrings(env, result.getBuffer(), (DWORD)nChars);
 	}
-	String result(buf);
-	delete[] buf;
 	return result;
 }
 
