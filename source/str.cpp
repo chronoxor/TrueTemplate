@@ -70,13 +70,13 @@ static inline bool isCharSpace (wchar_t c)
 	       c == L'\n';
 }
 
-static wchar_t *skipSpaces (wchar_t * &line)
+static const wchar_t *skipSpaces (const wchar_t * &line)
 {
 	while (*line && isCharSpace (*line)) line++;
 	return (line);
 }
 
-static wchar_t *getWord (wchar_t * &line, wchar_t *kwd)
+static const wchar_t *getWord (const wchar_t * &line, wchar_t *kwd)
 {
 	wchar_t	*k = kwd;
 	if (*skipSpaces (line) == L'\"')

@@ -70,7 +70,7 @@ static void parseCompiler (TCompiler *tmpc, const wchar_t *name, const wchar_t *
 	}
 }
 
-static wchar_t *parseItem (const TCollection<TDefine> *dc, wchar_t * &line, wchar_t *kwd, wchar_t *value)
+static const wchar_t *parseItem (const TCollection<TDefine> *dc, const wchar_t * &line, wchar_t *kwd, wchar_t *value)
 {
 	if (IsCharAlpha (*skipSpaces (line)))
 	{
@@ -129,44 +129,32 @@ static wchar_t *parseItem (const TCollection<TDefine> *dc, wchar_t * &line, wcha
 	return (nullptr);
 }
 
-static wchar_t *getItem (wchar_t * &line, wchar_t *kwd, bool &group)
+static const wchar_t *getItem (const wchar_t * &line, wchar_t *kwd, bool &group)
 {
 	group = true;
 
 	bool	coment = true;
 	while (coment)
 	{
-		if (*skipSpaces (line) == L'<')
+		if (*skipSpaces(line) == L'<' &&
+			line[1] == L'!' &&
+			line[2] == L'-' &&
+			line[3] == L'-')
 		{
-			if (line[1] == L'!')
+			line += 4;
+			coment = true;
+			while (*line)
 			{
-				if (line[2] == L'-')
+				if (line[0] == L'-' &&
+					line[1] == L'-' &&
+					line[2] == L'>')
 				{
-					if (line[3] == L'-')
-					{
-						line += 4;
-						coment = true;
-						while (*line)
-						{
-							if (line[0] == L'-')
-								if (line[1] == L'-')
-									if (line[2] == L'>')
-									{
-										line += 3;
-										break;
-									}
-
-							line++;
-						}
-					}
-					else
-						coment = false;
+					line += 3;
+					break;
 				}
-				else
-					coment = false;
+
+				line++;
 			}
-			else
-				coment = false;
 		}
 		else
 			coment = false;
@@ -174,15 +162,15 @@ static wchar_t *getItem (wchar_t * &line, wchar_t *kwd, bool &group)
 
 	if (*skipSpaces (line) == L'<')
 	{
-		wchar_t	*stLine = line;
+		const wchar_t	*stLine = line;
 		wchar_t	*k = kwd;
 		line++;
-		if (*line && (*line == L'/')) *k++ = *line++;
-		while (*line && IsCharAlpha (*line)) *k++ = *line++;
+		if (*line == L'/') *k++ = *line++;
+		while (IsCharAlpha (*line)) *k++ = *line++;
 		*k = 0;
-		k = --line;
+		const wchar_t *p = --line;
 
-		int inQuote = 0;
+		bool inQuote = false;
 		while (*++line)
 		{
 			if (inQuote)
@@ -190,40 +178,32 @@ static wchar_t *getItem (wchar_t * &line, wchar_t *kwd, bool &group)
 				if (*line == L'\\' && line[1] == L'\"')
 					line++;
 				else if (*line == L'\"')
-					inQuote = 0;
+					inQuote = false;
 			}
 			else
 			{
 				if (*line == L'>')
 				{
-					if (line > stLine)
+					if (line[-1] == L'/')
 					{
-						--line;
-						if (*line == L'/')
-						{
-							*line = 0;
-							group = false;
-						}
-
-						line++;
+						group = false;
 					}
 
-					*line = 0;
 					line++;
 					break;
 				}
 				else if (*line == L'\"')
-					inQuote = 1;
+					inQuote = true;
 			}
 		}
 
-		return (k);
+		return (p);
 	}
 
 	return (nullptr);
 }
 
-static void findSectionInXML (wchar_t * &p)
+static void findSectionInXML (const wchar_t * &p)
 {
 	bool	group;
 	wchar_t	name[MAX_STR_LEN];

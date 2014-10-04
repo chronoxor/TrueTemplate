@@ -37,10 +37,11 @@ static void InitMacro ()
 	wchar_t	path[NM];
 	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
 
-	wchar_t	*fileBuff = getFile (path, tplFilename);
+	const wchar_t	*fileBuff = getFile (path, tplFilename);
 	if (fileBuff)
 	{
-		wchar_t				*item, *p = fileBuff;
+		const wchar_t	*item;
+		const wchar_t	*p = fileBuff;
 		wchar_t				name[MAX_STR_LEN], value[MAX_STR_LEN];
 		TLang				*lng = nullptr;
 		bool				group;
