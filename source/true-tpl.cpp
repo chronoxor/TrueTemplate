@@ -21,9 +21,10 @@
 
 static HINSTANCE	hInst;
 bool							IsOldFar = true;
-wchar_t							szIni[_MAX_PATH]; //Plugin INI filename
-const wchar_t				cMD = L'@';				//Macro delimiter
-const wchar_t				cBOM = 0xFEFF;		//Byte-order mark
+wchar_t						szIni[_MAX_PATH]; //Plugin INI filename
+const wchar_t			cMD = L'@';				//Macro delimiter
+const wchar_t			cBOM = 0xFEFF;		//Byte-order mark
+const wchar_t			DefaultTplFilename[] = L"true-tpl.xml";
 
 #define expAnyWhere			L".*\\b\\p.*"
 #define expAtStart			L"\\p.*"
@@ -49,6 +50,8 @@ static bool				autocompile;
 static bool				autoformat;
 static String			tplFilename;
 static String			defExpandFKey;
+
+static String			tplDirectory;
 
 #include "files.cpp"
 #include "editor.cpp"
@@ -99,10 +102,12 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		ignoreposn = settings.Get(0, L"IgnorePosition", true);
 		outputmenu = settings.Get(0, L"OutputMenu", true);
 		filterring = settings.Get(0, L"OutputFilter", false);
-		tplFilename = String(settings.Get(0, L"TemplateFilename", L"true-tpl.xml"));
+		tplFilename = String(settings.Get(0, L"TemplateFilename", DefaultTplFilename));
+		if (tplFilename.empty())
+			tplFilename = DefaultTplFilename;
 		defExpandFKey = String(settings.Get(0, L"Key", L"Space"));
 
-		InitMacro ();
+		InitMacro();
 	}
 }
 

@@ -152,11 +152,40 @@ static wchar_t *fExpand (wchar_t *rpath, const wchar_t *defPath)
 {
 	static wchar_t path[NM], drive[NM], dir[NM], file[NM], ext[NM];
 	static wchar_t defDrive[4], defDir[NM];
+
+	wchar_t xname[NM];
+	*xname = 0;
+	const wchar_t *tail = rpath, *env1 = nullptr, *env2 = nullptr;
+	do
+	{
+		env1 = wcschr (tail, L'%');
+		if (env1 != nullptr)
+		{
+			env2 = wcschr (env1 + 1, L'%');
+		}
+
+		if (env1 != nullptr && env2 != nullptr)
+		{
+			wcscat (xname, String(tail, env1));
+			tail = env2 + 1;
+
+			String env(env1 + 1, env2);
+			wchar_t envbuf[NM];
+			*envbuf = L'\0';
+			GetEnvironmentVariable (env, envbuf, _countof(envbuf));
+			wcscat (xname, envbuf);
+		}
+		else
+		{
+			wcscat (xname, tail);
+		}
+	} while (env1 != nullptr && env2 != nullptr && *tail != '\0');
+
 	wcscpy (path, defPath);
 	FSF.AddEndSlash (path);
 	fnSplit (path, defDrive, defDir, file, ext);
 
-	int flags = fnSplit (rpath, drive, dir, file, ext);
+	int flags = fnSplit (xname, drive, dir, file, ext);
 	if ((flags & enDRIVE) == 0) wcscpy (drive, defDrive);
 	CharUpperBuff (drive, 1);
 	if ((flags & enDIRECTORY) == 0 || ((*dir != L'\\') && (*dir != L'/')))

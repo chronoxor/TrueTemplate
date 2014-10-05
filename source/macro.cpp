@@ -23,25 +23,15 @@ static String ExpandEnv(const wchar_t *env)
 	return result;
 }
 
-static void InitMacro ()
+static void LoadTemplate (const String &dir, const String &filename, TLang *&lng)
 {
-	reloadInProcess = true;
-
-	HANDLE			hScreen = Info.SaveScreen (0, 0, -1, -1);
-	const wchar_t	*MsgItems[] = { GetMsg (MTitle), GetMsg (MLoading) };
-	Info.Message (&MainGuid, &InitMacroGuid, 0, nullptr, MsgItems, _countof (MsgItems), 0);
-
-	wchar_t	path[NM];
-	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
-
-	const wchar_t	*fileBuff = getFile (path, tplFilename);
+	const wchar_t	*fileBuff = getFile (dir, filename);
 	if (fileBuff)
 	{
 		const wchar_t	*item;
 		const wchar_t	*p = fileBuff;
 		wchar_t				name[MAX_STR_LEN], value[MAX_STR_LEN];
-		TLang				*lng = nullptr;
-		bool				group;
+		bool					group;
 
 		if (*p == cBOM) p++;
 		findSectionInXML (p);
@@ -59,22 +49,10 @@ static void InitMacro ()
 					if (!_wcsicmp (name, L"File")) wcscpy (incFile, value);
 				if (*incFile)
 				{
-					wchar_t	*incBuff = getFile (path, incFile);
-					if (incBuff)
-					{
-						wchar_t	*inc = incBuff;
-						if (*inc == cBOM) inc++;
-						wchar_t	*newBuff = new wchar_t[wcslen (inc) + wcslen (p) + 16];
-						if (newBuff)
-						{
-							wcscat (wcscat (wcscpy (newBuff, inc), L"\r\n<TrueTpl>\r\n"), p);
-							delete[] fileBuff;
-							fileBuff = p = newBuff;
-							findSectionInXML (p);
-						}
-
-						delete[] incBuff;
-					}
+					wchar_t fullname[NM];
+					wcscpy (fullname, incFile);
+					wcscpy (fullname, fExpand(fullname, dir));
+					LoadTemplate (dir, incFile, lng);
 				}
 			}
 			else if (group && !_wcsicmp (name, L"/Language"))
@@ -436,6 +414,26 @@ static void InitMacro ()
 
 		delete[] fileBuff;
 	}
+}
+
+static void InitMacro()
+{
+	reloadInProcess = true;
+
+	HANDLE			hScreen = Info.SaveScreen (0, 0, -1, -1);
+	const wchar_t	*MsgItems[] = { GetMsg(MTitle), GetMsg(MLoading) };
+	Info.Message (&MainGuid, &InitMacroGuid, 0, nullptr, MsgItems, _countof(MsgItems), 0);
+
+	wchar_t	path[NM];
+	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
+	wchar_t	fullname[NM];
+	fExpand (wcscpy (fullname, tplFilename), path);
+	wchar_t	basedir[NM];
+	*wcsrchr (wcscpy (basedir, fullname), L'\\') = 0;
+	tplDirectory = basedir;
+
+	TLang *lng = nullptr;
+	LoadTemplate (basedir, fullname, lng);
 
 	Info.RestoreScreen (hScreen);
 	reloadInProcess = reloadNeeded = false;
