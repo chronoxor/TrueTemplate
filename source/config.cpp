@@ -24,7 +24,7 @@ bool Config (void)
 		{ /* 6 */ DI_CHECKBOX, 5, 7, 0, 0, outputmenu, 0, (wchar_t *) MOutputMenu },
 		{ /* 7 */ DI_CHECKBOX, 5, 8, 0, 0, filterring, 0, (wchar_t *) MFiltering },
 		{ /* 8 */ DI_TEXT, 5, 9, 0, 0, false, 0, (wchar_t *)MTplFilename },
-		{ /* 9 */ DI_EDIT, 5, 10, 63, 0, false, 0, tplFilename },
+		{ /* 9 */ DI_EDIT, 5, 10, 63, 0, false, 0, confFilename },
 		{ /* 10 */ DI_TEXT, 5, 11, 0, 255, false, 0, nullptr },
 		{ /* 11 */ DI_TEXT, 5, 12, 0, 0, false, 0, (wchar_t *)MKey },
 		{ /* 12 */ DI_EDIT, 25, 12, 63, 0, false, 0, defExpandFKey },
@@ -99,7 +99,7 @@ bool Config (void)
 				settings.Set(0,L"IgnorePosition", (ignoreposn = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,5,nullptr) == BSTATE_CHECKED) ? 1 : 0));
 				settings.Set(0,L"OutputMenu", (outputmenu = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,6,nullptr) == BSTATE_CHECKED) ? 1 : 0));
 				settings.Set(0,L"OutputFilter", (filterring = (Info.SendDlgMessage(hDlg1,DM_GETCHECK,7,nullptr) == BSTATE_CHECKED) ? 1 : 0));
-				settings.Set(0,L"TemplateFilename", (tplFilename = GetDialogItemText(hDlg1,9)));
+				settings.Set(0,L"ConfigFilename", (confFilename = GetDialogItemText(hDlg1,9)));
 				settings.Set(0,L"Key", (defExpandFKey = GetDialogItemText(hDlg1,12)));
 
 				DoneMacro ();

@@ -5,7 +5,7 @@ bool					reloadInProcess = false;
 DWORD WINAPI reloadCheck (LPVOID)
 {
 	HANDLE	hIdle[2];
-	hIdle[0] = FindFirstChangeNotification (tplDirectory, true, FILE_NOTIFY_CHANGE_LAST_WRITE);
+	hIdle[0] = FindFirstChangeNotification (confDirectory, true, FILE_NOTIFY_CHANGE_LAST_WRITE);
 	if (!hIdle[0] || hIdle[0] == INVALID_HANDLE_VALUE) return (0);
 	hIdle[1] = hEvent;
 	while (WaitForMultipleObjects (2, hIdle, false, INFINITE) == WAIT_OBJECT_0)

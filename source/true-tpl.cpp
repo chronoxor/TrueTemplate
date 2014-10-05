@@ -48,10 +48,10 @@ static bool				outputmenu;
 static bool				filterring;
 static bool				autocompile;
 static bool				autoformat;
-static String			tplFilename;
+static String			confFilename;
 static String			defExpandFKey;
 
-static String			tplDirectory;
+static String			confDirectory;
 
 #include "files.cpp"
 #include "editor.cpp"
@@ -102,9 +102,9 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		ignoreposn = settings.Get(0, L"IgnorePosition", true);
 		outputmenu = settings.Get(0, L"OutputMenu", true);
 		filterring = settings.Get(0, L"OutputFilter", false);
-		tplFilename = String(settings.Get(0, L"TemplateFilename", DefaultTplFilename));
-		if (tplFilename.empty())
-			tplFilename = DefaultTplFilename;
+		confFilename = String(settings.Get(0, L"ConfigFilename", DefaultTplFilename));
+		if (confFilename.empty())
+			confFilename = DefaultTplFilename;
 		defExpandFKey = String(settings.Get(0, L"Key", L"Space"));
 
 		InitMacro();

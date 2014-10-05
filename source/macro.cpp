@@ -23,7 +23,7 @@ static String ExpandEnv(const wchar_t *env)
 	return result;
 }
 
-static void LoadTemplate (const String &dir, const String &filename, TLang *&lng)
+static void LoadMacroFile (const String &dir, const String &filename, TLang *&lng)
 {
 	const wchar_t	*fileBuff = getFile (dir, filename);
 	if (fileBuff)
@@ -52,7 +52,7 @@ static void LoadTemplate (const String &dir, const String &filename, TLang *&lng
 					wchar_t fullname[NM];
 					wcscpy (fullname, incFile);
 					wcscpy (fullname, fExpand(fullname, dir));
-					LoadTemplate (dir, incFile, lng);
+					LoadMacroFile (dir, incFile, lng);
 				}
 			}
 			else if (group && !_wcsicmp (name, L"/Language"))
@@ -416,7 +416,7 @@ static void LoadTemplate (const String &dir, const String &filename, TLang *&lng
 	}
 }
 
-static void InitMacro()
+static void InitMacro ()
 {
 	reloadInProcess = true;
 
@@ -427,13 +427,13 @@ static void InitMacro()
 	wchar_t	path[NM];
 	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
 	wchar_t	fullname[NM];
-	fExpand (wcscpy (fullname, tplFilename), path);
+	fExpand (wcscpy (fullname, confFilename), path);
 	wchar_t	basedir[NM];
 	*wcsrchr (wcscpy (basedir, fullname), L'\\') = 0;
-	tplDirectory = basedir;
+	confDirectory = basedir;
 
 	TLang *lng = nullptr;
-	LoadTemplate (basedir, fullname, lng);
+	LoadMacroFile (basedir, fullname, lng);
 
 	Info.RestoreScreen (hScreen);
 	reloadInProcess = reloadNeeded = false;
