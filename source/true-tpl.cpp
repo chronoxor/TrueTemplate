@@ -24,7 +24,7 @@ bool							IsOldFar = true;
 wchar_t						szIni[_MAX_PATH]; //Plugin INI filename
 const wchar_t			cMD = L'@';				//Macro delimiter
 const wchar_t			cBOM = 0xFEFF;		//Byte-order mark
-const wchar_t			DefaultTplFilename[] = L"true-tpl.xml";
+const wchar_t			DefaultConfFilename[] = L"true-tpl.xml";
 
 #define expAnyWhere			L".*\\b\\p.*"
 #define expAtStart			L"\\p.*"
@@ -102,9 +102,9 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		ignoreposn = settings.Get(0, L"IgnorePosition", true);
 		outputmenu = settings.Get(0, L"OutputMenu", true);
 		filterring = settings.Get(0, L"OutputFilter", false);
-		confFilename = String(settings.Get(0, L"ConfigFilename", DefaultTplFilename));
+		confFilename = String(settings.Get(0, L"ConfigFilename", DefaultConfFilename));
 		if (confFilename.empty())
-			confFilename = DefaultTplFilename;
+			confFilename = DefaultConfFilename;
 		defExpandFKey = String(settings.Get(0, L"Key", L"Space"));
 
 		InitMacro();
