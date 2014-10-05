@@ -29,7 +29,7 @@ static ptrdiff_t findLngID(const wchar_t *fn)
 {
 	for (size_t i = 0; i < langColl.getCount (); i++)
 	{
-		TLang *lng = (TLang *) (langColl[i]);
+		const TLang *lng = langColl[i];
 		if (matched (lng->mask, fn)) return (i);
 	}
 
@@ -42,12 +42,6 @@ static size_t eListInsert(intptr_t EditorID, wchar_t* filename)
 	return (eList->insert (EditorID, findLngID (filename), filename, newFile));
 }
 
-static TCollection 		*compilerOutColl = nullptr;
-static TCollection		*errColl = nullptr;
-static FarMenuItemEx	*compilerOut = nullptr;
-static intptr_t 			compilerOutN = 0;
-static intptr_t				compilerOutP = -1;
-
 struct TErrData : TCollectionItem
 {
 	wchar_t	fn[NM];
@@ -56,12 +50,18 @@ struct TErrData : TCollectionItem
 	String	colSearch;
 };
 
+static TCollection<TOutputLine> 		*compilerOutColl = nullptr;
+static FarMenuItemEx	*compilerOut = nullptr;
+static TCollection<TErrData>		*errColl = nullptr;
+static intptr_t 			compilerOutN = 0;
+static intptr_t				compilerOutP = -1;
+
 static bool showErrorMsgBox(intptr_t res)
 {
 	intptr_t n = compilerOut[res].UserData - 1;
 	if (errColl && (n >= 0) && (n < (intptr_t)errColl->getCount()))
 	{
-		TErrData		*err = (TErrData *) ((*errColl)[n]);
+		TErrData		*err = (*errColl)[n];
 		const wchar_t	*MsgItems[] =
 		{
 			cmd, err->fn, L"\x01", err->message[0], err->message[1], err->message[2], err->message[3], err->message[4],
@@ -77,14 +77,14 @@ static bool showErrorMsgBox(intptr_t res)
 	return (false);
 }
 
-static void jumpToError( EditorInfoEx *ei, const wchar_t* path, intptr_t aj, bool showMsgBox )
+static void jumpToError(const EditorInfoEx *ei, const wchar_t* path, intptr_t aj, bool showMsgBox )
 {
 	if (compilerOut && (aj >= 0) && (aj <= compilerOutN))
 	{
 		intptr_t n = compilerOut[aj].UserData - 1;
 		if (errColl && (n >= 0) && (n < (intptr_t)errColl->getCount()))
 		{
-			TErrData	*err = (TErrData *) ((*errColl)[n]);
+			TErrData	*err = (*errColl)[n];
 			intptr_t	nLine = -1, nCol = -1, sLine = -1;
 			if (err->line > 0) nLine = err->line - 1;
 			if (err->col > 0) nCol = err->col - 1;
@@ -130,7 +130,7 @@ static void jumpToError( EditorInfoEx *ei, const wchar_t* path, intptr_t aj, boo
 	}
 }
 
-static void showCompileOut (EditorInfoEx *ei, const wchar_t* path)
+static void showCompileOut (const EditorInfoEx *ei, const wchar_t* path)
 {
 	if (compilerOut)
 	{
@@ -294,7 +294,7 @@ static bool findBaseFile (const wchar_t *path, const wchar_t *file, wchar_t *bas
 			Info.AdvControl (&MainGuid, ACTL_GETWINDOWINFO, 0, (void *) &wi);
 			if (wi.Type == WTYPE_EDITOR)
 			{
-				wchar_t	*p = (wchar_t *) wcsrchr (wcscpy (testFile, wi.Name), L'\\');
+				wchar_t	*p = wcsrchr (wcscpy (testFile, wi.Name), L'\\');
 				if (p)
 				{
 					wcscpy (p + 1, FSF.PointToName (file));
@@ -312,7 +312,7 @@ static bool findBaseFile (const wchar_t *path, const wchar_t *file, wchar_t *bas
 	return (found);
 }
 
-static bool validMenuItem (const wchar_t *path, const wchar_t *fn, TExec *e)
+static bool validMenuItem (const wchar_t *path, const wchar_t *fn, const TExec *e)
 {
 	wchar_t	baseFile[NM] = L"";
 	bool	enable = true;
@@ -335,15 +335,15 @@ static String makeTitle (const wchar_t *line, size_t size, const wchar_t *path, 
 	return String(FSF.TruncStr(temp, size));
 }
 
-static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path, const wchar_t *fn,
+static bool parseError(const TLang *lng, const wchar_t *compiler, const wchar_t *path, const wchar_t *fn,
 	const wchar_t *line, uintptr_t ci, intptr_t &aj)
 {
 	intptr_t	lineBounds[2], colBounds[2], fileBounds[2];
-	TCompiler *e = nullptr;
+	const TCompiler *e = nullptr;
 	bool			found = false, res = false;
 	for (size_t i = 0; i < lng->compilerColl.getCount (); i++)
 	{
-		e = (TCompiler *) (lng->compilerColl[i]);
+		e = lng->compilerColl[i];
 		if (e && !e->err.empty() && !_wcsicmp (compiler, e->title))
 		{
 			intptr_t	bounds[3][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 } };
@@ -461,7 +461,7 @@ static bool parseError(TLang *lng, const wchar_t *compiler, const wchar_t *path,
 	return (res);
 }
 
-static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const wchar_t *path, const wchar_t *title, TExec *e)
+static bool runCompiler (const EditorInfoEx *ei, const TLang *lng, const wchar_t *fn, const wchar_t *path, const wchar_t *title, const TExec *e)
 {
 	wchar_t	cwd[NM] = L"", baseFile[NM] = L"";
 	if (!e->enable.empty())
@@ -509,9 +509,9 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 	{
 		wchar_t	newDir[NM] = L"", *p;
 		if (e->cd == cdFile)
-			p = (wchar_t *) wcsrchr (wcscpy (newDir, fn), L'\\');
+			p = wcsrchr (wcscpy (newDir, fn), L'\\');
 		else if ((e->cd == cdBase) && *baseFile)
-			p = (wchar_t *) wcsrchr (wcscpy (newDir, baseFile), L'\\');
+			p = wcsrchr (wcscpy (newDir, baseFile), L'\\');
 		if (p) *p = 0;
 		if (*newDir)
 		{
@@ -523,12 +523,12 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 	if (compilerOutColl)
 		compilerOutColl->removeAll ();
 	else
-		compilerOutColl = new TCollection;
+		compilerOutColl = new TCollection<TOutputLine>;
 
 	if (errColl)
 		errColl->removeAll ();
 	else
-		errColl = new TCollection;
+		errColl = new TCollection<TErrData>;
 
 	compilerOutP = -1;
 	execute (compilerOutColl, cmd, e->echo);
@@ -540,7 +540,7 @@ static bool runCompiler (EditorInfoEx *ei, TLang *lng, const wchar_t *fn, const 
 		compilerOut = new FarMenuItemEx[compilerOutN = n + 1];
 		for (size_t i = 0; i < n; i++)
 		{
-			const TOutputLine *outData = static_cast<TOutputLine *>((*compilerOutColl)[i]);
+			const TOutputLine *outData = (*compilerOutColl)[i];
 			const wchar_t	*line = outData->line;
 			compilerOut[i].Text = line;
 			compilerOut[i].Flags = MIF_DISABLE;
@@ -624,10 +624,10 @@ static void addToCompilerMenu (const wchar_t *line, FarMenuItemEx *amenu, intptr
 	}
 }
 
-static void CompilerMenu (EditorInfoEx *ei, const wchar_t *FileName, const wchar_t *Path, ptrdiff_t lang)
+static void CompilerMenu (const EditorInfoEx *ei, const wchar_t *FileName, const wchar_t *Path, ptrdiff_t lang)
 {
 	String	top(GetMsg (MTitle));
-	TLang		*lng = (TLang *) (langColl[lang]);
+	const TLang	*lng = langColl[lang];
 	size_t	ec = (lng) ? lng->execColl.getCount () : 0;
 	if ((!ec) && (!outputmenu)) return ;
 	if (autocompile)
@@ -637,7 +637,7 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *FileName, const wchar
 		{
 			for (size_t j = 0; j < ec; j++)
 			{
-				TExec *ex = ((TExec *) lng->execColl[j]);
+				const TExec *ex = lng->execColl[j];
 				if (validMenuItem (Path, FileName, ex))
 				{
 					i = j;
@@ -649,7 +649,7 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *FileName, const wchar
 		if (count == 1)
 			if (lng)
 			{
-				TExec *e = (TExec *) lng->execColl[i];
+				const TExec *e = lng->execColl[i];
 				runCompiler (ei, lng, FileName, Path, e->title, e);
 				return ;
 			}
@@ -668,7 +668,7 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *FileName, const wchar
 		{
 			for (size_t j = 0; j < ec; j++)
 			{
-				TExec *ex = ((TExec *) lng->execColl[j]);
+				const TExec *ex = lng->execColl[j];
 				if (validMenuItem (Path, FileName, ex))
 					addToCompilerMenu (ex->title, amenu, i, j, Path, FileName, FarKey());
 			}
@@ -707,7 +707,7 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *FileName, const wchar
 				showCompileOut (ei, Path);
 			else if (lng)
 			{
-				TExec *e = (TExec *) lng->execColl[id];
+				const TExec *e = lng->execColl[id];
 				runCompiler (ei, lng, FileName, Path, e->title, e);
 			}
 		}
@@ -719,7 +719,7 @@ static void CompilerMenu (EditorInfoEx *ei, const wchar_t *FileName, const wchar
 	}
 }
 
-static void SelectCompiler (TEInfo *te)
+static void SelectCompiler (const TEInfo *te)
 {
 	wchar_t filepath[NM];
 	wchar_t filename[NM];

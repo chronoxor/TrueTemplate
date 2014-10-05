@@ -13,37 +13,25 @@ struct TMacro : TCollectionItem
 static String ExpandEnv(const wchar_t *env)
 {
 	const size_t BufSize = 4096;
-	wchar_t *buf = new wchar_t[BufSize];
-	size_t nChars = ExpandEnvironmentStrings(env, buf, BufSize);
+	String result(BufSize);
+	size_t nChars = ExpandEnvironmentStrings(env, result.getBuffer(), BufSize);
 	if (nChars > BufSize)
 	{
-		delete[] buf;
-		buf = new wchar_t[nChars];
-		ExpandEnvironmentStrings(env, buf, (DWORD)nChars);
+		result.makeBuffer(nChars);
+		ExpandEnvironmentStrings(env, result.getBuffer(), (DWORD)nChars);
 	}
-	String result(buf);
-	delete[] buf;
 	return result;
 }
 
-static void InitMacro ()
+static void LoadMacroFile (const String &dir, const String &filename, TLang *&lng)
 {
-	reloadInProcess = true;
-
-	HANDLE			hScreen = Info.SaveScreen (0, 0, -1, -1);
-	const wchar_t	*MsgItems[] = { GetMsg (MTitle), GetMsg (MLoading) };
-	Info.Message (&MainGuid, &InitMacroGuid, 0, nullptr, MsgItems, _countof (MsgItems), 0);
-
-	wchar_t	path[NM];
-	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
-
-	wchar_t	*fileBuff = getFile (path, L"true-tpl.xml");
+	const wchar_t	*fileBuff = getFile (dir, filename);
 	if (fileBuff)
 	{
-		wchar_t				*item, *p = fileBuff;
+		const wchar_t	*item;
+		const wchar_t	*p = fileBuff;
 		wchar_t				name[MAX_STR_LEN], value[MAX_STR_LEN];
-		TLang				*lng = nullptr;
-		bool				group;
+		bool					group;
 
 		if (*p == cBOM) p++;
 		findSectionInXML (p);
@@ -56,27 +44,15 @@ static void InitMacro ()
 				wchar_t	incFile[NM];
 				*incFile = 0;
 
-				TCollection *dc = (lng == nullptr) ? nullptr : &(lng->defineColl);
+				const TCollection<TDefine> *dc = (lng == nullptr) ? nullptr : &(lng->defineColl);
 				while (parseItem (dc, item, name, value))
 					if (!_wcsicmp (name, L"File")) wcscpy (incFile, value);
 				if (*incFile)
 				{
-					wchar_t	*incBuff = getFile (path, incFile);
-					if (incBuff)
-					{
-						wchar_t	*inc = incBuff;
-						if (*inc == cBOM) inc++;
-						wchar_t	*newBuff = new wchar_t[wcslen (inc) + wcslen (p) + 16];
-						if (newBuff)
-						{
-							wcscat (wcscat (wcscpy (newBuff, inc), L"\r\n<TrueTpl>\r\n"), p);
-							delete[] fileBuff;
-							fileBuff = p = newBuff;
-							findSectionInXML (p);
-						}
-
-						delete[] incBuff;
-					}
+					wchar_t fullname[NM];
+					wcscpy (fullname, incFile);
+					wcscpy (fullname, fExpand(fullname, dir));
+					LoadMacroFile (dir, incFile, lng);
 				}
 			}
 			else if (group && !_wcsicmp (name, L"/Language"))
@@ -146,16 +122,16 @@ static void InitMacro ()
 							tmpn->path = ExpandEnv (value);
 						else if (!_wcsicmp (name, L"Suffixes"))
 							tmpn->suffixes = ExpandEnv (value);
-						else if (!_wcsicmp (name, L"Rect"))
-							FSF.sscanf
-								(
-									value,
-									L"%d%%,%d%%,%d%%,%d%%",
-									&tmpn->rect[0],
-									&tmpn->rect[1],
-									&tmpn->rect[2],
-									&tmpn->rect[3]
-								);
+						else if (!_wcsicmp(name, L"Rect"))
+						{
+							int r0, r1, r2, r3;
+							FSF.sscanf (value, L"%d%%,%d%%,%d%%,%d%%",
+								&r0, &r1, &r2, &r3);
+							tmpn->rect[0] = r0;
+							tmpn->rect[1] = r1;
+							tmpn->rect[2] = r2;
+							tmpn->rect[3] = r3;
+						}
 						else if (!_wcsicmp (name, L"Viewer"))
 							tmpn->viewer = FSF.atoi (value) ? true : false;
 					}
@@ -438,6 +414,26 @@ static void InitMacro ()
 
 		delete[] fileBuff;
 	}
+}
+
+static void InitMacro ()
+{
+	reloadInProcess = true;
+
+	HANDLE			hScreen = Info.SaveScreen (0, 0, -1, -1);
+	const wchar_t	*MsgItems[] = { GetMsg(MTitle), GetMsg(MLoading) };
+	Info.Message (&MainGuid, &InitMacroGuid, 0, nullptr, MsgItems, _countof(MsgItems), 0);
+
+	wchar_t	path[NM];
+	*wcsrchr (wcscpy (path, Info.ModuleName), L'\\') = 0;
+	wchar_t	fullname[NM];
+	fExpand (wcscpy (fullname, confFilename), path);
+	wchar_t	basedir[NM];
+	*wcsrchr (wcscpy (basedir, fullname), L'\\') = 0;
+	confDirectory = basedir;
+
+	TLang *lng = nullptr;
+	LoadMacroFile (basedir, fullname, lng);
 
 	Info.RestoreScreen (hScreen);
 	reloadInProcess = reloadNeeded = false;
@@ -451,21 +447,21 @@ static void DoneMacro ()
 	doneThread ();
 }
 
-static TMacro *FindMacro
+static const TMacro *FindMacro
 (
-	TLang *lng,
-	wchar_t	*before,
-	wchar_t	*after,
+	const TLang *lng,
+	const wchar_t	*before,
+	const wchar_t	*after,
 	wchar_t	expChar,
 	intptr_t	*delCount,
 	intptr_t	bounds[][2],
 	bool	frommenu = false
 )
 {
-	wchar_t			*regEnd = lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/";
+	const wchar_t	*regEnd = lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/";
 	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
-		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+		const TMacro	*mm = lng->macroColl[i];
 		if (expChar && (expChar != mm->immChar)) continue;
 		if (!frommenu && !expChar && mm->immChar) continue;
 		if (frommenu && !mm->Name.empty() && (wcscmp (mm->Name, before) == 0)) return (mm);
@@ -473,7 +469,7 @@ static TMacro *FindMacro
 
 	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
-		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+		const TMacro	*mm = lng->macroColl[i];
 		if (expChar && (expChar != mm->immChar)) continue;
 		if (!mm->Word.empty() && strMatch (after, mm->after, L"/^\\s*", regEnd, 0))
 		{
@@ -500,20 +496,20 @@ static TMacro *FindMacro
 	return (nullptr);
 }
 
-static TMacro *FindMacroKey (TLang *lng, const INPUT_RECORD *Rec)
+static const TMacro *FindMacroKey (const TLang *lng, const INPUT_RECORD *Rec)
 {
 	wchar_t rKeyp[MAX_STR_LEN];
 	FSF.FarInputRecordToName (Rec, rKeyp, MAX_STR_LEN);
 	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 	{
-		TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+		const TMacro	*mm = lng->macroColl[i];
 		if (wcscmp(mm->FARKey, rKeyp) == 0) return (mm);
 	}
 
 	return (nullptr);
 }
 
-static TMacro *CheckMacroPos (TLang *lng, TMacro *mm, const wchar_t *before, const wchar_t *after)
+static const TMacro *CheckMacroPos (const TLang *lng, const TMacro *mm, const wchar_t *before, const wchar_t *after)
 {
 	wchar_t	*regEnd = lng->ignoreCase ? L"\\s*$/i" : L"\\s*$/";
 	if (strMatch (after, mm->after, L"/^\\s*", regEnd, 0))

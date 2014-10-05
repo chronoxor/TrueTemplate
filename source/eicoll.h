@@ -21,7 +21,7 @@ struct TEInfo : TCollectionItem
 	}
 };
 
-class TEICollection: public TCollection
+class TEICollection: public TCollection<TEInfo>
 {
 public:
 	size_t insert(intptr_t, intptr_t, const wchar_t*, bool);
@@ -29,6 +29,6 @@ public:
 	ptrdiff_t findID(intptr_t);
 	ptrdiff_t findLang(intptr_t);
 	const wchar_t *findFile(intptr_t);
-	TEInfo *operator[](size_t i) { return (TEInfo *)at(i); };
 };
+
 #endif

@@ -9,7 +9,7 @@ struct TFormat : TCollectionItem
 	}
 };
 
-static void runFormatting (TFormat *tf, const wchar_t *Name = nullptr)
+static void runFormatting (const TFormat *tf, const wchar_t *Name = nullptr)
 {
 	String	old_cmd(tf->comm);
 	wchar_t	new_cmd[MAX_STR_LEN];
@@ -269,16 +269,16 @@ static void runFormatting (TFormat *tf, const wchar_t *Name = nullptr)
 	_wunlink (filename);
 }
 
-static void SelectFormatting (TEInfo *te)
+static void SelectFormatting (const TEInfo *te)
 {
 	if (te)
 	{
-		TLang *lng = (TLang *) (langColl[te->lang]);
+		const TLang *lng = langColl[te->lang];
 		if (lng)
 		{
 			if ((autoformat) && (lng->formatColl.getCount () == 1))
 			{
-				runFormatting ((TFormat *) lng->formatColl[0]);
+				runFormatting (lng->formatColl[0]);
 				return ;
 			}
 
@@ -289,8 +289,7 @@ static void SelectFormatting (TEInfo *te)
 				{
 					for (size_t i = 0; i < lng->formatColl.getCount (); i++)
 					{
-						TFormat *mm = (TFormat *) (lng->formatColl[i]);
-						amenu[i].Text = mm->name;
+						amenu[i].Text = lng->formatColl[i]->name;
 						amenu[i].Flags = 0;
 					}
 
@@ -310,7 +309,7 @@ static void SelectFormatting (TEInfo *te)
 							amenu,
 							lng->formatColl.getCount ()
 						);
-					if (res != -1) runFormatting ((TFormat *) lng->formatColl[res]);
+					if (res != -1) runFormatting (lng->formatColl[res]);
 					delete[] amenu;
 				}
 			}
@@ -320,12 +319,12 @@ static void SelectFormatting (TEInfo *te)
 
 static void FormatMenu (const wchar_t *Name, intptr_t lang)
 {
-	TLang *lng = (TLang *) (langColl[lang]);
+	const TLang *lng = langColl[lang];
 	if (lng)
 	{
 		if ((autoformat) && (lng->formatColl.getCount () == 1))
 		{
-			runFormatting ((TFormat *) lng->formatColl[0], Name);
+			runFormatting (lng->formatColl[0], Name);
 			return ;
 		}
 
@@ -336,8 +335,7 @@ static void FormatMenu (const wchar_t *Name, intptr_t lang)
 			{
 				for (size_t i = 0; i < lng->formatColl.getCount (); i++)
 				{
-					TFormat *mm = (TFormat *) (lng->formatColl[i]);
-					amenu[i].Text = mm->name;
+					amenu[i].Text = lng->formatColl[i]->name;
 					amenu[i].Flags = 0;
 				}
 
@@ -357,7 +355,7 @@ static void FormatMenu (const wchar_t *Name, intptr_t lang)
 						amenu,
 						lng->formatColl.getCount ()
 					);
-				if (res != -1) runFormatting ((TFormat *) lng->formatColl[res], Name);
+				if (res != -1) runFormatting (lng->formatColl[res], Name);
 				delete[] amenu;
 			}
 		}

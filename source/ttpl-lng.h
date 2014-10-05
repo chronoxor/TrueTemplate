@@ -27,6 +27,7 @@ enum
   MIgnorePos,
   MOutputMenu,
   MFiltering,
+  MTplFilename,
   MKey,
   MGetKeyPrompt,
   MGetKeyError,

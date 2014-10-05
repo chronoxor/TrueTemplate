@@ -1,3 +1,8 @@
+struct TMacro;
+struct TCompiler;
+struct TNavy;
+struct TFormat;
+
 struct TLang : TCollectionItem
 {
 	TLang();
@@ -5,8 +10,15 @@ struct TLang : TCollectionItem
 	bool				ignoreCase;
 	int					setCP;
 	TExec				defExec;
-	TCollection macroColl, indentColl, bracketColl, commentColl, execColl, compilerColl, defineColl, navyColl,
-		formatColl;
+	TCollection<TMacro>			macroColl;
+	TCollection<TIndent>		indentColl;
+	TCollection<TBracket>		bracketColl;
+	TCollection<TComment>		commentColl;
+	TCollection<TExec>			execColl;
+	TCollection<TCompiler>	compilerColl;
+	TCollection<TDefine>		defineColl;
+	TCollection<TNavy>			navyColl;
+	TCollection<TFormat>		formatColl;
 };
 
 TLang::TLang ()
@@ -18,4 +30,4 @@ TLang::TLang ()
 	defineColl.insert (new TDefine (L"nbsp", L" "));
 }
 
-static TCollection	langColl;
+static TCollection<TLang>	langColl;

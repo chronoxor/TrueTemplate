@@ -21,9 +21,10 @@
 
 static HINSTANCE	hInst;
 bool							IsOldFar = true;
-wchar_t							szIni[_MAX_PATH]; //Plugin INI filename
-const wchar_t				cMD = L'@';				//Macro delimiter
-const wchar_t				cBOM = 0xFEFF;		//Byte-order mark
+wchar_t						szIni[_MAX_PATH]; //Plugin INI filename
+const wchar_t			cMD = L'@';				//Macro delimiter
+const wchar_t			cBOM = 0xFEFF;		//Byte-order mark
+const wchar_t			DefaultConfFilename[] = L"true-tpl.xml";
 
 #define expAnyWhere			L".*\\b\\p.*"
 #define expAtStart			L"\\p.*"
@@ -39,16 +40,18 @@ const wchar_t				cBOM = 0xFEFF;		//Byte-order mark
 #define MAX_REG_LEN			512
 #define MAX_STR_LEN			8192
 
-static wchar_t			defExpandFKey[256] = L"Space";
+static bool				pluginBusy;
+static bool				pluginStop;
+static bool				scrollStop;
+static bool				ignoreposn;
+static bool				outputmenu;
+static bool				filterring;
+static bool				autocompile;
+static bool				autoformat;
+static String			confFilename;
+static String			defExpandFKey;
 
-static int				pluginBusy = 0;
-static int				pluginStop = 0;
-static int				scrollStop = 0;
-static int				ignoreposn = 0;
-static int				outputmenu = 0;
-static int				filterring = 0;
-static int				autocompile = 0;
-static int				autoformat = 0;
+static String			confDirectory;
 
 #include "files.cpp"
 #include "editor.cpp"
@@ -72,7 +75,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
 	Info->StructSize = sizeof(struct PluginInfo);
 	Info->MinFarVersion=MAKEFARVERSION(3,0,0,4040,VS_RELEASE);
-	Info->Version=MAKEFARVERSION(3,0,1,6,VS_RC);
+	Info->Version=MAKEFARVERSION(3,0,1,7,VS_RC);
 	Info->Guid=MainGuid;
 	Info->Title=L"True Template";
 	Info->Description=L"True Template Editor Plugin";
@@ -99,9 +102,12 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *Info)
 		ignoreposn = settings.Get(0, L"IgnorePosition", true);
 		outputmenu = settings.Get(0, L"OutputMenu", true);
 		filterring = settings.Get(0, L"OutputFilter", false);
-		settings.Get(0, L"Key", defExpandFKey, 256, L"Space");
+		confFilename = String(settings.Get(0, L"ConfigFilename", DefaultConfFilename));
+		if (confFilename.empty())
+			confFilename = DefaultConfFilename;
+		defExpandFKey = String(settings.Get(0, L"Key", L"Space"));
 
-		InitMacro ();
+		InitMacro();
 	}
 }
 
@@ -153,7 +159,7 @@ intptr_t WINAPI ProcessEditorEventW(const struct ProcessEditorEventInfo *Info)
 			intptr_t	lngid = te->lang;
 			if (lngid != -1)
 			{
-				TLang		*lng = (TLang *)(langColl[lngid]);
+				const TLang	*lng = langColl[lngid];
 				if (lng)
 					InsertTemplate (ei.EditorID, lng);
 			}
@@ -182,13 +188,13 @@ static void SelectTemplate (TEInfo *te)
 {
 	if (te)
 	{
-		TLang *lng = (TLang *) (langColl[te->lang]);
+		const TLang *lng = langColl[te->lang];
 		if (lng)
 		{
 			size_t	count = 0;
 			for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 			{
-				TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+				const TMacro	*mm = lng->macroColl[i];
 				if (!mm->Name.empty() && !mm->submenu) count++;
 			}
 
@@ -200,7 +206,7 @@ static void SelectTemplate (TEInfo *te)
 					count = 0;
 					for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 					{
-						TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+						const TMacro	*mm = lng->macroColl[i];
 						if (!mm->Name.empty() && !mm->submenu)
 						{
 							amenu[count].Text = mm->Name;
@@ -230,12 +236,12 @@ static void SelectTemplate (TEInfo *te)
 						count = 0;
 						for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 						{
-							TMacro	*mm = (TMacro *) (lng->macroColl[i]);
+							const TMacro	*mm = lng->macroColl[i];
 							if (!mm->Name.empty() && !mm->submenu)
 							{
 								if (count == res)
 								{
-									TMacro			*fm = (TMacro *) (lng->macroColl[i]);
+									const TMacro	*fm = lng->macroColl[i];
 									wchar_t				line[MAX_STR_LEN];
 									EditorInfoEx	ei;
 									Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
@@ -287,7 +293,7 @@ static void SelectTemplateSet (TEInfo *te)
 	{
 		for (size_t i = 0; i < lc; i++)
 		{
-			amenu[i].Text = ((TLang *) langColl[i])->desc;
+			amenu[i].Text = langColl[i]->desc;
 			amenu[i].Flags &= ~(MIF_CHECKED | MIF_SEPARATOR);
 			amenu[i].Flags |= ((size_t) (te->lang) == i) ? MIF_SELECTED : 0;
 		}

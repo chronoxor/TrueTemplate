@@ -1,11 +1,11 @@
-static int inComment (TLang *lng, const wchar_t *text_line, intptr_t pos)
+static bool inComment (const TLang *lng, const wchar_t *text_line, intptr_t pos)
 {
 	if (text_line)
 	{
 		size_t len = wcslen(text_line);
 		for (size_t i = 0; i < lng->commentColl.getCount(); i++)
 		{
-			TComment	*tmpc = (TComment *)(lng->commentColl[i]);
+			const TComment	*tmpc = lng->commentColl[i];
 			wchar_t		*line = (wchar_t *)malloc((len + 1) * sizeof(wchar_t));
 
 			if (line)
@@ -19,21 +19,21 @@ static int inComment (TLang *lng, const wchar_t *text_line, intptr_t pos)
 
 				if (blMatched && pos >= bounds[0] && pos <= bounds[1])
 				{
-					return (1);
+					return true;
 				}
 			}
 		}
 	}
 
-	return (0);
+	return false;
 }
 
-static intptr_t FindIndent (wchar_t c, TLang *lng, wchar_t *str, intptr_t foundBounds[2])
+static intptr_t FindIndent (wchar_t c, const TLang *lng, const wchar_t *str, intptr_t foundBounds[2])
 {
 	for (size_t j = 0; j < lng->indentColl.getCount(); j++)
 	{
-		TIndent *tmpi = (TIndent *) (lng->indentColl[j]);
-		wchar_t		ic = ((TIndent *) (lng->indentColl[j]))->immChar;
+		const TIndent *tmpi = lng->indentColl[j];
+		wchar_t		ic = lng->indentColl[j]->immChar;
 		if (lng->ignoreCase) ic = (wchar_t) FSF.LLower (ic);
 		if ((c == L'\0') || (c == ic))
 		{
@@ -50,13 +50,13 @@ static intptr_t FindIndent (wchar_t c, TLang *lng, wchar_t *str, intptr_t foundB
 	return (-1);
 }
 
-static size_t FindBrackets (TLang *lng, const wchar_t *str, const wchar_t **foundBrackets)
+static size_t FindBrackets (const TLang *lng, const wchar_t *str, const wchar_t **foundBrackets)
 {
 	size_t foundBracketsNum = 0;
 
 	for (size_t j = 0; j < lng->indentColl.getCount(); j++)
 	{
-		TIndent *tmpi = (TIndent *) (lng->indentColl[j]);
+		const TIndent *tmpi = lng->indentColl[j];
 		wchar_t	*line = new wchar_t[tmpi->mask.length() + 1];
 
 		if (line)
@@ -72,7 +72,7 @@ static size_t FindBrackets (TLang *lng, const wchar_t *str, const wchar_t **foun
 			{
 				if (tmpi->indent[0] != 0xFFFF && tmpi->BracketsMode)
 				{
-					TBracket	*br = (TBracket *) (lng->bracketColl[tmpi->bracketLink]);
+					const TBracket	*br = lng->bracketColl[tmpi->bracketLink];
 					foundBrackets[foundBracketsNum++] = br->open;
 				}
 			}
@@ -82,12 +82,12 @@ static size_t FindBrackets (TLang *lng, const wchar_t *str, const wchar_t **foun
 	return (foundBracketsNum);
 }
 
-static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng, const wchar_t **openBr, size_t nOpenBr)
+static const wchar_t *LookForOpenBracket (const EditorInfoEx *ei, TEditorPos &p, const TLang *lng, const wchar_t **openBr, size_t nOpenBr)
 {
 	static wchar_t							*c, buff[MAX_STR_LEN];
 	static EditorGetStringEx	gs;
 	ptrdiff_t	ret = -1;
-	wchar_t	*closeReg = lng->ignoreCase ? L"$/i" : L"$/";
+	const wchar_t	*closeReg = lng->ignoreCase ? L"$/i" : L"$/";
 	while (--p.Row >= 0)
 	{
 		EditorSetPos (p);
@@ -114,10 +114,10 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 				{
 					for (size_t i = 0; i < n; i++)
 					{
-						TBracket	*br = (TBracket *) (lng->bracketColl[i]);
+						const TBracket	*br = lng->bracketColl[i];
 						if (strMatch (buff, br->close, L"/^", closeReg, 0, 0))
 						{
-							wchar_t	*result = nullptr;
+							const wchar_t	*result = nullptr;
 							const wchar_t **br4look = new const wchar_t *[n];
 							size_t nbr4look = FindBrackets (lng, buff, br4look);
 							if (nbr4look) result = LookForOpenBracket (ei, p, lng, br4look, nbr4look);
@@ -141,13 +141,13 @@ static wchar_t *LookForOpenBracket (EditorInfoEx *ei, TEditorPos &p, TLang *lng,
 	return (nullptr);
 }
 
-static wchar_t *FindOpenBracket (EditorInfoEx *ei, TLang *lng, const wchar_t **openBr, size_t n)
+static const wchar_t *FindOpenBracket (const EditorInfoEx *ei, const TLang *lng, const wchar_t **openBr, size_t n)
 {
 	TEditorPos	p, o = EditorGetPos ();
 	p.Default ();
 	p.Row = o.Row;
 
-	wchar_t	*ret = LookForOpenBracket (ei, p, lng, openBr, n);
+	const wchar_t	*ret = LookForOpenBracket (ei, p, lng, openBr, n);
 	EditorSetPos (o);
 	return (ret);
 }
@@ -206,9 +206,9 @@ static intptr_t shiftLine(intptr_t i)
 
 static int TryIndent
 (
-	EditorInfoEx	*ei,
-	int						ret,
-	TLang					*lng,
+	const EditorInfoEx	*ei,
+	bool					ret,
+	const TLang		*lng,
 	intptr_t			j,
 	wchar_t				*str,
 	wchar_t				*realStr,
@@ -216,13 +216,13 @@ static int TryIndent
 	intptr_t			foundBounds[2]
 )
 {
-	TIndent		*tmpi = (TIndent *) (lng->indentColl[j]);
+	const TIndent		*tmpi = lng->indentColl[j];
 	intptr_t	iCurr = tmpi->indent[0];
 	intptr_t	iNext = tmpi->indent[1];
 	if (iCurr != 0xFFFF)
 	{
-		bool				processIndent = true;
-		wchar_t				*opencol = nullptr;
+		bool					processIndent = true;
+		const wchar_t	*opencol = nullptr;
 		TEditorPos	pos = EditorGetPos ();
 		if (!tmpi->relative.empty())
 		{
@@ -272,7 +272,7 @@ static int TryIndent
 	return (IGNORE_EVENT);
 }
 
-static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wchar_t *after, intptr_t len, intptr_t bounds[][2])
+static bool checkMultipleChoice (const TLang *lng, const TMacro * &mc, wchar_t *before, wchar_t *after, intptr_t len, intptr_t bounds[][2])
 {
 	const wchar_t	*menuPrefix = L"\\~";
 	size_t	pl = wcslen (menuPrefix);
@@ -305,14 +305,14 @@ static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wcha
 		if (lc)
 		{
 			FarMenuItemEx *amenu = new FarMenuItemEx[lc];
-			TMacro			**amacro = new TMacro *[lc];
+			const TMacro	**amacro = new const TMacro *[lc];
 			if (amenu)
 			{
 				size_t	i;
 				p = mc->MacroText;
 				for (i = 0; ((i < lc) && (*p));)
 				{
-					TMacro	*tm;
+					const TMacro	*tm;
 					wchar_t		tmpTitle[MAX_STR_LEN];
 					wchar_t		tmpBefore[MAX_STR_LEN];
 					tmpTitle[0] = 0;
@@ -408,7 +408,7 @@ static bool checkMultipleChoice (TLang *lng, TMacro * &mc, wchar_t *before, wcha
 	return (true);
 }
 
-static int TryMacro (EditorInfoEx *ei, TLang *lng, EditorGetStringEx &gs, TEditorPos &ep, wchar_t *line, wchar_t expChar)
+static bool TryMacro (EditorInfoEx *ei, const TLang *lng, EditorGetStringEx &gs, TEditorPos &ep, wchar_t *line, wchar_t expChar)
 {
 	if (expChar || !isCharSpace (gs.StringText[ep.Col - 1]))
 	{
@@ -435,7 +435,7 @@ static int TryMacro (EditorInfoEx *ei, TLang *lng, EditorGetStringEx &gs, TEdito
 			}
 
 			intptr_t	bounds[16][2];
-			TMacro	*mc = FindMacro (lng, before, after, expChar, &len, bounds);
+			const TMacro	*mc = FindMacro (lng, before, after, expChar, &len, bounds);
 			if (mc && checkMultipleChoice (lng, mc, before, after, len, bounds))
 			{
 				if (expChar) len--;
@@ -444,12 +444,12 @@ static int TryMacro (EditorInfoEx *ei, TLang *lng, EditorGetStringEx &gs, TEdito
 				pluginBusy = 0;
 				RunMacro (mc, before, bounds);
 				redraw ();
-				return (1);
+				return true;
 			}
 		}
 	}
 
-	return (0);
+	return false;
 }
 
 intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
@@ -461,7 +461,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 		Info->Rec.Event.KeyEvent.bKeyDown == 0
 	) return (PROCESS_EVENT);
 
-	int vState = Info->Rec.Event.KeyEvent.dwControlKeyState;
+	DWORD vState = Info->Rec.Event.KeyEvent.dwControlKeyState;
 	if (scrollStop && (vState & SCROLLLOCK_ON)) return (PROCESS_EVENT);
 
 	wchar_t filename[NM];
@@ -476,7 +476,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 	TEInfo	  *te = (*eList)[edId];
 	if (te->lang != -1)
 	{
-		TLang *lng = (TLang *) (langColl[te->lang]);
+		const TLang *lng = langColl[te->lang];
 		if (lng)
 		{
 			// Don't handle other editor events for disabled plugin.
@@ -488,7 +488,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 			line[MAX_STR_LEN - 1] = L'\0';
 
 			TEditorPos	epos = EditorGetPos ();
-			TMacro			*fm;
+			const TMacro			*fm;
 
 			//! MACRO EXISTS - START
 			if ((fm = FindMacroKey (lng, &Info->Rec)) != nullptr)
@@ -524,13 +524,13 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 			} //! MACRO EXISTS - END
 
 			wchar_t fKey[256];
-			FSF.FarInputRecordToName (&Info->Rec, fKey, 256);
+			FSF.FarInputRecordToName (&Info->Rec, fKey, _countof(fKey));
 			vState &= (SHIFT_PRESSED | RIGHT_ALT_PRESSED | LEFT_ALT_PRESSED | RIGHT_CTRL_PRESSED | LEFT_CTRL_PRESSED);
 
-			int spORret = ((wcscmp(fKey, L"Enter") == 0) || (wcscmp(fKey, defExpandFKey) == 0));
+			bool spORret = ((wcscmp(fKey, L"Enter") == 0) || (wcscmp(fKey, defExpandFKey) == 0));
 			if (!spORret && (vState &~SHIFT_PRESSED)) return (PROCESS_EVENT);
 
-			int		inImm = 0, inImmExp = 0;
+			bool	inImm = false, inImmExp = false;
 			wchar_t	vChar = Info->Rec.Event.KeyEvent.uChar.UnicodeChar;
 			if (!spORret)
 			{
@@ -617,7 +617,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 	return (PROCESS_EVENT);
 }
 
-static void InsertTemplate(intptr_t EditorID, TLang *lng)
+static void InsertTemplate(intptr_t EditorID, const TLang *lng)
 {
 	if (lng->setCP)
 	{
@@ -631,7 +631,7 @@ static void InsertTemplate(intptr_t EditorID, TLang *lng)
 	size_t	l = 0;
 	size_t	n = 0;
 	for (size_t i = 0; i < lng->macroColl.getCount(); i++)
-		if ((((TMacro *)(lng->macroColl[i]))->atStartup))
+		if (lng->macroColl[i]->atStartup)
 		{
 		l = i;
 		n++;
@@ -639,7 +639,7 @@ static void InsertTemplate(intptr_t EditorID, TLang *lng)
 
 	if (n == 1)
 	{
-		TMacro	*mm = (TMacro *)(lng->macroColl[l]);
+		const TMacro	*mm = lng->macroColl[l];
 		if (checkMultipleChoice(lng, mm, L"", L"", 0, nullptr))
 		{
 			RunMacro(mm, nullptr, nullptr);
@@ -654,12 +654,12 @@ static void InsertTemplate(intptr_t EditorID, TLang *lng)
 		FarMenuItemEx *pMenu = new FarMenuItemEx[n];
 		for (size_t i = 0; i < lng->macroColl.getCount(); i++)
 		{
-			if ((((TMacro *)(lng->macroColl[i]))->atStartup))
+			if (lng->macroColl[i]->atStartup)
 			{
-				if (((TMacro *)(lng->macroColl[i]))->Name.empty())
+				if (lng->macroColl[i]->Name.empty())
 					pMenu[l].Text = GetMsg(MUnnamed);
 				else
-					pMenu[l].Text = ((TMacro *)(lng->macroColl[i]))->Name;
+					pMenu[l].Text = lng->macroColl[i]->Name;
 				l++;
 			}
 		}
@@ -684,7 +684,7 @@ static void InsertTemplate(intptr_t EditorID, TLang *lng)
 		{
 			n = 0;
 			for (size_t i = 0; i < lng->macroColl.getCount(); i++)
-				if ((((TMacro *)(lng->macroColl[i]))->atStartup))
+				if (lng->macroColl[i]->atStartup)
 				{
 				if (n == res)
 				{
@@ -695,7 +695,7 @@ static void InsertTemplate(intptr_t EditorID, TLang *lng)
 				n++;
 				}
 
-			TMacro	*mm = (TMacro *)(lng->macroColl[l]);
+			const TMacro	*mm = lng->macroColl[l];
 			if (checkMultipleChoice(lng, mm, L"", L"", 0, nullptr))
 			{
 				RunMacro(mm, nullptr, nullptr);
@@ -708,4 +708,3 @@ static void InsertTemplate(intptr_t EditorID, TLang *lng)
 
 
 }
-

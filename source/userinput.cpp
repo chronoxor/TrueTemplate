@@ -272,10 +272,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 		InitItem.Y1 = 1;
 		InitItem.X2 = 55;
 		InitItem.Y2 = itemscount + addlength;
-		InitItem.Focus = 0;
-		InitItem.Selected = 0;
+		InitItem.Focus = false;
+		InitItem.Selected = false;
 		InitItem.Flags = DIF_BOXCOLOR;
-		InitItem.DefaultButton = 0;
+		InitItem.DefaultButton = false;
 		InitItem.Data = (title != nullptr) ? title : GetMsg (MParams);
 		InitItem.History = nullptr;
 		InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
@@ -291,23 +291,23 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 				InitItem.Y1 = curDlgPos++;
 				InitItem.X2 = 53;
 				InitItem.Y2 = 0;
-				InitItem.Focus = 0;
-				InitItem.Selected = 0;
+				InitItem.Focus = false;
+				InitItem.Selected = false;
 				InitItem.Flags = 0;
-				InitItem.DefaultButton = 0;
+				InitItem.DefaultButton = false;
 				InitItem.Data = uttlString[i];
 				InitItem.History = nullptr;
 				InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
 				break;
 			case USER_CHECK:
 				{
-					int		selected = 0;
+					bool		selected = false;
 					wchar_t	*tmp = userString[i];
 					while (*tmp)
 					{
 						if ((tmp[0] != L'\\') && (tmp[1] == L'\'') && (tmp[2] == L'+') && (tmp[3] == L'\''))
 						{
-							selected = 1;
+							selected = true;
 							break;
 						}
 
@@ -319,10 +319,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					InitItem.Y1 = curDlgPos++;
 					InitItem.X2 = 53;
 					InitItem.Y2 = 0;
-					InitItem.Focus = (gainfocus) ? 1 : 0;
+					InitItem.Focus = gainfocus;
 					InitItem.Selected = selected;
 					InitItem.Flags = 0;
-					InitItem.DefaultButton = 0;
+					InitItem.DefaultButton = false;
 					InitItem.Data = uttlString[i];
 					InitItem.History = nullptr;
 					InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
@@ -338,10 +338,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					InitItem.Y1 = curDlgPos++;
 					InitItem.X2 = 53;
 					InitItem.Y2 = 0;
-					InitItem.Focus = 0;
-					InitItem.Selected = 0;
+					InitItem.Focus = false;
+					InitItem.Selected = false;
 					InitItem.Flags = 0;
-					InitItem.DefaultButton = 0;
+					InitItem.DefaultButton = false;
 					InitItem.Data = uttlString[i];
 					InitItem.History = nullptr;
 					InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
@@ -385,10 +385,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					InitItem.Y1 = curDlgPos++;
 					InitItem.X2 = 53;
 					InitItem.Y2 = 0;
-					InitItem.Focus = (gainfocus) ? 1 : 0;
-					InitItem.Selected = (int) (&listBox[i]);
+					InitItem.Focus = gainfocus;
+					InitItem.Selected = (bool) (&listBox[i]);
 					InitItem.Flags = DIF_LISTAUTOHIGHLIGHT | DIF_LISTNOAMPERSAND | DIF_LISTWRAPMODE | ((utypString[i] == USER_COMBO) ? 0 : DIF_DROPDOWNLIST);
-					InitItem.DefaultButton = 0;
+					InitItem.DefaultButton = false;
 					InitItem.Data = (sel < 0) ? L"" : listBox[i].Items[sel].Text;
 					InitItem.History = nullptr;
 					InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
@@ -405,10 +405,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					InitItem.Y1 = curDlgPos++;
 					InitItem.X2 = 53;
 					InitItem.Y2 = 0;
-					InitItem.Focus = 0;
-					InitItem.Selected = 0;
+					InitItem.Focus = false;
+					InitItem.Selected = false;
 					InitItem.Flags = 0;
-					InitItem.DefaultButton = 0;
+					InitItem.DefaultButton = false;
 					InitItem.Data = uttlString[i];
 					InitItem.History = nullptr;
 					InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
@@ -420,10 +420,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					InitItem.Y1 = curDlgPos++;
 					InitItem.X2 = (utypString[i] == USER_EDIT) ? 53 : (5 + _wtoi (len) - 1);
 					InitItem.Y2 = 0;
-					InitItem.Focus = (gainfocus) ? 1 : 0;
-					InitItem.Selected = 0;
+					InitItem.Focus = gainfocus;
+					InitItem.Selected = false;
 					InitItem.Flags = (utypString[i] == USER_EDIT) ? DIF_HISTORY : 0;
-					InitItem.DefaultButton = 0;
+					InitItem.DefaultButton = false;
 					InitItem.Data = uformat[curDlgItem];
 					InitItem.History = (utypString[i] == USER_EDIT) ? L"True-Tpl.History.UserInput.Edit" : nullptr;
 					InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
@@ -472,10 +472,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					InitItem.Y1 = curDlgPos++;
 					InitItem.X2 = 53;
 					InitItem.Y2 = (curDlgPos += ic)++;
-					InitItem.Focus = (gainfocus) ? 1 : 0;
-					InitItem.Selected = (int) (&listBox[i]);
+					InitItem.Focus = gainfocus;
+					InitItem.Selected = (bool) (&listBox[i]);
 					InitItem.Flags = DIF_LISTAUTOHIGHLIGHT | DIF_LISTNOAMPERSAND | DIF_LISTWRAPMODE;
-					InitItem.DefaultButton = 0;
+					InitItem.DefaultButton = false;
 					InitItem.Data = uttlString[i];
 					InitItem.History = nullptr;
 					InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
@@ -502,10 +502,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					InitItem.Y1 = curDlgPos++;
 					InitItem.X2 = 53;
 					InitItem.Y2 = curDlgPos + ic;
-					InitItem.Focus = 0;
-					InitItem.Selected = 0;
+					InitItem.Focus = false;
+					InitItem.Selected = false;
 					InitItem.Flags = 0;
-					InitItem.DefaultButton = 0;
+					InitItem.DefaultButton = false;
 					InitItem.Data = uttlString[i];
 					InitItem.History = nullptr;
 					InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
@@ -538,10 +538,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 							InitItem.Y1 = curDlgPos++;
 							InitItem.X2 = 52;
 							InitItem.Y2 = 0;
-							InitItem.Focus = (gainfocus) ? 1 : 0;
-							InitItem.Selected = (selItem) ? 1 : 0;
+							InitItem.Focus = gainfocus;
+							InitItem.Selected = selItem;
 							InitItem.Flags = (startGroup) ? DIF_GROUP : 0;
-							InitItem.DefaultButton = 0;
+							InitItem.DefaultButton = false;
 							InitItem.Data = uformat[curDlgItem];
 							InitItem.History = nullptr;
 							InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
@@ -565,10 +565,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 		InitItem.Y1 = itemscount + addlength - 2;
 		InitItem.X2 = 0;
 		InitItem.Y2 = 0;
-		InitItem.Focus = 0;
-		InitItem.Selected = 0;
+		InitItem.Focus = false;
+		InitItem.Selected = false;
 		InitItem.Flags = DIF_BOXCOLOR | DIF_SEPARATOR;
-		InitItem.DefaultButton = 0;
+		InitItem.DefaultButton = false;
 		InitItem.Data = L"";
 		InitItem.History = nullptr;
 		InitDialogItemsEx (&InitItem, DialogItems + itemscount - 3, 1);
@@ -579,10 +579,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 		InitItem.Y1 = itemscount + addlength - 1;
 		InitItem.X2 = 0;
 		InitItem.Y2 = 0;
-		InitItem.Focus = 0;
-		InitItem.Selected = 0;
+		InitItem.Focus = false;
+		InitItem.Selected = false;
 		InitItem.Flags = DIF_CENTERGROUP;
-		InitItem.DefaultButton = 1;
+		InitItem.DefaultButton = true;
 		InitItem.Data = GetMsg (MOK);
 		InitItem.History = nullptr;
 		InitDialogItemsEx (&InitItem, DialogItems + itemscount - 2, 1);
@@ -593,10 +593,10 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 		InitItem.Y1 = itemscount + addlength - 1;
 		InitItem.X2 = 0;
 		InitItem.Y2 = 0;
-		InitItem.Focus = 0;
-		InitItem.Selected = 0;
+		InitItem.Focus = false;
+		InitItem.Selected = false;
 		InitItem.Flags = DIF_CENTERGROUP;
-		InitItem.DefaultButton = 0;
+		InitItem.DefaultButton = false;
 		InitItem.Data = GetMsg (MCancel);
 		InitItem.History = nullptr;
 		InitDialogItemsEx (&InitItem, DialogItems + itemscount - 1, 1);

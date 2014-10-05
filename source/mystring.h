@@ -6,9 +6,14 @@
 class String
 {
 public:
-	String() : m_buf(nullptr), m_len(0) 
+	String() : m_buf(nullptr), m_len(0)
 	{
 		clear();
+	}
+
+	explicit String(size_t len) : m_buf(nullptr), m_len(0)
+	{
+		makeBuffer(len);
 	}
 
 	String(const wchar_t *p) : m_buf(nullptr), m_len(0)
@@ -69,7 +74,7 @@ public:
 		}
 		return *this;
 	}
-	
+
 	String &operator+=(wchar_t c)
 	{
 		wchar_t *newbuf = new wchar_t[m_len + 2];
@@ -96,13 +101,21 @@ public:
 
 	size_t length() const { return m_len; }
 	bool empty() const { return m_len == 0; }
+	wchar_t *getBuffer() { return m_buf; }
 
 	void clear()
 	{
-		m_len = 0;
+		makeBuffer(0);
+	}
+
+	wchar_t *makeBuffer(size_t size)
+	{
+		wchar_t *newbuf = new wchar_t[size + 1];
+		newbuf[size] = L'\0';
 		delete[] m_buf;
-		m_buf = new wchar_t[1];
-		m_buf[0] = L'\0';
+		m_buf = newbuf;
+		m_len = size;
+		return m_buf;
 	}
 
 private:
