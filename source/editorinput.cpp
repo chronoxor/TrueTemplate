@@ -2,25 +2,14 @@ static bool inComment (const TLang *lng, const wchar_t *text_line, intptr_t pos)
 {
 	if (text_line)
 	{
-		size_t len = wcslen(text_line);
 		for (size_t i = 0; i < lng->commentColl.getCount(); i++)
 		{
 			const TComment	*tmpc = lng->commentColl[i];
-			wchar_t		*line = (wchar_t *)malloc((len + 1) * sizeof(wchar_t));
-
-			if (line)
+			intptr_t	bounds[2], zero = 0;
+			bool	blMatched = strMatch(text_line, tmpc->mask, L"/", lng->ignoreCase ? L"/i" : L"/", 1, &bounds, &zero);
+			if (blMatched && pos >= bounds[0] && pos <= bounds[1])
 			{
-				wcscpy(line, text_line);
-				if (lng->ignoreCase) StrLower(line); /*!?*/
-
-				intptr_t	bounds[2], zero = 0;
-				bool	blMatched = strMatch(line, tmpc->mask, L"/", lng->ignoreCase ? L"/i" : L"/", 1, &bounds, &zero);
-				free(line);
-
-				if (blMatched && pos >= bounds[0] && pos <= bounds[1])
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 	}
