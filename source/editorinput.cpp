@@ -473,7 +473,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 				return (PROCESS_EVENT);
 
 			wchar_t	line[MAX_STR_LEN];
-			for (int i = 0; i < MAX_STR_LEN; i++) line[i] = L' ';
+			for (intptr_t i = 0; i < MAX_STR_LEN; i++) line[i] = L' ';
 			line[MAX_STR_LEN - 1] = L'\0';
 
 			TEditorPos	epos = EditorGetPos ();
@@ -521,6 +521,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 
 			bool	inImm = false, inImmExp = false;
 			wchar_t	vChar = Info->Rec.Event.KeyEvent.uChar.UnicodeChar;
+			WORD		keycode = Info->Rec.Event.KeyEvent.wVirtualKeyCode;
 			if (!spORret)
 			{
 				if (lng->ignoreCase)
@@ -561,7 +562,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 					if (!spORret)
 					{
 						pluginBusy = 1;
-						EditorProcessKey (vChar);
+						EditorProcessKey (vChar, keycode);
 						pluginBusy = 0;
 						ret = IGNORE_EVENT;
 						EditorGetStr (&gs);

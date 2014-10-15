@@ -301,13 +301,14 @@ static void GetFilePathName (wchar_t* filename, size_t size)
 	Info.EditorControl (-1, ECTL_GETFILENAME, size, filename);
 }
 
-static void EditorProcessKey (wchar_t unicode)
+static void EditorProcessKey (wchar_t unicode, WORD keycode = 0)
 {
 	INPUT_RECORD	tr;
 	tr.EventType = KEY_EVENT;
 	tr.Event.KeyEvent.bKeyDown = true;
 	tr.Event.KeyEvent.wRepeatCount = 1;
-	tr.Event.KeyEvent.wVirtualKeyCode = 0;
+	tr.Event.KeyEvent.wVirtualKeyCode = keycode;
+	tr.Event.KeyEvent.wVirtualScanCode = 0;
 	tr.Event.KeyEvent.uChar.UnicodeChar = unicode;
 	tr.Event.KeyEvent.dwControlKeyState = 0;
 	Info.EditorControl (-1, ECTL_PROCESSINPUT, 0, &tr);
