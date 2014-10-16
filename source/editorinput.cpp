@@ -2,25 +2,14 @@ static bool inComment (const TLang *lng, const wchar_t *text_line, intptr_t pos)
 {
 	if (text_line)
 	{
-		size_t len = wcslen(text_line);
 		for (size_t i = 0; i < lng->commentColl.getCount(); i++)
 		{
 			const TComment	*tmpc = lng->commentColl[i];
-			wchar_t		*line = (wchar_t *)malloc((len + 1) * sizeof(wchar_t));
-
-			if (line)
+			intptr_t	bounds[2], zero = 0;
+			bool	blMatched = strMatch(text_line, tmpc->mask, L"/", lng->ignoreCase ? L"/i" : L"/", 1, &bounds, &zero);
+			if (blMatched && pos >= bounds[0] && pos <= bounds[1])
 			{
-				wcscpy(line, text_line);
-				if (lng->ignoreCase) StrLower(line); /*!?*/
-
-				intptr_t	bounds[2], zero = 0;
-				bool	blMatched = strMatch(line, tmpc->mask, L"/", lng->ignoreCase ? L"/i" : L"/", 1, &bounds, &zero);
-				free(line);
-
-				if (blMatched && pos >= bounds[0] && pos <= bounds[1])
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 	}
@@ -484,7 +473,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 				return (PROCESS_EVENT);
 
 			wchar_t	line[MAX_STR_LEN];
-			for (int i = 0; i < MAX_STR_LEN; i++) line[i] = L' ';
+			for (intptr_t i = 0; i < MAX_STR_LEN; i++) line[i] = L' ';
 			line[MAX_STR_LEN - 1] = L'\0';
 
 			TEditorPos	epos = EditorGetPos ();
@@ -532,6 +521,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 
 			bool	inImm = false, inImmExp = false;
 			wchar_t	vChar = Info->Rec.Event.KeyEvent.uChar.UnicodeChar;
+			WORD		keycode = Info->Rec.Event.KeyEvent.wVirtualKeyCode;
 			if (!spORret)
 			{
 				if (lng->ignoreCase)
@@ -572,7 +562,7 @@ intptr_t WINAPI ProcessEditorInputW(const struct ProcessEditorInputInfo *Info)
 					if (!spORret)
 					{
 						pluginBusy = 1;
-						EditorProcessKey (vChar);
+						EditorProcessKey (vChar, keycode);
 						pluginBusy = 0;
 						ret = IGNORE_EVENT;
 						EditorGetStr (&gs);
