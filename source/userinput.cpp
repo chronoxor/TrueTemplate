@@ -1,14 +1,17 @@
 #define USER_INPUT_LENGTH 512
-#define USER_CHECK				0
-#define USER_COMBO				1
-#define USER_DROPDOWN			2
-#define USER_EDIT					3
-#define USER_FIXEDIT			4
-#define USER_LIST					5
-#define USER_RADIO				6
-#define USER_STATIC				7
 
-static int	utypString[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+enum UserStringType {
+	USER_CHECK,
+	USER_COMBO,
+	USER_DROPDOWN,
+	USER_EDIT,
+	USER_FIXEDIT,
+	USER_LIST,
+	USER_RADIO,
+	USER_STATIC,
+};
+
+static UserStringType	utypString[10];
 static wchar_t userString[10][USER_INPUT_LENGTH] = { L"", L"", L"", L"", L"", L"", L"", L"", L"", L"" };
 static wchar_t uttlString[10][USER_INPUT_LENGTH] = { L"", L"", L"", L"", L"", L"", L"", L"", L"", L"" };
 static wchar_t uformat[1000][USER_INPUT_LENGTH];
@@ -16,14 +19,18 @@ static wchar_t ulist[10][10][USER_INPUT_LENGTH];
 
 static void nullUserStrings (void)
 {
-	for (int i = 0; i < 10; i++) utypString[i] = *userString[i] = *uttlString[i] = 0;
+	for (int i = 0; i < 10; i++) {
+		utypString[i] = USER_CHECK;
+		*userString[i] = 0;
+		*uttlString[i] = 0;
+	}
 	for (int i = 0; i < 1000; i++) *uformat[i] = 0;
         for (int i = 0; i < 10; i++)
                 for (int j = 0; j < 10; j++)
                         *ulist[i][j] = 0;
 }
 
-void unpackUserString (const wchar_t *userStr, wchar_t *format, size_t index)
+static void unpackUserString (const wchar_t *userStr, wchar_t *format, size_t index)
 {
 	const wchar_t	*tmp = userStr;
 	wchar_t				*tmpname = format;
