@@ -328,7 +328,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 		break;
 	case CMD_Argument:
 		{
-			psz = userString[*szParam1 - 0x30];
+			psz = userString[*szParam1 - 0x30].getBuffer ();
 		}
 		break;
 	case CMD_ClipBoard:
@@ -858,6 +858,9 @@ static void RunMacro(const TMacro *m, const wchar_t *origStr, intptr_t bounds[][
 		{
 			switch (*++p)
 			{
+			case L'?':
+				skipUserInputMacro (++p);
+				break;
 			case L'l':
 				firstsel = true;
 				break;

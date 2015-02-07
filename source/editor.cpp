@@ -78,6 +78,21 @@ static void EditorSetStr (const wchar_t *src, intptr_t line = -1)
 	Info.EditorControl (-1, ECTL_SETSTRING, 0, &st);
 }
 
+static String EditorGetSelectionLine (void)
+{
+	EditorInfoEx	ei;
+	Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
+	if (ei.BlockType != BTYPE_NONE)
+	{
+		EditorGetStringEx egs;
+		EditorGetStr (&egs, ei.BlockStartLine);
+		if (egs.SelEnd == -1)
+			return String (egs.StringText + egs.SelStart);
+		return String (egs.StringText + egs.SelStart, egs.StringText + egs.SelEnd);
+	}
+	return L"";
+}
+
 static void EditorSaveSelected (void)
 {
 	int				vblock;
