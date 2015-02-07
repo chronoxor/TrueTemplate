@@ -902,8 +902,7 @@ static void RunMacro(const TMacro *m, const wchar_t *origStr, intptr_t bounds[][
 					selEnd = EditorGetPos ();
 					break;
 				case 0:
-				case L'\\':
-					EditorProcessFARKey (VK_OEM_5, false);
+					p--;
 					break;
 				case L't':
 					EditorProcessFARKey (VK_TAB, false);
