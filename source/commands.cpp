@@ -676,7 +676,6 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 							}
 
 							bool	blSetPos = false;
-							byte	isDateTime = 0;
 							if (wcslen (f) > 5)	//min_para_size==4 + 2 delimiters
 							{
 								wchar_t	_d;
