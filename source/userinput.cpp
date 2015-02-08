@@ -1,34 +1,41 @@
 #define USER_INPUT_LENGTH 512
-#define USER_CHECK				0
-#define USER_COMBO				1
-#define USER_DROPDOWN			2
-#define USER_EDIT					3
-#define USER_FIXEDIT			4
-#define USER_LIST					5
-#define USER_RADIO				6
-#define USER_STATIC				7
 
-static int	utypString[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-static wchar_t userString[10][USER_INPUT_LENGTH] = { L"", L"", L"", L"", L"", L"", L"", L"", L"", L"" };
-static wchar_t uttlString[10][USER_INPUT_LENGTH] = { L"", L"", L"", L"", L"", L"", L"", L"", L"", L"" };
-static wchar_t uformat[1000][USER_INPUT_LENGTH];
-static wchar_t ulist[10][10][USER_INPUT_LENGTH];
+enum UserStringType {
+	USER_CHECK,
+	USER_COMBO,
+	USER_DROPDOWN,
+	USER_EDIT,
+	USER_FIXEDIT,
+	USER_LIST,
+	USER_RADIO,
+	USER_STATIC,
+};
+
+static UserStringType	utypString[10];
+static String userString[10];
+static String uttlString[10];
+static String uformat[1000];
+static String ulist[10][10];
 
 static void nullUserStrings (void)
 {
-	for (int i = 0; i < 10; i++) utypString[i] = *userString[i] = *uttlString[i] = 0;
-	for (int i = 0; i < 1000; i++) *uformat[i] = 0;
-        for (int i = 0; i < 10; i++)
-                for (int j = 0; j < 10; j++)
-                        *ulist[i][j] = 0;
+	for (int i = 0; i < 10; i++) {
+		utypString[i] = USER_CHECK;
+		userString[i].clear ();
+		uttlString[i].clear ();
+	}
+	for (int i = 0; i < 1000; i++)
+		uformat[i].clear ();
+	for (int i = 0; i < 10; i++)
+		for (int j = 0; j < 10; j++)
+			ulist[i][j].clear ();
 }
 
-void unpackUserString (const wchar_t *userStr, wchar_t *format, size_t index)
+static void unpackUserString(const String &userStr, String &format, size_t index)
 {
 	const wchar_t	*tmp = userStr;
-	wchar_t				*tmpname = format;
 	size_t				curindex = 0;
-	*tmpname = L'\0';
+	format.clear ();
 	while (*tmp)
 	{
 		if (tmp[0] == L'\'')
@@ -36,11 +43,11 @@ void unpackUserString (const wchar_t *userStr, wchar_t *format, size_t index)
 			tmp++;
 			while (*tmp)
 			{
-				if ((tmp[0] == L'\\') && ((tmp[1] == L'\\') || (tmp[1] == L'\'') || (tmp[1] == L'?')))
+				if ((tmp[0] == L'\\') && ((tmp[1] == L'\\') || (tmp[1] == L'\'') || (tmp[1] == L'?') || (tmp[1] == L'l')))
 				{
 					tmp++;
 					if (curindex == index)
-						*tmpname++ = *tmp++;
+						format += *tmp++;
 					else
 						tmp++;
 				}
@@ -51,7 +58,6 @@ void unpackUserString (const wchar_t *userStr, wchar_t *format, size_t index)
 						tmp++;
 						if (curindex == index)
 						{
-							*tmpname = L'\0';
 							return ;
 						}
 						else
@@ -60,7 +66,7 @@ void unpackUserString (const wchar_t *userStr, wchar_t *format, size_t index)
 					else
 					{
 						if (curindex == index)
-							*tmpname++ = *tmp++;
+							format += *tmp++;
 						else
 							tmp++;
 					}
@@ -74,42 +80,58 @@ void unpackUserString (const wchar_t *userStr, wchar_t *format, size_t index)
 	}
 }
 
+static void skipUserInputMacro (const wchar_t *&p)
+{
+	while (*p)
+	{
+		if ((p[0] == L'\\') && ((p[1] == L'\\') || (p[1] == L'\'') || (p[1] == L'?') || (p[1] == L'l')))
+		{
+			p++;
+			p++;
+		}
+		else if (*p == L'?')
+			break;
+		else
+			p++;
+	}
+}
+
 static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText, const wchar_t *title = nullptr)
 {
 	size_t count = 0;
 	nullUserStrings ();
-	for (wchar_t *p = (wchar_t *) MacroText; *p; p++)
+	for (const wchar_t *p = (wchar_t *) MacroText; *p; p++)
 	{
 		if (*p == macro)
 		{
 			//Getting user string type and argument string
 			if (*++p == L'?')
 			{
-				wchar_t	*tmp = p + 1;
+				const wchar_t	*tmp = p + 1;
 				if (*tmp == L'\'')
 				{
 					tmp++;
 
-					wchar_t	*tmpname = uttlString[count];
-					*tmpname = '\0';
+					uttlString[count].clear ();
 					while (*tmp)
 					{
 						if ((tmp[0] == L'\\') && ((tmp[1] == L'\\') || (tmp[1] == L'\'') || (tmp[1] == L'?')))
 						{
 							tmp++;
-							*tmpname++ = *tmp++;
+							uttlString[count] += *tmp++;
+						}
+						else if ((tmp[0] == L'\\') && (tmp[1] == L'l'))
+						{
+							tmp += 2;
+							uttlString[count] += EditorGetSelectionLine();
+						}
+						else if (*tmp == L'\'')
+						{
+							tmp++;
+							break;
 						}
 						else
-						{
-							if (*tmp == L'\'')
-							{
-								tmp++;
-								*tmpname = L'\0';
-								break;
-							}
-							else
-								*tmpname++ = *tmp++;
-						}
+							uttlString[count] += *tmp++;
 					}
 
 					switch (*tmp)
@@ -149,44 +171,31 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 						return (false);
 					}
 
-					tmpname = userString[count++];
 					while (*tmp)
 					{
 						if ((tmp[0] == L'\\') && ((tmp[1] == L'\\') || (tmp[1] == L'\'') || (tmp[1] == L'?')))
 						{
-							*tmpname++ = *tmp++;
-							*tmpname++ = *tmp++;
+							userString[count] += *tmp++;
+							userString[count] += *tmp++;
+						}
+						else if ((tmp[0] == L'\\') && (tmp[1] == L'l'))
+						{
+							tmp += 2;
+							userString[count] += EditorGetSelectionLine();
+						}
+						else if (*tmp == L'?')
+						{
+							tmp++;
+							break;
 						}
 						else
-						{
-							if (*tmp == L'?')
-							{
-								tmp++;
-								*tmpname = L'\0';
-								break;
-							}
-							else
-								*tmpname++ = *tmp++;
-						}
+							userString[count] += *tmp++;
 					}
+					count++;
 				}
 
 				p++;
-				while (*p)
-				{
-					if ((p[0] == L'\\') && ((p[1] == L'\\') || (p[1] == L'\'') || (p[1] == L'?')))
-					{
-						p++;
-						p++;
-					}
-					else
-					{
-						if (*p == L'?')
-							break;
-						else
-							p++;
-					}
-				}
+				skipUserInputMacro (p);
 			}
 		}
 	}
@@ -213,7 +222,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 				addlength += 1;
 				itemscount += 1;
 
-				wchar_t	*tmp = userString[i];
+				const wchar_t	*tmp = userString[i];
 				while (*tmp)
 				{
 					if
@@ -231,7 +240,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 				addlength += 1;
 				itemscount += 1;
 
-				wchar_t	*tmp = userString[i];
+				const wchar_t	*tmp = userString[i];
 				while (*tmp)
 				{
 					if
@@ -302,7 +311,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 			case USER_CHECK:
 				{
 					bool		selected = false;
-					wchar_t	*tmp = userString[i];
+					const wchar_t	*tmp = userString[i];
 					while (*tmp)
 					{
 						if ((tmp[0] != L'\\') && (tmp[1] == L'\'') && (tmp[2] == L'+') && (tmp[3] == L'\''))
@@ -348,7 +357,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 
 					intptr_t	ic = 0;
 					intptr_t	sel = -1;
-					wchar_t	*tmp = userString[i];
+					const wchar_t	*tmp = userString[i];
 					while (*tmp)
 					{
 						if
@@ -399,7 +408,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 			case USER_EDIT:
 			case USER_FIXEDIT:
 				{
-					wchar_t	len[USER_INPUT_LENGTH];
+					String	len;
 					InitItem.Type = DI_TEXT;
 					InitItem.X1 = 5;
 					InitItem.Y1 = curDlgPos++;
@@ -414,7 +423,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					InitDialogItemsEx (&InitItem, DialogItems + curDlgItem++, 1);
 					unpackUserString (userString[i], uformat[curDlgItem], 0);
 					if (utypString[i] == USER_FIXEDIT) unpackUserString (userString[i], len, 1);
-					wcscpy (userString[i], uformat[curDlgItem]);
+					userString[i] = uformat[curDlgItem];
 					InitItem.Type = (utypString[i] == USER_EDIT) ? DI_EDIT : DI_FIXEDIT;
 					InitItem.X1 = 5;
 					InitItem.Y1 = curDlgPos++;
@@ -435,7 +444,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 				{
 					intptr_t	ic = 0;
 					intptr_t	sel = -1;
-					wchar_t	*tmp = userString[i];
+					const wchar_t	*tmp = userString[i];
 					while (*tmp)
 					{
 						if
@@ -486,7 +495,7 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 			case USER_RADIO:
 				{
 					intptr_t	ic = 0;
-					wchar_t	*tmp = userString[i];
+					const wchar_t	*tmp = userString[i];
 					while (*tmp)
 					{
 						if
@@ -613,84 +622,90 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 					switch (utypString[i])
 					{
 					case USER_STATIC:
-						wcscpy (userString[i], L"");
+						userString[i].clear ();
 						curdialogitem += 1;
 						break;
 					case USER_CHECK:
 						unpackUserString (userString[i], uformat[curdialogitem], (Info.SendDlgMessage(hDlg,DM_GETCHECK,curdialogitem,nullptr) == BSTATE_CHECKED) ? 0 : 1);
-						wcscpy (userString[i], uformat[curdialogitem]);
+						userString[i] = uformat[curdialogitem];
 						curdialogitem += 1;
 						break;
 					case USER_COMBO:
 					case USER_DROPDOWN:
 						{
 							FarDialogItemDataEx item;
-							item.PtrLength = 512;
-							item.PtrData = userString[i];
+							wchar_t buf[USER_INPUT_LENGTH];
+							item.PtrLength = _countof(buf);
+							item.PtrData = buf;
 							Info.SendDlgMessage(hDlg, DM_GETTEXT, curdialogitem + 1, (void*)&item);
+							userString[i] = buf;
 							curdialogitem += 2;
 							break;
 						}
 					case USER_EDIT:
 						{
 							FarDialogItemDataEx item;
-							item.PtrLength = 512;
-							item.PtrData = userString[i];
+							wchar_t buf[USER_INPUT_LENGTH];
+							item.PtrLength = _countof(buf);
+							item.PtrData = buf;
 							Info.SendDlgMessage(hDlg, DM_GETTEXT, curdialogitem + 1, (void*)&item);
+							userString[i] = buf;
 							curdialogitem += 2;
 							break;
 						}
 					case USER_FIXEDIT:
 						{
 							FarDialogItemDataEx item;
-							item.PtrLength = 512;
-							item.PtrData = userString[i];
+							wchar_t buf[USER_INPUT_LENGTH];
+							item.PtrLength = _countof(buf);
+							item.PtrData = buf;
 							Info.SendDlgMessage(hDlg, DM_GETTEXT, curdialogitem + 1, (void*)&item);
+							userString[i] = buf;
 							curdialogitem += 2;
 							break;
 						}
 					case USER_LIST:
 						{
-							wchar_t	tmpList[USER_INPUT_LENGTH];
-							wchar_t	*tmp = userString[i];
+							String	tmpList;
+							const wchar_t	*tmp = userString[i];
 							intptr_t	ic = 0;
-							wcscpy (tmpList, L"");
+							tmpList.clear ();
 							while (*tmp)
 							{
 								if
-								(
+									(
 									((tmp[0] != L'\\') && (tmp[1] == L'\'') && ((tmp[2] == L'+') || (tmp[2] == L'-')) && (tmp[3] == L'\'')) ||
 									((tmp == userString[i]) && ((tmp[0] == L'+') || (tmp[0] == L'-')) && ((tmp[1] == L'\'')))
-								)
+									)
 								{
-                                    struct FarListGetItem List={sizeof(FarListGetItem)};
-                                    List.ItemIndex=ic;
-                                    Info.SendDlgMessage(hDlg,DM_LISTGETITEM,curdialogitem,&List);
+									struct FarListGetItem List = { sizeof(FarListGetItem) };
+									List.ItemIndex = ic;
+									Info.SendDlgMessage(hDlg, DM_LISTGETITEM, curdialogitem, &List);
 
 									unpackUserString
-									(
+										(
 										userString[i],
 										uformat[curdialogitem],
 										ic * 3 + ((List.Item.Flags & LIF_SELECTED) ? 1 : 2)
-									);
-									wcscat (tmpList, uformat[curdialogitem]);
+										);
+									tmpList += uformat[curdialogitem];
 									ic++;
 								}
 
 								tmp++;
 							}
 
-							wcscpy (userString[i], tmpList);
+							userString[i] = tmpList;
 							curdialogitem += 1;
 							break;
 						}
 
 					case USER_RADIO:
 						{
-							wchar_t	tmpRadio[USER_INPUT_LENGTH];
-							wchar_t	*tmp = userString[i];
+							String	tmpRadio;
+							const wchar_t	*tmp = userString[i];
 							intptr_t	ic = 0;
-							wcscpy (tmpRadio, L"");
+							tmpRadio.clear ();
 							while (*tmp)
 							{
 								if
@@ -705,14 +720,14 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 										uformat[curdialogitem],
 										ic * 3 + ((Info.SendDlgMessage(hDlg,DM_GETCHECK,curdialogitem + ic + 1,nullptr) == BSTATE_CHECKED) ? 1 : 2)
 									);
-									wcscat (tmpRadio, uformat[curdialogitem]);
+									tmpRadio += uformat[curdialogitem];
 									ic++;
 								}
 
 								tmp++;
 							}
 
-							wcscpy (userString[i], tmpRadio);
+							userString[i] = tmpRadio;
 							curdialogitem += ic + 1;
 							break;
 						}
@@ -721,7 +736,8 @@ static bool scanUserInput (bool inMacro, wchar_t macro, const wchar_t *MacroText
 			}
 			else
 			{
-				for (size_t i = 0; i < count; i++) wcscpy(userString[i], L"");
+				for (size_t i = 0; i < count; i++)
+					userString[i].clear ();
 				res = false;
 			}
 			Info.DialogFree(hDlg);

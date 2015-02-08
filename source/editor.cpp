@@ -78,6 +78,21 @@ static void EditorSetStr (const wchar_t *src, intptr_t line = -1)
 	Info.EditorControl (-1, ECTL_SETSTRING, 0, &st);
 }
 
+static String EditorGetSelectionLine (void)
+{
+	EditorInfoEx	ei;
+	Info.EditorControl (-1, ECTL_GETINFO, 0, &ei);
+	if (ei.BlockType != BTYPE_NONE)
+	{
+		EditorGetStringEx egs;
+		EditorGetStr (&egs, ei.BlockStartLine);
+		if (egs.SelEnd == -1)
+			return String (egs.StringText + egs.SelStart);
+		return String (egs.StringText + egs.SelStart, egs.StringText + egs.SelEnd);
+	}
+	return L"";
+}
+
 static void EditorSaveSelected (void)
 {
 	int				vblock;
@@ -289,10 +304,20 @@ static void selectBlock (intptr_t X1, intptr_t Y1, intptr_t X2, intptr_t Y2)
 {
 	EditorSelectEx	es;
 	es.BlockType = BTYPE_STREAM;
-	es.BlockStartLine = min (Y2, Y1);
-	es.BlockStartPos = min (X1, X2);
-	es.BlockHeight = max (Y1, Y2) - min (Y1, Y2) + 1;
-	es.BlockWidth = max (X1, X2) - min (X1, X2);
+	if (Y1 < Y2)
+	{
+		es.BlockStartLine = Y1;
+		es.BlockStartPos = X1;
+		es.BlockHeight = Y2 - Y1 + 1;
+		es.BlockWidth = X2 - X1;
+	}
+	else
+	{
+		es.BlockStartLine = Y2;
+		es.BlockStartPos = X2;
+		es.BlockHeight = Y1 - Y2 + 1;
+		es.BlockWidth = X1 - X2;
+	}
 	Info.EditorControl (-1, ECTL_SELECT, 0, (void *) &es);
 }
 

@@ -289,7 +289,7 @@ static wchar_t *DoString (wchar_t *szName, wchar_t *szParam, wchar_t *szValue, D
 	}
 }
 
-static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos);
+static void ParseFile (wchar_t *pf, bool *setPos, TEditorPos *pos);
 
 static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 {
@@ -328,7 +328,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 		break;
 	case CMD_Argument:
 		{
-			psz = userString[*szParam1 - 0x30];
+			psz = userString[*szParam1 - 0x30].getBuffer ();
 		}
 		break;
 	case CMD_ClipBoard:
@@ -618,11 +618,11 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 
 	if (eCmd == CMD_ClipBoard)
 	{
-		if (clip) free (clip);
+		free (clip);
 	}																	//free allocated for this case memory
 }
 
-static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
+static void ParseFile (wchar_t *pf, bool *setPos, TEditorPos *pos)
 {
 	wchar_t				szFilePath[_MAX_PATH + 1];
 	wchar_t				szFileName[_MAX_FNAME + 1];
@@ -676,7 +676,6 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 							}
 
 							bool	blSetPos = false;
-							byte	isDateTime = 0;
 							if (wcslen (f) > 5)	//min_para_size==4 + 2 delimiters
 							{
 								wchar_t	_d;
@@ -826,7 +825,7 @@ static void ParseFile (wchar_t *pf, int *setPos, TEditorPos *pos)
 										s = f;
 										if (blSetPos)
 										{
-											*setPos = 1;
+											*setPos = true;
 											*pos = EditorGetPos ();
 											pos->LeftCol = 0;
 										}
@@ -859,6 +858,9 @@ static void RunMacro(const TMacro *m, const wchar_t *origStr, intptr_t bounds[][
 		{
 			switch (*++p)
 			{
+			case L'?':
+				skipUserInputMacro (++p);
+				break;
 			case L'l':
 				firstsel = true;
 				break;
@@ -876,8 +878,8 @@ static void RunMacro(const TMacro *m, const wchar_t *origStr, intptr_t bounds[][
 
 	if (scanUserInput (true, L'\\', m->MacroText))
 	{
-		int					userStrN, insPos = 0, setPos = 0, setStart = 0, setEnd = 0;
-		bool				makeTime = false;
+		int					userStrN, insPos = 0;
+		bool				setPos = false, setStart = false, setEnd = false, makeTime = false;
 		wchar_t				ins[MAX_STR_LEN] = L"";
 		TEditorPos	pos, curPos, selStart, selEnd;
 		pluginBusy = 1;
@@ -890,20 +892,19 @@ static void RunMacro(const TMacro *m, const wchar_t *origStr, intptr_t bounds[][
 				switch (*++p)
 				{
 				case L'p':
-					setPos = 1;
+					setPos = true;
 					pos = EditorGetPos ();
 					break;
 				case L's':
-					setStart = 1;
+					setStart = true;
 					selStart = EditorGetPos ();
 					break;
 				case L'e':
-					setEnd = 1;
+					setEnd = true;
 					selEnd = EditorGetPos ();
 					break;
 				case 0:
-				case L'\\':
-					EditorProcessFARKey (VK_OEM_5, false);
+					p--;
 					break;
 				case L't':
 					EditorProcessFARKey (VK_TAB, false);
