@@ -311,12 +311,19 @@ static void selectBlock (intptr_t X1, intptr_t Y1, intptr_t X2, intptr_t Y2)
 		es.BlockHeight = Y2 - Y1 + 1;
 		es.BlockWidth = X2 - X1;
 	}
-	else
+	else if (Y1 > Y2)
 	{
 		es.BlockStartLine = Y2;
 		es.BlockStartPos = X2;
 		es.BlockHeight = Y1 - Y2 + 1;
 		es.BlockWidth = X1 - X2;
+	}
+	else
+	{
+		es.BlockStartLine = Y1;
+		es.BlockStartPos = min(X1, X2);
+		es.BlockHeight = 1;
+		es.BlockWidth = abs(X2 - X1);
 	}
 	Info.EditorControl (-1, ECTL_SELECT, 0, (void *) &es);
 }
