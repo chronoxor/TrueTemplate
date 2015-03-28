@@ -414,7 +414,7 @@ static void DoCommand (TCOMMAND eCmd, wchar_t *szParam)
 	case CMD_FileNameUp:
 		{
 			GetFilePathName(szString, _countof(szString));
-			psz = Point2FileExt(szString);
+			psz = Point2FileName(szString);
 			*(Point2FileExt (psz) - 1) = 0;
 			toup = (eCmd == CMD_FileNameUp);
 		}
