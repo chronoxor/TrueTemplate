@@ -75,7 +75,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
 	Info->StructSize = sizeof(struct PluginInfo);
 	Info->MinFarVersion=MAKEFARVERSION(3,0,0,4040,VS_RELEASE);
-	Info->Version=MAKEFARVERSION(3,0,1,10,VS_RC);
+	Info->Version=MAKEFARVERSION(3,0,1,11,VS_RC);
 	Info->Guid=MainGuid;
 	Info->Title=L"True Template";
 	Info->Description=L"True Template Editor Plugin";
